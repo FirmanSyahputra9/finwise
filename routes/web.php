@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OfflineTransactionSyncController;
+use App\Livewire\Analysis;
+use App\Livewire\Categories;
+use App\Livewire\Dashboard;
+use App\Livewire\Profile;
+use App\Livewire\SavingsGoals;
+use App\Livewire\Transactions\Index as TransactionsIndex;
+
+Route::get('/', fn () => Auth::check()
+    ? redirect()->route('dashboard')
+    : redirect()->route('login'))->name('home');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:10,1')->name('login.store');
+    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'createAccount'])->middleware('throttle:5,1')->name('register.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/analysis', Analysis::class)->name('analysis');
+    Route::get('/transactions', TransactionsIndex::class)->name('transactions');
+    Route::get('/categories', Categories::class)->name('categories');
+    Route::get('/savings-goals', SavingsGoals::class)->name('savings-goals');
+    Route::get('/profile', Profile::class)->name('profile');
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::post('/transactions/sync', OfflineTransactionSyncController::class)->middleware('throttle:30,1')->name('transactions.sync');
+});

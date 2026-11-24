@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+/* Token dari desain Figma finWise */
+@theme {
+    --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-spartan: 'League Spartan', ui-sans-serif, system-ui, sans-serif;
+
+    --color-main: #00D09E;   /* Main Green */
+    --color-mint: #F1FFF3;   /* Background Green White */
+    --color-light: #DFF7E2;  /* Light Green */
+    --color-dark: #0E3E3E;   /* Dark Mode Green bar */
+    --color-ink: #093030;    /* Letters and Icons */
+    --color-nav: #052224;
+    --color-ocean: #0068FF;  /* Ocean Blue */
+    --color-blue: #3299FF;   /* Blue Button */
+    --color-sky: #6DB6FE;    /* Light Blue button */
+}
+
+[x-cloak] { display: none !important; }
+
+@layer components {
+    .field {
+        @apply h-[41px] w-full rounded-[18px] bg-light px-4 text-[15px] text-dark outline-none placeholder:text-dark/50;
+    }
+    .label {
+        @apply mb-1.5 mt-4 block text-[15px] font-medium text-ink;
+    }
+    .btn {
+        @apply h-9 rounded-full bg-main px-10 text-[15px] font-medium text-ink;
+    }
+    .btn-soft {
+        @apply h-9 rounded-full bg-light px-10 text-[15px] font-medium text-dark;
+    }
+}

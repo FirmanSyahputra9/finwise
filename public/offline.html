@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#00D09E">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/icons/finwise.svg" type="image/svg+xml">
+    <title>Mode offline - finWise</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <style>
+        * { box-sizing: border-box } body { margin: 0; background: #00D09E; color: #093030; font: 16px system-ui, sans-serif }
+        main { max-width: 430px; min-height: 100dvh; margin: auto; padding: 32px 24px 48px; background: #F1FFF3 }
+        h1 { margin: 0 0 8px; font-size: 24px } p { line-height: 1.5 } .card { margin-top: 24px; padding: 20px; border-radius: 24px; background: white }
+        label { display: block; margin-top: 14px; font-size: 13px; font-weight: 600 } input, select, textarea, button { width: 100%; margin-top: 6px; padding: 12px; border: 0; border-radius: 14px; font: inherit }
+        input, select, textarea { background: #DFF7E2 } .types { display: flex; gap: 8px } .types button { background: #DFF7E2; cursor: pointer } .types button[aria-pressed="true"], .save { background: #00D09E }
+        .save { margin-top: 20px; cursor: pointer; font-weight: 700 } .muted { color: #48605d; font-size: 13px } #offline-queue { margin-top: 16px }
+        a { color: #0068FF } .pending-item { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; padding:12px; border-radius:14px; background:#DFF7E2; font-size:13px }
+    </style>
+</head>
+<body>
+<main>
+    <h1>finWise offline</h1>
+    <p class="muted">Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.</p>
+    <p id="offline-queue" class="muted" role="status"></p>
+    <section id="offline-pending-list" aria-label="Transaksi menunggu sinkronisasi"></section>
+    <form id="offline-transaction-form" class="card">
+        <div class="types" role="group" aria-label="Jenis transaksi">
+            <button type="button" data-type="expense" aria-pressed="true">Pengeluaran</button>
+            <button type="button" data-type="income" aria-pressed="false">Pemasukan</button>
+            <button type="button" data-type="transfer" aria-pressed="false">Transfer</button>
+        </div>
+        <label for="offline-amount">Jumlah (Rp)<input id="offline-amount" name="amount" type="number" min="1" autocomplete="off" required></label>
+        <label for="offline-account">Dari akun<select id="offline-account" name="account_id" autocomplete="off" required></select></label>
+        <label id="category-wrap" for="offline-category">Kategori<select id="offline-category" name="category_id" autocomplete="off"></select></label>
+        <label id="to-account-wrap" for="offline-to-account" hidden>Ke akun<select id="offline-to-account" name="to_account_id" autocomplete="off"></select></label>
+        <label for="offline-date">Tanggal<input id="offline-date" name="date" type="date" autocomplete="off" required></label>
+        <label for="offline-note">Catatan<textarea id="offline-note" name="note" autocomplete="off" maxlength="255" rows="2"></textarea></label>
+        <button class="save">Simpan di perangkat</button>
+    </form>
+    <p class="muted"><a href="/dashboard">Coba buka aplikasi lagi</a></p>
+</main>
+<script src="/offline.js"></script>
+</body>
+</html>
