@@ -29,6 +29,24 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public function profileId(): string
+    {
+        $createdAt = $this->created_at;
+
+        if (! $createdAt || ! $this->getKey()) {
+            return 'N/A';
+        }
+
+        $second = $createdAt->copy()->startOfSecond();
+        $sequence = static::query()
+            ->where('created_at', '>=', $second)
+            ->where('created_at', '<', $second->copy()->addSecond())
+            ->where('id', '<=', $this->getKey())
+            ->count();
+
+        return $createdAt->format('sidmY').$sequence;
+    }
+
     /**
      * Get the attributes that should be cast.
      *

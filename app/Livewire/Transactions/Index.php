@@ -77,6 +77,28 @@ class Index extends Component
     {
         $data = $this->validate();
 
+        if ($data['type'] === 'expense') {
+            $transactionDate = \Illuminate\Support\Carbon::parse($data['date']);
+            $monthlyLimit = (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')
+                ->where('user_id', auth()->id())
+                ->where('month', $transactionDate->month)
+                ->where('year', $transactionDate->year)
+                ->value('amount');
+
+            if ($monthlyLimit > 0) {
+                $spentThisMonth = Transaction::ofType(TransactionType::Expense)
+                    ->inMonth($transactionDate->year, $transactionDate->month)
+                    ->when($this->editingId, fn ($query) => $query->where('id', '<>', $this->editingId))
+                    ->sum('amount');
+
+                if ((int) $spentThisMonth + (int) $data['amount'] > $monthlyLimit) {
+                    $remaining = max(0, $monthlyLimit - (int) $spentThisMonth);
+                    $this->addError('amount', 'Pengeluaran melewati batas budget bulanan. Sisa yang boleh dipakai Rp '.number_format($remaining, 0, ',', '.').'.');
+                    return;
+                }
+            }
+        }
+
         if ($data['type'] === 'transfer') {
             $data['category_id'] = null;
         } else {
@@ -165,10 +187,36 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterType(string $type): void
+    {
+        if ($this->filterCategory) {
+            $categoryMatches = Category::whereKey($this->filterCategory)
+                ->where('type', $type)
+                ->exists();
+
+            if (! $categoryMatches) {
+                $this->filterCategory = '';
+            }
+        }
+    }
+
     public function render()
     {
         $accounts = Account::all();
         $allCategories = Category::orderBy('name')->get();
+        $filterCategories = Category::whereHas('transactions', fn ($query) => $query
+            ->when($this->filterType, fn ($transactions) => $transactions->where('type', $this->filterType)))
+            ->when(in_array($this->filterType, ['income', 'expense'], true), fn ($query) => $query->where('type', $this->filterType))
+            ->when($this->filterType === 'transfer', fn ($query) => $query->whereRaw('1 = 0'))
+            ->orderBy('name')
+            ->get();
+        $filterAccounts = Account::where(function ($query) {
+            $query->whereHas('transactions')
+                ->orWhereIn('id', Transaction::whereNotNull('to_account_id')->select('to_account_id'));
+        })->orderBy('name')->get();
+        $filterTypes = Transaction::query()->select('type')->distinct()->orderBy('type')->pluck('type')
+            ->map(fn ($type) => $type instanceof TransactionType ? $type->value : (string) $type)
+            ->all();
         $offlineDataJson = json_encode([
             'userId' => auth()->id(),
             'accounts' => $accounts->map(fn (Account $account) => ['id' => $account->id, 'name' => $account->name])->values(),
@@ -194,6 +242,9 @@ class Index extends Component
             'accounts' => $accounts,
             'categories' => Category::where('type', $this->type)->get(),
             'allCategories' => $allCategories,
+            'filterCategories' => $filterCategories,
+            'filterAccounts' => $filterAccounts,
+            'filterTypes' => $filterTypes,
             'offlineDataJson' => $offlineDataJson,
         ]);
     }

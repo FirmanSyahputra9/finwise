@@ -1,3 +1,7 @@
+(() => {
+if (window.__finwiseOfflineInitialized) return;
+window.__finwiseOfflineInitialized = true;
+
 const DB_NAME = 'finwise-offline';
 const DB_VERSION = 1;
 const openDb = () => new Promise((resolve, reject) => {
@@ -230,3 +234,4 @@ document.addEventListener('livewire:navigated', () => { captureOnlineData(); set
 window.addEventListener('online', () => { registerBackgroundSync(); syncQueue(); });
 window.addEventListener('offline', refreshQueueStatus);
 navigator.serviceWorker?.addEventListener('message', (event) => { if (event.data?.type === 'FINWISE_SYNC') syncQueue(); });
+})();

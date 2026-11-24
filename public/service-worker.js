@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finwise-shell-v1';
+const CACHE_NAME = 'finwise-shell-v2';
 const APP_SHELL = ['/offline.html', '/offline.js', '/manifest.webmanifest', '/favicon.ico', '/icons/finwise.svg'];
 
 self.addEventListener('install', (event) => {

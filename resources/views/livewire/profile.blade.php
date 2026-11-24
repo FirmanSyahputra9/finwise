@@ -1,4 +1,4 @@
-<div x-data="{ open: false, edit: false, security: false, help: false }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
+<div x-data="{ open: false, edit: false, security: false, help: false, appearance: { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16' }, appearanceSaved: false, init() { this.appearance = window.finwiseAppearance.read() }, saveAppearance() { this.appearance = window.finwiseAppearance.save(this.appearance); this.appearanceSaved = true; setTimeout(() => this.appearanceSaved = false, 2500) } }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
     <x-screen title="Profile">
         <x-slot:top>
             <div class="mt-6 flex justify-center">
@@ -10,8 +10,63 @@
 
         <div class="text-center">
             <p class="text-xl font-bold capitalize text-dark">{{ $user->name }}</p>
-            <p class="text-[13px] font-semibold text-ink">ID: {{ str_pad((string) $user->id, 8, '0', STR_PAD_LEFT) }}</p>
+            <p class="text-[13px] font-semibold text-ink">ID: {{ $user->profileId() }}</p>
         </div>
+
+        <details class="group mt-6 rounded-[24px] bg-white/70 p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
+                <span><span class="block text-base font-semibold text-ink">Tampilan aplikasi</span><span class="mt-1 block text-xs text-dark/60">Preferensi tersimpan di perangkat ini</span></span>
+                <span class="text-dark/60 transition-transform group-open:rotate-180">⌄</span>
+            </summary>
+            <div class="mt-4 space-y-3">
+                <label class="block text-sm font-medium text-dark">Tema
+                    <select x-model="appearance.theme" class="field mt-1">
+                        <option value="light">Terang</option>
+                        <option value="dark">Gelap</option>
+                    </select>
+                </label>
+                <label class="block text-sm font-medium text-dark">Warna aksen
+                    <select x-model="appearance.accent" class="field mt-1">
+                        <option value="green">Hijau</option>
+                        <option value="blue">Biru</option>
+                        <option value="pink">Merah muda</option>
+                        <option value="purple">Ungu</option>
+                        <option value="orange">Oranye</option>
+                        <option value="red">Merah</option>
+                    </select>
+                </label>
+                <label class="block text-sm font-medium text-dark">Warna teks utama
+                    <select x-model="appearance.textColor" class="field mt-1">
+                        <option value="default">Otomatis mengikuti tema</option>
+                        <option value="black">Hitam</option>
+                        <option value="white">Putih</option>
+                        <option value="blue">Biru</option>
+                        <option value="pink">Merah muda</option>
+                        <option value="green">Hijau</option>
+                    </select>
+                </label>
+                <label class="block text-sm font-medium text-dark">Jenis font
+                    <select x-model="appearance.font" class="field mt-1">
+                        <option value="poppins">Poppins</option>
+                        <option value="system">System</option>
+                        <option value="arial">Arial</option>
+                        <option value="georgia">Georgia</option>
+                    </select>
+                </label>
+                <label class="block text-sm font-medium text-dark">Ukuran font
+                    <select x-model="appearance.size" class="field mt-1">
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                    </select>
+                </label>
+            </div>
+            <div class="mt-4 flex items-center justify-between gap-2">
+                <button type="button" x-on:click="saveAppearance()" class="btn px-6">Terapkan tampilan</button>
+                <span x-show="appearanceSaved" x-cloak class="text-xs text-emerald-700">Diterapkan</span>
+            </div>
+        </details>
 
         <div class="mt-8 space-y-8">
             @foreach ([['edit', 'Edit Profile', 'bg-sky', 'edit'], ['security', 'Security', 'bg-blue', 'security'], ['help', 'Help', 'bg-sky', 'help']] as [$icon, $label, $color, $action])

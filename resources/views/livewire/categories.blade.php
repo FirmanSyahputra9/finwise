@@ -8,9 +8,9 @@
             @foreach ($categories as $c)
                 <div wire:key="c-{{ $c->id }}" class="group relative text-center">
                     <button type="button" wire:click="delete({{ $c->id }})" wire:confirm="Hapus kategori {{ $c->name }}? Transaksi terkait tetap tersimpan tanpa kategori." aria-label="Hapus kategori {{ $c->name }}" class="absolute -right-2 -top-2 z-10 grid size-7 place-items-center rounded-full bg-red-500 text-lg leading-none text-white shadow">&times;</button>
-                    <div class="grid h-[98px] place-items-center rounded-[26px] text-4xl font-semibold text-mint {{ $loop->first ? 'bg-ocean' : 'bg-sky' }}">
+                    <button type="button" wire:click="$set('selectedCategory', {{ $selectedCategory === $c->id ? 'null' : $c->id }})" class="w-full grid h-[98px] place-items-center rounded-[26px] text-4xl font-semibold text-mint {{ $selectedCategory === $c->id ? 'bg-dark' : ($loop->first ? 'bg-ocean' : 'bg-sky') }}">
                         {{ mb_strtoupper(mb_substr($c->name, 0, 1)) }}
-                    </div>
+                    </button>
                     <p class="mt-2 truncate text-[15px] font-medium text-ink">{{ $c->name }}</p>
                 </div>
             @endforeach
@@ -20,6 +20,17 @@
                 <p class="mt-2 text-[15px] font-medium text-ink">More</p>
             </button>
         </div>
+
+        @if ($selectedCategory)
+            <section class="mt-6 rounded-2xl bg-white/70 p-4">
+                <h2 class="font-semibold">Transaksi: {{ $selectedCategoryName }}</h2>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <select wire:model.live="typeFilter" class="transaction-control text-sm"><option value="">Semua jenis</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select>
+                    <span></span><input type="date" wire:model.live="dateFrom" class="transaction-control text-sm" aria-label="Dari tanggal"><input type="date" wire:model.live="dateTo" class="transaction-control text-sm" aria-label="Sampai tanggal">
+                </div>
+                <ul class="mt-3 divide-y divide-dark/10">@forelse ($transactions as $transaction)<li class="flex justify-between py-2 text-sm"><span>{{ $transaction->date->translatedFormat('d M Y') }} · {{ $transaction->account->name }}</span><strong>{{ $transaction->type->value === 'income' ? '+' : '-' }}{{ \App\Support\Money::rp($transaction->amount) }}</strong></li>@empty<li class="py-3 text-sm text-dark/60">Tidak ada transaksi pada filter ini.</li>@endforelse</ul>
+            </section>
+        @endif
     </x-screen>
 
     <div x-show="open" x-cloak class="fixed inset-0 z-40 grid place-items-center bg-black/50 px-6" x-on:keydown.escape.window="open = false">

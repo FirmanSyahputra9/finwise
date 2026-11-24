@@ -26,7 +26,7 @@
             @error('name') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <label for="account-type" class="label">Jenis akun</label>
             <select id="account-type" name="type" autocomplete="off" wire:model="type" class="field"><option value="cash">Tunai</option><option value="bank">Bank</option><option value="ewallet">E-Wallet</option></select>
-            <label for="account-opening-balance" class="label">Saldo awal (Rp)</label><input id="account-opening-balance" name="opening_balance" type="number" min="0" autocomplete="off" wire:model="openingBalance" class="field">
+            <label for="account-opening-balance" class="label">Saldo awal (Rp)</label><x-money-input id="account-opening-balance" model="openingBalance" :value="$openingBalance" name="opening_balance" placeholder="0" class="field" />
             @error('openingBalance') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <div class="mt-6 flex flex-col items-center gap-3"><button class="btn w-full max-w-[218px]">Simpan</button><button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">Batal</button></div>
         </form>

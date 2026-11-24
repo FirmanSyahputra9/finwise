@@ -37,6 +37,8 @@ class Dashboard extends Component
             'offlineDataJson' => $offlineDataJson,
             'recent' => Transaction::with(['category', 'account'])->latest('date')->latest('id')->limit(5)->get(),
             'budgets' => Budget::with('category')->where('month', $now->month)->where('year', $now->year)->get(),
+            'monthlyBudget' => (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', $now->month)->where('year', $now->year)->value('amount'),
+            'allocatedBudget' => (int) Budget::where('month', $now->month)->where('year', $now->year)->sum('amount'),
         ]);
     }
 }

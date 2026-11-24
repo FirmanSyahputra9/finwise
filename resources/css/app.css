@@ -20,12 +20,159 @@
 
 [x-cloak] { display: none !important; }
 
+html[data-font-size="14"] { font-size: 14px; }
+html[data-font-size="16"] { font-size: 16px; }
+html[data-font-size="18"] { font-size: 18px; }
+html[data-font-size="20"] { font-size: 20px; }
+
+html[data-font="system"] {
+    --font-poppins: ui-sans-serif, system-ui, sans-serif;
+    --font-spartan: ui-sans-serif, system-ui, sans-serif;
+}
+html[data-font="arial"] {
+    --font-poppins: Arial, Helvetica, sans-serif;
+    --font-spartan: Arial, Helvetica, sans-serif;
+}
+html[data-font="georgia"] {
+    --font-poppins: Georgia, 'Times New Roman', serif;
+    --font-spartan: Georgia, 'Times New Roman', serif;
+}
+
+html[data-accent="blue"] {
+    --color-main: #3984d8;
+    --color-ocean: #1559aa;
+    --color-blue: #3479c4;
+    --color-sky: #5f9ddd;
+}
+html[data-accent="pink"] {
+    --color-main: #e779ad;
+    --color-ocean: #bc4e83;
+    --color-blue: #cf5b91;
+    --color-sky: #e895bb;
+}
+html[data-accent="purple"] {
+    --color-main: #9272dc;
+    --color-ocean: #6848b4;
+    --color-blue: #7658c3;
+    --color-sky: #aa91e4;
+}
+html[data-accent="orange"] {
+    --color-main: #f0a24d;
+    --color-ocean: #c87827;
+    --color-blue: #d78737;
+    --color-sky: #f2b66f;
+}
+html[data-accent="red"] {
+    --color-main: #e66e70;
+    --color-ocean: #bd4549;
+    --color-blue: #c84f53;
+    --color-sky: #e58b8d;
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --color-mint: #10191d;
+    --color-light: #1b292e;
+    --color-dark: #24383e;
+    --color-ink: #e5eff0;
+    --color-nav: #e5eff0;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] body > div.relative {
+    background-color: #0b1215;
+}
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/70,
+html[data-theme="dark"] .bg-slate-50 {
+    background-color: #1a292e;
+}
+html[data-theme="dark"] .bg-sky {
+    background-color: #263d47;
+}
+html[data-theme="dark"] .bg-blue {
+    background-color: #2868a8;
+}
+html[data-theme="dark"] .bg-ocean {
+    background-color: #3986c8;
+}
+html[data-theme="dark"] .bg-main.text-ink,
+html[data-theme="dark"] .bg-main.text-nav {
+    color: #071512;
+}
+html[data-theme="dark"] .btn {
+    color: #071512;
+}
+html[data-theme="dark"] .text-dark,
+html[data-theme="dark"] .text-ink,
+html[data-theme="dark"] .text-nav,
+html[data-theme="dark"] .text-mint {
+    color: #e5eff0;
+}
+html[data-theme="dark"] [class~="text-mint/90"] {
+    color: rgb(229 239 240 / 92%);
+}
+html[data-theme="dark"] [class~="text-dark/75"],
+html[data-theme="dark"] [class~="text-dark/70"] {
+    color: rgb(229 239 240 / 78%);
+}
+html[data-theme="dark"] [class~="text-dark/60"],
+html[data-theme="dark"] [class~="text-dark/50"],
+html[data-theme="dark"] [class~="text-nav/70"],
+html[data-theme="dark"] [class~="text-nav/60"] {
+    color: rgb(229 239 240 / 72%);
+}
+html[data-theme="dark"] [class~="placeholder:text-dark/50"]::placeholder {
+    color: rgb(229 239 240 / 50%);
+}
+html[data-theme="dark"] .text-gray-500 {
+    color: #a8b8bb;
+}
+html[data-theme="dark"] .border-dark\/10,
+html[data-theme="dark"] .divide-dark\/10,
+html[data-theme="dark"] .border-dark\/30,
+html[data-theme="dark"] .border-light {
+    border-color: rgb(195 215 219 / 38%);
+}
+html[data-theme="dark"] .bg-red-50 {
+    background-color: #432629;
+}
+
+html[data-text-color="black"] { --user-text-color: #111827; }
+html[data-text-color="white"] { --user-text-color: #f8fafc; }
+html[data-text-color="blue"] { --user-text-color: #1d4ed8; }
+html[data-text-color="pink"] { --user-text-color: #be185d; }
+html[data-text-color="green"] { --user-text-color: #047857; }
+html[data-theme="dark"][data-text-color="black"] { --user-text-color: #f8fafc; }
+html[data-theme="dark"][data-text-color="white"] { --user-text-color: #ffffff; }
+html[data-theme="dark"][data-text-color="blue"] { --user-text-color: #93c5fd; }
+html[data-theme="dark"][data-text-color="pink"] { --user-text-color: #f9a8d4; }
+html[data-theme="dark"][data-text-color="green"] { --user-text-color: #6ee7b7; }
+
+html[data-text-color]:not([data-text-color="default"]) .text-dark,
+html[data-text-color]:not([data-text-color="default"]) .text-ink,
+html[data-text-color]:not([data-text-color="default"]) .text-nav {
+    color: var(--user-text-color);
+}
+html[data-text-color]:not([data-text-color="default"]) [class~="text-dark/75"],
+html[data-text-color]:not([data-text-color="default"]) [class~="text-dark/70"],
+html[data-text-color]:not([data-text-color="default"]) [class~="text-nav/70"] {
+    color: color-mix(in srgb, var(--user-text-color) 78%, transparent);
+}
+html[data-text-color]:not([data-text-color="default"]) [class~="text-dark/60"],
+html[data-text-color]:not([data-text-color="default"]) [class~="text-dark/50"],
+html[data-text-color]:not([data-text-color="default"]) [class~="text-nav/60"] {
+    color: color-mix(in srgb, var(--user-text-color) 68%, transparent);
+}
+html[data-text-color]:not([data-text-color="default"]) [class~="placeholder:text-dark/50"]::placeholder {
+    color: color-mix(in srgb, var(--user-text-color) 55%, transparent);
+}
+
 @layer components {
     .field {
         @apply h-12 w-full min-w-0 max-w-full rounded-[16px] bg-light px-3 text-base text-dark outline-none placeholder:text-dark/50;
     }
     .transaction-amount {
-        @apply h-14 min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-semibold tabular-nums text-dark outline-none placeholder:font-normal placeholder:text-dark/45;
+        @apply h-14 w-full min-w-0 max-w-full flex-1 border-0 bg-transparent p-0 text-right font-semibold tabular-nums text-dark outline-none placeholder:font-normal placeholder:text-dark/45;
         font-size: clamp(1.125rem, 5vw, 1.5rem);
     }
     .transaction-control {

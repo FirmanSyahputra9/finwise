@@ -8,7 +8,6 @@
                     <p class="font-spartan text-sm text-nav">{{ $subtitle }}</p>
                 @endif
             </div>
-            <div class="absolute right-0 top-0"><livewire:notifications-menu /></div>
         </div>
         {{ $top ?? '' }}
     </header>

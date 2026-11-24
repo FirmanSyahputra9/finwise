@@ -26,13 +26,13 @@
                     <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-light"><div class="h-full rounded-full bg-main transition-all" style="width: {{ $pct }}%"></div></div>
                     <div class="mt-1 flex justify-between text-[11px] text-dark/60"><span>{{ $pct }}% terkumpul</span><span>{{ $goal->saved_amount >= $goal->target_amount ? 'Tercapai! 🎉' : 'Kurang '.$rp($goal->target_amount - $goal->saved_amount) }}</span></div>
                     <form wire:submit="addContribution({{ $goal->id }})" class="mt-4 flex gap-2">
-                        <input type="number" min="1" step="1" wire:model="contribution" placeholder="Nominal tabungan" class="field flex-1" aria-label="Nominal tabungan">
+                        <x-money-input model="contribution" :value="$contribution" name="contribution" placeholder="Nominal tabungan" class="field flex-1" aria-label="Nominal tabungan" />
                         <button type="submit" class="rounded-full bg-dark px-4 text-xs font-medium text-mint">Tambah</button>
                     </form>
                     @error('contribution') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </article>
             @empty
-                <div class="rounded-[22px] bg-white/70 px-5 py-10 text-center"><p class="text-4xl">🐷</p><p class="mt-3 font-semibold text-ink">Belum ada target simpanan</p><p class="mt-1 text-sm text-dark/60">Mulai dari hal yang kamu impikan.</p><button type="button" wire:click="create" class="btn mt-5">Buat target pertama</button></div>
+                <div class="rounded-[22px] bg-white/70 px-5 py-10 text-center"><p class="text-4xl">??</p><p class="mt-3 font-semibold text-ink">Belum ada target simpanan</p><p class="mt-1 text-sm text-dark/60">Mulai dari hal yang kamu impikan.</p><button type="button" wire:click="create" class="btn mt-5">Buat target pertama</button></div>
             @endforelse
         </div>
     </x-screen>
@@ -43,7 +43,7 @@
                 <h2 class="text-center text-xl font-bold text-dark">{{ $editingId ? 'Ubah target' : 'Target baru' }}</h2>
                 <label class="label" for="goal-name">Nama target</label><input id="goal-name" type="text" wire:model="name" placeholder="Contoh: Dana liburan" class="field">
                 @error('name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                <label class="label" for="goal-amount">Jumlah yang ingin dikumpulkan</label><input id="goal-amount" type="number" min="1" step="1" wire:model="targetAmount" placeholder="5000000" class="field">
+                <label class="label" for="goal-amount">Jumlah yang ingin dikumpulkan</label><x-money-input id="goal-amount" model="targetAmount" :value="$targetAmount" name="target_amount" placeholder="5000000" class="field" />
                 @error('targetAmount') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 <label class="label" for="goal-date">Batas waktu <span class="font-normal text-dark/50">(opsional)</span></label><input id="goal-date" type="date" wire:model="targetDate" class="field">
                 @error('targetDate') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror

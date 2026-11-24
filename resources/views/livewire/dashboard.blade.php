@@ -18,6 +18,13 @@
 
     <section>
         <h2 class="mb-2 font-semibold">Budget bulan ini</h2>
+        @if ($monthlyBudget)
+            <div class="mb-4 rounded-2xl bg-dark p-4 text-mint">
+                <div class="flex justify-between text-sm"><span>Budget total</span><strong>{{ $rp($monthlyBudget) }}</strong></div>
+                <p class="mt-1 text-xs opacity-80">Sudah dipakai: {{ $rp($expense) }}</p>
+                <p class="mt-1 text-xs opacity-80">Sisa budget yang boleh dipakai: {{ $rp(max(0, $monthlyBudget - $expense)) }}</p>
+            </div>
+        @endif
         @forelse ($budgets as $budget)
             @php($spent = $budget->spent())
             @php($pct = $budget->amount > 0 ? min(100, round($spent / $budget->amount * 100)) : 0)

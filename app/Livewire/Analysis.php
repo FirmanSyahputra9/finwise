@@ -25,6 +25,30 @@ class Analysis extends Component
     public ?int $categoryId = null;
 
     public ?int $budgetAmount = null;
+    public ?int $monthlyBudget = null;
+    public array $analysisCategoryIds = [];
+
+    public function toggleAnalysisCategory(int $id): void
+    {
+        $selected = array_map('intval', $this->analysisCategoryIds);
+        $this->analysisCategoryIds = in_array($id, $selected, true)
+            ? array_values(array_diff($selected, [$id]))
+            : [...$selected, $id];
+    }
+
+    public function mount(): void
+    {
+        $this->monthlyBudget = (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', now()->month)->where('year', now()->year)->value('amount') ?: null;
+    }
+
+    public function saveMonthlyBudget(): void
+    {
+        $data = $this->validate(['monthlyBudget' => ['required', 'integer', 'min:1']]);
+        \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->updateOrInsert(
+            ['user_id' => auth()->id(), 'month' => now()->month, 'year' => now()->year],
+            ['amount' => $data['monthlyBudget'], 'updated_at' => now(), 'created_at' => now()]
+        );
+    }
 
     public function createBudget(): void
     {
@@ -46,11 +70,23 @@ class Analysis extends Component
         $budget = $this->budgetId ? Budget::whereKey($this->budgetId)->firstOrFail() : null;
         $month = now()->month;
         $year = now()->year;
+        $limit = (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->value('amount');
+        $allocated = (int) Budget::where('month', $month)->where('year', $year)->when($budget, fn ($q) => $q->where('id', '<>', $budget->id))->sum('amount');
+
+        if (! $limit) {
+            $this->addError('budgetAmount', 'Atur batas total budget bulanan terlebih dahulu.');
+            return;
+        }
 
         $data = $this->validate([
             'categoryId' => ['required', Rule::exists('categories', 'id')->where('user_id', auth()->id())->where('type', 'expense')],
             'budgetAmount' => ['required', 'integer', 'min:1'],
         ]);
+
+        if ($limit && $allocated + $data['budgetAmount'] > $limit) {
+            $this->addError('budgetAmount', 'Alokasi kategori melebihi batas budget bulanan yang tersisa.');
+            return;
+        }
 
         validator(['categoryId' => $data['categoryId']], [
             'categoryId' => [Rule::unique('budgets', 'category_id')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->ignore($budget?->id)],
@@ -86,13 +122,24 @@ class Analysis extends Component
     public function render()
     {
         $sum = fn (TransactionType $type, array $b) => (int) Transaction::ofType($type)
-            ->whereBetween('date', [$b['from'], $b['to']])->sum('amount');
+            ->whereDate('date', '>=', $b['from'])
+            ->whereDate('date', '<=', $b['to'])
+            ->when($this->analysisCategoryIds, fn ($q) => $q->whereIn('category_id', $this->analysisCategoryIds))
+            ->sum('amount');
 
         $rows = collect($this->buckets())->map(fn ($b) => [
             'label' => $b['label'],
             'income' => $sum(TransactionType::Income, $b),
             'expense' => $sum(TransactionType::Expense, $b),
         ]);
+        $budgetCards = Budget::with('category')->where('month', now()->month)->where('year', now()->year)->get()
+            ->map(fn (Budget $budget) => [
+                'id' => $budget->id,
+                'name' => $budget->category->name,
+                'amount' => $budget->amount,
+                'spent' => $budget->spent(),
+                'percentage' => $budget->amount > 0 ? min(100, (int) round($budget->spent() / $budget->amount * 100)) : 0,
+            ]);
 
         return view('livewire.analysis', [
             ...$this->summary(),
@@ -100,9 +147,11 @@ class Analysis extends Component
             'max' => max(1, $rows->max(fn ($r) => max($r['income'], $r['expense']))),
             'totalIncome' => $rows->sum('income'),
             'totalExpense' => $rows->sum('expense'),
-            'targets' => Budget::with('category')
-                ->where('month', now()->month)->where('year', now()->year)->get(),
+            'budgetCards' => $budgetCards,
             'expenseCategories' => Category::where('type', 'expense')->orderBy('name')->get(),
+            'analysisCategories' => Category::orderBy('type')->orderBy('name')->get(),
+            'monthlyBudget' => (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', now()->month)->where('year', now()->year)->value('amount'),
+            'allocatedBudget' => (int) Budget::where('month', now()->month)->where('year', now()->year)->sum('amount'),
         ]);
     }
 }

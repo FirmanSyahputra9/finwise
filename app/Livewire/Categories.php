@@ -13,6 +13,10 @@ class Categories extends Component
     use HasSummary;
 
     public string $name = '';
+    public ?int $selectedCategory = null;
+    public string $typeFilter = '';
+    public string $dateFrom = '';
+    public string $dateTo = '';
 
     public function save(): void
     {
@@ -31,9 +35,16 @@ class Categories extends Component
 
     public function render()
     {
+        $transactions = $this->selectedCategory ? \App\Models\Transaction::with('account')->where('category_id', $this->selectedCategory)
+            ->when($this->typeFilter, fn ($q) => $q->where('type', $this->typeFilter))
+            ->when($this->dateFrom, fn ($q) => $q->whereDate('date', '>=', $this->dateFrom))
+            ->when($this->dateTo, fn ($q) => $q->whereDate('date', '<=', $this->dateTo))
+            ->latest('date')->get() : collect();
         return view('livewire.categories', [
             ...$this->summary(),
             'categories' => Category::where('type', 'expense')->orderBy('name')->get(),
+            'transactions' => $transactions,
+            'selectedCategoryName' => Category::find($this->selectedCategory)?->name,
         ]);
     }
 }

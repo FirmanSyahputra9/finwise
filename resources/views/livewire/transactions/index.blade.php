@@ -2,7 +2,7 @@
 <div x-on:edit-transaction.window="document.getElementById('transaction-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">
 <x-screen title="Transaksi">
     <script type="application/json" id="offline-finance-data">{!! $offlineDataJson !!}</script>
-    <form id="transaction-form" wire:submit="save" class="min-w-0 space-y-4 rounded-[24px] bg-white/70 p-4 sm:p-5">
+    <form id="transaction-form" wire:submit="save" class="w-full min-w-0 space-y-4 rounded-[24px] bg-white/70 p-3 min-[380px]:p-4">
         <input id="transaction-type" name="type" type="hidden" autocomplete="off" data-offline-field="type" value="{{ $type }}">
         <h2 class="text-base font-semibold text-dark">{{ $editingId ? 'Ubah transaksi' : 'Transaksi baru' }}</h2>
         <div class="grid grid-cols-3 gap-1 rounded-[18px] bg-light p-1">
@@ -16,9 +16,9 @@
         </div>
 
         <label for="transaction-amount" class="block text-xs font-medium text-dark/70">Nominal transaksi
-            <span class="mt-1 flex min-w-0 items-center gap-3 rounded-[18px] bg-light px-4">
+            <span class="mt-1 flex min-w-0 items-center gap-2 rounded-[18px] bg-light px-3 min-[380px]:gap-3 min-[380px]:px-4">
                 <span class="shrink-0 text-base font-semibold text-dark/60">Rp</span>
-                <input id="transaction-amount" name="amount" type="number" min="1" inputmode="numeric" autocomplete="off" data-offline-field="amount" wire:model="amount" placeholder="0" class="transaction-amount">
+                <x-money-input id="transaction-amount" model="amount" :value="$amount" name="amount" placeholder="0" class="transaction-amount" offline-field="amount" />
             </span>
         </label>
         @error('amount') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
@@ -52,33 +52,33 @@
         @endif
     </form>
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex min-w-0 flex-col gap-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
         <h2 class="font-semibold">Riwayat</h2>
-        <select id="transaction-filter-type" name="filter_type" autocomplete="off" wire:model.live="filterType" class="transaction-control w-auto text-sm">
+        <select id="transaction-filter-type" name="filter_type" autocomplete="off" wire:model.live="filterType" class="transaction-control w-full min-w-0 text-sm min-[380px]:w-auto">
             <option value="">Semua</option>
-            <option value="income">Pemasukan</option>
-            <option value="expense">Pengeluaran</option>
-            <option value="transfer">Transfer</option>
+            @foreach ($filterTypes as $availableType)
+                <option value="{{ $availableType }}">{{ ['income' => 'Pemasukan', 'expense' => 'Pengeluaran', 'transfer' => 'Transfer'][$availableType] ?? ucfirst($availableType) }}</option>
+            @endforeach
         </select>
     </div>
 
-    <div class="grid min-w-0 grid-cols-1 gap-2 rounded-2xl bg-white/70 p-3 min-[380px]:grid-cols-2">
-        <input id="transaction-search" name="search" type="search" autocomplete="off" wire:model.live.debounce.300ms="search" placeholder="Cari catatan, kategori, akun..." class="field min-[380px]:col-span-2">
-        <select id="transaction-filter-account" name="filter_account" autocomplete="off" wire:model.live="filterAccount" class="transaction-control text-sm"><option value="">Semua akun</option>@foreach ($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select>
-        <select id="transaction-filter-category" name="filter_category" autocomplete="off" wire:model.live="filterCategory" class="transaction-control text-sm"><option value="">Semua kategori</option>@foreach ($allCategories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>
-        <label for="transaction-date-from" class="text-xs text-dark/70">Dari<input id="transaction-date-from" name="date_from" type="date" autocomplete="off" wire:model.live="dateFrom" class="transaction-control mt-1 text-sm"></label>
-        <label for="transaction-date-to" class="text-xs text-dark/70">Sampai<input id="transaction-date-to" name="date_to" type="date" autocomplete="off" wire:model.live="dateTo" class="transaction-control mt-1 text-sm"></label>
-        <button type="button" wire:click="resetFilters" class="col-span-2 text-right text-xs text-blue">Reset filter</button>
+    <div class="grid w-full min-w-0 grid-cols-1 gap-2 rounded-2xl bg-white/70 p-2 min-[380px]:p-3 min-[400px]:grid-cols-2">
+        <input id="transaction-search" name="search" type="search" autocomplete="off" wire:model.live.debounce.300ms="search" placeholder="Cari catatan, kategori, akun..." class="field min-w-0 min-[400px]:col-span-2">
+        <select id="transaction-filter-account" name="filter_account" autocomplete="off" wire:model.live="filterAccount" class="transaction-control min-w-0 text-sm"><option value="">Semua akun</option>@foreach ($filterAccounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select>
+        <select id="transaction-filter-category" name="filter_category" autocomplete="off" wire:model.live="filterCategory" class="transaction-control min-w-0 text-sm"><option value="">Semua kategori</option>@foreach ($filterCategories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>
+        <label for="transaction-date-from" class="min-w-0 text-xs text-dark/70">Dari<input id="transaction-date-from" name="date_from" type="date" autocomplete="off" wire:model.live="dateFrom" class="transaction-control mt-1 min-w-0 text-sm"></label>
+        <label for="transaction-date-to" class="min-w-0 text-xs text-dark/70">Sampai<input id="transaction-date-to" name="date_to" type="date" autocomplete="off" wire:model.live="dateTo" class="transaction-control mt-1 min-w-0 text-sm"></label>
+        <button type="button" wire:click="resetFilters" class="text-right text-xs text-blue min-[400px]:col-span-2">Reset filter</button>
     </div>
 
     <ul class="divide-y divide-dark/10 rounded-2xl bg-white/70">
         @forelse ($transactions as $t)
-            <li class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 p-3 text-sm" wire:key="t-{{ $t->id }}">
+            <li class="grid min-w-0 grid-cols-1 items-center gap-2 p-3 text-sm min-[380px]:grid-cols-[minmax(0,1fr)_auto]" wire:key="t-{{ $t->id }}">
                 <div class="min-w-0">
-                    <p class="font-medium">{{ $t->category?->name ?? ($t->type->value === 'transfer' ? 'Transfer ke '.$t->toAccount?->name : $t->type->label()) }}</p>
+                    <p class="break-words font-medium">{{ $t->category?->name ?? ($t->type->value === 'transfer' ? 'Transfer ke '.$t->toAccount?->name : $t->type->label()) }}</p>
                     <p class="text-gray-500">{{ $t->date->translatedFormat('d M Y') }} · {{ $t->account->name }}{{ $t->note ? ' · '.$t->note : '' }}</p>
                 </div>
-                <div class="flex min-w-0 flex-col items-end gap-1">
+                <div class="flex min-w-0 items-center justify-between gap-2 min-[380px]:flex-col min-[380px]:items-end">
                     <span class="whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm {{ $t->type->value === 'income' ? 'text-emerald-600' : 'text-red-500' }}">
                         {{ $t->type->value === 'income' ? '+' : '-' }}{{ $rp($t->amount) }}
                     </span>
