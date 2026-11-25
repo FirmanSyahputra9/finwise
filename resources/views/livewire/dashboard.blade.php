@@ -1,13 +1,13 @@
 @php($rp = fn ($n) => 'Rp '.number_format($n, 0, ',', '.'))
-<x-screen title="Beranda">
+<x-screen :title="__('ui.home')">
     <script type="application/json" id="offline-finance-data">{!! $offlineDataJson !!}</script>
     <x-slot:top>
         <div class="mt-5 rounded-[26px] bg-dark p-5 text-mint">
-        <p class="text-sm opacity-80">Total Saldo</p>
+        <p class="text-sm opacity-80">{{ __('ui.total_balance') }}</p>
         <p class="text-3xl font-bold">{{ $rp($totalBalance) }}</p>
         <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
-            <div><p class="opacity-80">Pemasukan</p><p class="font-semibold">{{ $rp($income) }}</p></div>
-            <div><p class="opacity-80">Pengeluaran</p><p class="font-semibold">{{ $rp($expense) }}</p></div>
+            <div><p class="opacity-80">{{ __('ui.income') }}</p><p class="font-semibold">{{ $rp($income) }}</p></div>
+            <div><p class="opacity-80">{{ __('ui.expense') }}</p><p class="font-semibold">{{ $rp($expense) }}</p></div>
         </div>
         </div>
     </x-slot:top>
@@ -17,12 +17,12 @@
     <livewire:account-manager />
 
     <section>
-        <h2 class="mb-2 font-semibold">Budget bulan ini</h2>
+        <h2 class="mb-2 font-semibold">{{ __('ui.monthly_budget') }}</h2>
         @if ($monthlyBudget)
             <div class="mb-4 rounded-2xl bg-dark p-4 text-mint">
-                <div class="flex justify-between text-sm"><span>Budget total</span><strong>{{ $rp($monthlyBudget) }}</strong></div>
-                <p class="mt-1 text-xs opacity-80">Sudah dipakai: {{ $rp($expense) }}</p>
-                <p class="mt-1 text-xs opacity-80">Sisa budget yang boleh dipakai: {{ $rp(max(0, $monthlyBudget - $expense)) }}</p>
+                <div class="flex justify-between text-sm"><span>{{ __('ui.budget_total') }}</span><strong>{{ $rp($monthlyBudget) }}</strong></div>
+                <p class="mt-1 text-xs opacity-80">{{ __('ui.spent') }} {{ $rp($expense) }}</p>
+                <p class="mt-1 text-xs opacity-80">{{ __('ui.remaining_budget') }} {{ $rp(max(0, $monthlyBudget - $expense)) }}</p>
             </div>
         @endif
         @forelse ($budgets as $budget)
@@ -38,14 +38,14 @@
                 </div>
             </div>
         @empty
-            <p class="text-sm text-nav/60">Belum ada budget.</p>
+            <p class="text-sm text-nav/60">{{ __('ui.no_budget') }}</p>
         @endforelse
     </section>
 
     <section>
         <div class="mb-2 flex justify-between">
-            <h2 class="font-semibold">Transaksi terakhir</h2>
-            <a href="{{ route('transactions') }}" wire:navigate class="text-sm text-emerald-600">Lihat semua</a>
+            <h2 class="font-semibold">{{ __('ui.latest_transactions') }}</h2>
+            <a href="{{ route('transactions') }}" wire:navigate class="text-sm text-emerald-600">{{ __('ui.see_all') }}</a>
         </div>
         <ul class="divide-y divide-dark/10 rounded-2xl bg-white/70">
             @forelse ($recent as $t)
@@ -59,10 +59,10 @@
                     </p>
                 </li>
             @empty
-                <li class="p-3 text-sm text-gray-500">Belum ada transaksi.</li>
+                <li class="p-3 text-sm text-gray-500">{{ __('ui.no_transactions') }}</li>
             @endforelse
         </ul>
-        <a href="{{ route('transactions') }}" wire:navigate class="btn mt-4 flex items-center justify-center">Tambah transaksi</a>
+        <a href="{{ route('transactions') }}" wire:navigate class="btn mt-4 flex items-center justify-center">{{ __('ui.add_transaction') }}</a>
     </section>
 </div>
 </x-screen>

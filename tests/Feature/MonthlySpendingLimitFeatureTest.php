@@ -71,3 +71,29 @@ it('checks the full monthly ceiling when an existing expense is edited', functio
 
     expect($transaction->fresh()->amount)->toBe(80_000);
 });
+
+it('enforces the monthly ceiling while syncing offline expenses', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $category = Category::create(['name' => 'Belanja', 'type' => 'expense']);
+    DB::table('monthly_budget_limits')->insert([
+        'user_id' => $user->id, 'month' => now()->month, 'year' => now()->year,
+        'amount' => 100_000, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $firstId = (string) str()->uuid();
+    $secondId = (string) str()->uuid();
+
+    $response = $this->postJson(route('transactions.sync'), [
+        'owner_id' => $user->id,
+        'transactions' => [
+            ['client_id' => $firstId, 'type' => 'expense', 'amount' => '70000', 'date' => today()->toDateString(), 'account_id' => $account->id, 'category_id' => $category->id],
+            ['client_id' => $secondId, 'type' => 'expense', 'amount' => '40000', 'date' => today()->toDateString(), 'account_id' => $account->id, 'category_id' => $category->id],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('synced.0', $firstId)
+        ->assertJsonPath('failed.0.client_id', $secondId);
+    expect(Transaction::sum('amount'))->toBe(70_000);
+});

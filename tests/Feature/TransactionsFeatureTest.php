@@ -24,6 +24,23 @@ it('creates a categorized expense with an integer amount', function () {
     expect(Transaction::firstOrFail()->amount)->toBe(125_000);
 });
 
+it('preserves large nominal values without JavaScript number rounding', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $category = Category::create(['name' => 'Belanja', 'type' => 'expense']);
+    $amount = '9007199254740993';
+
+    Livewire::test(Transactions::class)
+        ->set('account_id', $account->id)
+        ->set('category_id', $category->id)
+        ->set('amount', $amount)
+        ->set('date', today()->toDateString())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect((string) Transaction::firstOrFail()->amount)->toBe($amount);
+});
+
 it('rejects a category that belongs to another transaction type', function () {
     $this->actingAs(User::factory()->create());
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);

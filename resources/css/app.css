@@ -20,6 +20,72 @@
 
 [x-cloak] { display: none !important; }
 
+@keyframes page-content-out {
+    to { opacity: 0; transform: translateY(-0.4rem); }
+}
+@keyframes page-content-in {
+    from { opacity: 0; transform: translateY(0.65rem); }
+}
+@supports (view-transition-name: none) {
+    html:active-view-transition-type(navigate)::view-transition-old(livewire-navigate) {
+        animation: page-content-out 140ms ease-in both;
+    }
+    html:active-view-transition-type(navigate)::view-transition-new(livewire-navigate) {
+        animation: page-content-in 220ms cubic-bezier(.2, .75, .25, 1) both;
+    }
+    html:active-view-transition-type(navigate)::view-transition-group(bottom-navigation) {
+        z-index: 1000;
+    }
+}
+
+button,
+a[wire\:navigate] {
+    transition: transform 140ms ease, filter 140ms ease, background-color 180ms ease, color 180ms ease;
+}
+button:active:not(:disabled) {
+    transform: scale(.97);
+}
+button:not(:disabled):hover {
+    filter: brightness(1.04);
+}
+.btn:not(:disabled):hover,
+.btn-soft:not(:disabled):hover {
+    box-shadow: 0 4px 10px rgb(14 62 62 / 16%);
+    transform: translateY(-1px);
+}
+.btn:not(:disabled):active,
+.btn-soft:not(:disabled):active {
+    transform: scale(.98);
+}
+.segmented-control > button {
+    transition: transform 160ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.segmented-control > button[aria-pressed="true"] {
+    box-shadow: 0 3px 8px rgb(14 62 62 / 18%);
+    transform: translateY(-1px);
+}
+html[data-theme="dark"] .segmented-control > button[aria-pressed="true"] {
+    color: #071512;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--color-ocean);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
 html[data-font-size="14"] { font-size: 14px; }
 html[data-font-size="16"] { font-size: 16px; }
 html[data-font-size="18"] { font-size: 18px; }

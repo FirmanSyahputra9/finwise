@@ -59,7 +59,7 @@ class AccountManager extends Component
         $account = Account::findOrFail($id);
         $hasTransactions = Transaction::where('account_id', $id)->orWhere('to_account_id', $id)->exists();
         if ($hasTransactions) {
-            $this->addError('accountId', 'Akun yang memiliki transaksi tidak bisa dihapus. Hapus atau pindahkan transaksinya dulu.');
+            $this->addError('accountId', __('ui.account_has_transactions'));
 
             return;
         }

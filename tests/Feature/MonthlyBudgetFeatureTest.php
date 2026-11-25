@@ -88,3 +88,21 @@ it('rejects invalid monthly budget values', function () {
         ->call('saveMonthlyBudget')
         ->assertHasErrors(['monthlyBudget']);
 });
+
+it('does not let the monthly ceiling drop below existing category allocations', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+    $category = Category::create(['name' => 'Makan', 'type' => 'expense']);
+    DB::table('monthly_budget_limits')->insert([
+        'user_id' => $user->id, 'month' => now()->month, 'year' => now()->year,
+        'amount' => 1_000_000, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    Budget::create(['category_id' => $category->id, 'amount' => 600_000, 'month' => now()->month, 'year' => now()->year]);
+
+    Livewire::test(Analysis::class)
+        ->set('monthlyBudget', 500_000)
+        ->call('saveMonthlyBudget')
+        ->assertHasErrors(['monthlyBudget']);
+
+    expect((int) DB::table('monthly_budget_limits')->where('user_id', $user->id)->value('amount'))->toBe(1_000_000);
+});

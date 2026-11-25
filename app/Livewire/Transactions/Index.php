@@ -93,7 +93,7 @@ class Index extends Component
 
                 if ((int) $spentThisMonth + (int) $data['amount'] > $monthlyLimit) {
                     $remaining = max(0, $monthlyLimit - (int) $spentThisMonth);
-                    $this->addError('amount', 'Pengeluaran melewati batas budget bulanan. Sisa yang boleh dipakai Rp '.number_format($remaining, 0, ',', '.').'.');
+                    $this->addError('amount', __('ui.expense_over_limit', ['amount' => number_format($remaining, 0, ',', '.') ]));
                     return;
                 }
             }
@@ -128,21 +128,30 @@ class Index extends Component
         $amount = (int) $data['amount'];
         $rp = fn (int $value) => 'Rp '.number_format($value, 0, ',', '.');
         auth()->user()->notify(new FinanceActivityNotification([
-            'title' => 'Transaksi berhasil disimpan',
-            'message' => ucfirst($data['type']).' sebesar '.$rp($amount).' telah dicatat.',
+            'title_key' => 'notification_saved',
+            'message_key' => 'notification_recorded',
+            'message_params' => ['type' => $data['type'], 'amount' => $rp($amount)],
+            'title' => __('ui.notification_saved'),
+            'message' => __('ui.notification_recorded', ['type' => __('ui.'.$data['type']), 'amount' => $rp($amount)]),
         ]));
 
         if ($budget && $budget->amount > 0) {
             $spentAfter = $spentBefore + $amount;
             if ($spentBefore < $budget->amount && $spentAfter >= $budget->amount) {
                 auth()->user()->notify(new FinanceActivityNotification([
-                    'title' => 'Budget terlampaui',
-                    'message' => 'Pengeluaran kategori '.$budget->category->name.' mencapai '.$rp($spentAfter).' dari budget '.$rp($budget->amount).'.',
+                    'title_key' => 'notification_budget_reached',
+                    'message_key' => 'notification_budget_detail',
+                    'message_params' => ['category' => $budget->category->name, 'spent' => $rp($spentAfter), 'budget' => $rp($budget->amount)],
+                    'title' => __('ui.notification_budget_reached'),
+                    'message' => __('ui.notification_budget_detail', ['category' => $budget->category->name, 'spent' => $rp($spentAfter), 'budget' => $rp($budget->amount)]),
                 ]));
             } elseif ($spentBefore < $budget->amount * 0.8 && $spentAfter >= $budget->amount * 0.8) {
                 auth()->user()->notify(new FinanceActivityNotification([
-                    'title' => 'Budget hampir habis',
-                    'message' => 'Pengeluaran kategori '.$budget->category->name.' mencapai '.$rp($spentAfter).' dari budget '.$rp($budget->amount).'.',
+                    'title_key' => 'notification_budget_low',
+                    'message_key' => 'notification_budget_detail',
+                    'message_params' => ['category' => $budget->category->name, 'spent' => $rp($spentAfter), 'budget' => $rp($budget->amount)],
+                    'title' => __('ui.notification_budget_low'),
+                    'message' => __('ui.notification_budget_detail', ['category' => $budget->category->name, 'spent' => $rp($spentAfter), 'budget' => $rp($budget->amount)]),
                 ]));
             }
         }
@@ -219,6 +228,7 @@ class Index extends Component
             ->all();
         $offlineDataJson = json_encode([
             'userId' => auth()->id(),
+            'locale' => app()->getLocale(),
             'accounts' => $accounts->map(fn (Account $account) => ['id' => $account->id, 'name' => $account->name])->values(),
             'categories' => $allCategories->map(fn (Category $category) => ['id' => $category->id, 'name' => $category->name, 'type' => $category->type->value])->values(),
         ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);

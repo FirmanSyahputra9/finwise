@@ -23,7 +23,7 @@
     update(event) {
         const digits = event.target.value.replace(/\D/g, '');
         this.sync(digits);
-        $wire.set(this.model, digits ? Number(digits) : null);
+        $wire.set(this.model, digits || null);
     }
 }">
     <input

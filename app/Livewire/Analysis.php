@@ -44,6 +44,13 @@ class Analysis extends Component
     public function saveMonthlyBudget(): void
     {
         $data = $this->validate(['monthlyBudget' => ['required', 'integer', 'min:1']]);
+        $allocated = (int) Budget::where('month', now()->month)->where('year', now()->year)->sum('amount');
+
+        if ($allocated > $data['monthlyBudget']) {
+            $this->addError('monthlyBudget', __('ui.monthly_below_allocations', ['amount' => number_format($allocated, 0, ',', '.') ]));
+            return;
+        }
+
         \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->updateOrInsert(
             ['user_id' => auth()->id(), 'month' => now()->month, 'year' => now()->year],
             ['amount' => $data['monthlyBudget'], 'updated_at' => now(), 'created_at' => now()]
@@ -74,7 +81,7 @@ class Analysis extends Component
         $allocated = (int) Budget::where('month', $month)->where('year', $year)->when($budget, fn ($q) => $q->where('id', '<>', $budget->id))->sum('amount');
 
         if (! $limit) {
-            $this->addError('budgetAmount', 'Atur batas total budget bulanan terlebih dahulu.');
+            $this->addError('budgetAmount', __('ui.set_monthly_limit_first'));
             return;
         }
 
@@ -84,13 +91,13 @@ class Analysis extends Component
         ]);
 
         if ($limit && $allocated + $data['budgetAmount'] > $limit) {
-            $this->addError('budgetAmount', 'Alokasi kategori melebihi batas budget bulanan yang tersisa.');
+            $this->addError('budgetAmount', __('ui.allocation_exceeds_limit'));
             return;
         }
 
         validator(['categoryId' => $data['categoryId']], [
             'categoryId' => [Rule::unique('budgets', 'category_id')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->ignore($budget?->id)],
-        ], ['categoryId.unique' => 'Kategori ini sudah memiliki budget bulan ini.'])->validate();
+        ], ['categoryId.unique' => __('ui.category_budget_exists')])->validate();
 
         if ($budget) {
             $budget->update(['category_id' => $data['categoryId'], 'amount' => $data['budgetAmount']]);
@@ -112,7 +119,7 @@ class Analysis extends Component
         $make = fn ($label, $from, $to) => ['label' => $label, 'from' => $from->toDateString(), 'to' => $to->toDateString()];
 
         return match ($this->period) {
-            'weekly' => collect(range(3, 0))->map(fn ($i) => $make('Wk '.(4 - $i), now()->subWeeks($i)->startOfWeek(), now()->subWeeks($i)->endOfWeek()))->all(),
+            'weekly' => collect(range(3, 0))->map(fn ($i) => $make(__('ui.weekly_short').' '.(4 - $i), now()->subWeeks($i)->startOfWeek(), now()->subWeeks($i)->endOfWeek()))->all(),
             'monthly' => collect(range(5, 0))->map(fn ($i) => $make(now()->subMonthsNoOverflow($i)->translatedFormat('M'), now()->subMonthsNoOverflow($i)->startOfMonth(), now()->subMonthsNoOverflow($i)->endOfMonth()))->all(),
             'yearly' => collect(range(4, 0))->map(fn ($i) => $make((string) now()->subYears($i)->year, now()->subYears($i)->startOfYear(), now()->subYears($i)->endOfYear()))->all(),
             default => collect(range(6, 0))->map(fn ($i) => $make(now()->subDays($i)->translatedFormat('D'), now()->subDays($i)->startOfDay(), now()->subDays($i)->endOfDay()))->all(),
@@ -150,6 +157,7 @@ class Analysis extends Component
             'budgetCards' => $budgetCards,
             'expenseCategories' => Category::where('type', 'expense')->orderBy('name')->get(),
             'analysisCategories' => Category::orderBy('type')->orderBy('name')->get(),
+            'selectedAnalysisCategories' => Category::whereIn('id', $this->analysisCategoryIds)->orderBy('name')->pluck('name')->all(),
             'monthlyBudget' => (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', now()->month)->where('year', now()->year)->value('amount'),
             'allocatedBudget' => (int) Budget::where('month', now()->month)->where('year', now()->year)->sum('amount'),
         ]);

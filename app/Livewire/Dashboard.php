@@ -24,6 +24,7 @@ class Dashboard extends Component
         $accounts = Account::all();
         $offlineDataJson = json_encode([
             'userId' => auth()->id(),
+            'locale' => app()->getLocale(),
             'accounts' => $accounts->map(fn (Account $account) => ['id' => $account->id, 'name' => $account->name])->values(),
             'categories' => Category::orderBy('name')->get()->map(fn (Category $category) => ['id' => $category->id, 'name' => $category->name, 'type' => $category->type->value])->values(),
         ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);

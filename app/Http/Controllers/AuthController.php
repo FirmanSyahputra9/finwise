@@ -25,7 +25,7 @@ class AuthController extends Controller
         ]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Email atau kata sandi tidak cocok.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('ui.invalid_credentials')])->onlyInput('email');
         }
 
         $request->session()->regenerate();

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#00D09E">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icons/finwise.svg" type="image/svg+xml">
-    <title>Mode offline - finWise</title>
+    <title data-i18n="offline_title">Mode offline - finWise</title>
     <link rel="manifest" href="/manifest.webmanifest">
     <style>
         * { box-sizing: border-box } body { margin: 0; background: #00D09E; color: #093030; font: 16px system-ui, sans-serif }
@@ -20,25 +20,28 @@
 </head>
 <body>
 <main>
-    <h1>finWise offline</h1>
-    <p class="muted">Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.</p>
+    <h1 data-i18n="heading">Mode offline</h1>
+    <p class="muted" data-i18n="offline_intro">Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.</p>
     <p id="offline-queue" class="muted" role="status"></p>
-    <section id="offline-pending-list" aria-label="Transaksi menunggu sinkronisasi"></section>
+    <section id="offline-pending-list" aria-label="Transaksi menunggu sinkronisasi" data-i18n-aria="offline_pending"></section>
     <form id="offline-transaction-form" class="card">
-        <div class="types" role="group" aria-label="Jenis transaksi">
-            <button type="button" data-type="expense" aria-pressed="true">Pengeluaran</button>
-            <button type="button" data-type="income" aria-pressed="false">Pemasukan</button>
-            <button type="button" data-type="transfer" aria-pressed="false">Transfer</button>
+        <div class="types" role="group" aria-label="Jenis transaksi" data-i18n-aria="transaction_kind">
+            <button type="button" data-type="expense" data-i18n="expense">Pengeluaran</button>
+            <button type="button" data-type="income" data-i18n="income">Pemasukan</button>
+            <button type="button" data-type="transfer" data-i18n="transfer">Transfer</button>
         </div>
-        <label for="offline-amount">Jumlah (Rp)<input id="offline-amount" name="amount" type="number" min="1" autocomplete="off" required></label>
-        <label for="offline-account">Dari akun<select id="offline-account" name="account_id" autocomplete="off" required></select></label>
-        <label id="category-wrap" for="offline-category">Kategori<select id="offline-category" name="category_id" autocomplete="off"></select></label>
-        <label id="to-account-wrap" for="offline-to-account" hidden>Ke akun<select id="offline-to-account" name="to_account_id" autocomplete="off"></select></label>
-        <label for="offline-date">Tanggal<input id="offline-date" name="date" type="date" autocomplete="off" required></label>
-        <label for="offline-note">Catatan<textarea id="offline-note" name="note" autocomplete="off" maxlength="255" rows="2"></textarea></label>
-        <button class="save">Simpan di perangkat</button>
+        <label for="offline-amount-display"><span data-i18n="amount_label">Jumlah (Rp)</span>
+            <input id="offline-amount-display" type="text" inputmode="numeric" autocomplete="off" required>
+            <input id="offline-amount" name="amount" type="hidden">
+        </label>
+        <label for="offline-account"><span data-i18n="from_account">Dari akun</span><select id="offline-account" name="account_id" autocomplete="off" required></select></label>
+        <label id="category-wrap" for="offline-category"><span data-i18n="category">Kategori</span><select id="offline-category" name="category_id" autocomplete="off"></select></label>
+        <label id="to-account-wrap" for="offline-to-account" hidden><span data-i18n="to_account">Ke akun</span><select id="offline-to-account" name="to_account_id" autocomplete="off"></select></label>
+        <label for="offline-date"><span data-i18n="date">Tanggal</span><input id="offline-date" name="date" type="date" autocomplete="off" required></label>
+        <label for="offline-note"><span data-i18n="note">Catatan</span><textarea id="offline-note" name="note" autocomplete="off" maxlength="255" rows="2"></textarea></label>
+        <button class="save" data-i18n="save_offline">Simpan di perangkat</button>
     </form>
-    <p class="muted"><a href="/dashboard">Coba buka aplikasi lagi</a></p>
+    <p class="muted"><a href="/dashboard" data-i18n="try_again">Coba buka aplikasi lagi</a></p>
 </main>
 <script src="/offline.js"></script>
 </body>

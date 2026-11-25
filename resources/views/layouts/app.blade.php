@@ -67,10 +67,10 @@
         {{ $slot }}
         <div class="absolute right-5 top-12 z-40"><livewire:notifications-menu :key="'global-notifications'" /></div>
         <div id="offline-sync-status" class="fixed bottom-[96px] left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
-        <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">Pasang finWise</button>
+        <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">{{ __('ui.install_app') }}</button>
 
-        <nav class="fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[88px] max-w-[430px] items-center justify-between rounded-t-[50px] bg-light px-9">
-            @foreach ([['dashboard', 'home', 'Home'], ['analysis', 'analysis', 'Analisis'], ['transactions', 'transactions', 'Transaksi'], ['savings-goals', 'savings', 'Simpanan'], ['categories', 'category', 'Kategori'], ['profile', 'profile', 'Profil']] as [$route, $icon, $label])
+        <nav wire:transition.navigate="bottom-navigation" class="fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[88px] max-w-[430px] items-center justify-between rounded-t-[50px] bg-light px-9">
+            @foreach ([['dashboard', 'home', __('ui.home')], ['analysis', 'analysis', __('ui.analysis')], ['transactions', 'transactions', __('ui.transactions')], ['savings-goals', 'savings', __('ui.savings')], ['categories', 'category', __('ui.categories')], ['profile', 'profile', __('ui.profile')]] as [$route, $icon, $label])
                 <a href="{{ route($route) }}" wire:navigate
                    aria-label="{{ $label }}" class="flex h-[58px] min-w-10 flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 text-nav {{ request()->routeIs($route) ? 'bg-main' : '' }}">
                     <x-icon :name="$icon" class="size-5" />

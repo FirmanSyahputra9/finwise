@@ -5,11 +5,11 @@
 <div class="mt-7">
     <div class="grid grid-cols-2 text-center">
         <div class="border-r border-light">
-            <p class="text-xs text-ink">Total Balance</p>
+            <p class="text-xs text-ink">{{ __('ui.total_balance') }}</p>
             <p class="text-2xl font-bold text-mint">{{ \App\Support\Money::rp($balance) }}</p>
         </div>
         <div>
-            <p class="text-xs text-ink">Total Expense</p>
+            <p class="text-xs text-ink">{{ __('ui.expense') }}</p>
             <p class="text-2xl font-semibold text-ocean">-{{ \App\Support\Money::rp($expense) }}</p>
         </div>
     </div>
@@ -19,5 +19,5 @@
              style="width: max(14%, {{ $pct }}%)">{{ $pct }}%</div>
         <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-medium italic text-nav">{{ \App\Support\Money::rp($income) }}</span>
     </div>
-    <p class="mt-3 text-center text-[15px] text-nav">{{ $pct }}% of your expenses, {{ $pct <= 50 ? 'looks good.' : 'be careful!' }}</p>
+    <p class="mt-3 text-center text-[15px] text-nav">{{ __('ui.expense_ratio', ['percent' => $pct, 'advice' => $pct <= 50 ? __('ui.looks_good') : __('ui.be_careful')]) }}</p>
 </div>

@@ -11,9 +11,9 @@ enum AccountType: string
     public function label(): string
     {
         return match ($this) {
-            self::Cash => 'Tunai',
-            self::Bank => 'Bank',
-            self::EWallet => 'E-Wallet',
+            self::Cash => __('ui.cash'),
+            self::Bank => __('ui.bank'),
+            self::EWallet => __('ui.ewallet'),
         };
     }
 }

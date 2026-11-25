@@ -15,6 +15,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public string $language = 'id';
+
     public string $currentPassword = '';
 
     public string $newPassword = '';
@@ -25,6 +27,20 @@ class Profile extends Component
     {
         $this->name = auth()->user()->name;
         $this->email = auth()->user()->email;
+        $this->language = session('locale', 'id');
+    }
+
+    public function updatedLanguage(string $language): void
+    {
+        if (! in_array($language, ['id', 'en', 'ja'], true)) {
+            $this->language = session('locale', 'id');
+            return;
+        }
+
+        session(['locale' => $language]);
+        app()->setLocale($language);
+        $this->dispatch('locale-changed', locale: $language);
+        $this->redirect(route('profile'), navigate: true);
     }
 
     public function updateProfile(): void
@@ -44,8 +60,8 @@ class Profile extends Component
             'currentPassword' => ['required', 'current_password'],
             'newPassword' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'currentPassword.current_password' => 'Kata sandi saat ini tidak sesuai.',
-            'newPassword.confirmed' => 'Konfirmasi kata sandi belum cocok.',
+            'currentPassword.current_password' => __('ui.password_incorrect'),
+            'newPassword.confirmed' => __('ui.password_confirmation'),
         ]);
 
         auth()->user()->update(['password' => Hash::make($this->newPassword)]);

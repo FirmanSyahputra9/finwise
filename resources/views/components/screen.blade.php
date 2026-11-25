@@ -12,7 +12,7 @@
         {{ $top ?? '' }}
     </header>
 
-    <main class="mt-6 flex-1 rounded-t-[50px] bg-mint px-5 pb-32 pt-7 sm:px-9 sm:pt-8">
+    <main wire:transition.navigate class="mt-6 flex-1 rounded-t-[50px] bg-mint px-5 pb-32 pt-7 sm:px-9 sm:pt-8">
         {{ $slot }}
     </main>
 </div>
