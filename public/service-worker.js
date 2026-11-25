@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finwise-shell-v4';
+const CACHE_NAME = 'finwise-shell-v5';
 const APP_SHELL = ['/offline.html', '/offline.js', '/manifest.webmanifest', '/favicon.ico', '/icons/finwise.svg'];
 
 self.addEventListener('install', (event) => {
@@ -33,9 +33,27 @@ self.addEventListener('sync', (event) => {
     }
 });
 
+self.addEventListener('message', (event) => {
+    if (event.data?.type !== 'FINWISE_SHOW_NOTIFICATION' || Notification.permission !== 'granted') return;
+    event.waitUntil(self.registration.showNotification(event.data.title, {
+        body: event.data.body,
+        icon: '/icons/finwise.svg',
+        badge: '/icons/finwise.svg',
+        data: { url: '/' },
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+        const app = clients.find((client) => new URL(client.url).origin === self.location.origin);
+        return app ? app.focus() : self.clients.openWindow(event.notification.data?.url || '/');
+    }));
+});
+
 async function readStore(storeName, requestName) {
     const db = await new Promise((resolve, reject) => {
-        const request = indexedDB.open('finwise-offline', 1);
+        const request = indexedDB.open('finwise-offline', 2);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
     });

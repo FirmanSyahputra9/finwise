@@ -12,9 +12,9 @@
             <div class="min-w-0 flex-1"><h2 class="truncate font-semibold text-dark">{{ $group?->name ?? $person?->name }}</h2>
                 <p class="text-[11px] text-dark/50">{{ $group ? $group->members->count().' '.__('ui.chat_group_members_short') : __('ui.chat_text_only') }}</p></div>
             @if ($group && $isGroupAdmin)
-                <button type="button" wire:click="deleteGroup({{ $group->id }})" wire:confirm="{{ __('ui.chat_group_delete_confirm') }}" aria-label="{{ __('ui.chat_group_delete') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
+                <button type="button" wire:click="deleteGroup({{ $group->id }})" data-confirm="{{ __('ui.chat_group_delete_confirm') }}" aria-label="{{ __('ui.chat_group_delete') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
             @elseif ($connection)
-                <button type="button" wire:click="disconnect({{ $connection->id }})" wire:confirm="{{ __('ui.chat_disconnect_confirm') }}" class="shrink-0 rounded-full bg-red-100 px-3 py-2 text-xs font-medium text-red-700">{{ __('ui.chat_disconnect') }}</button>
+                <button type="button" wire:click="disconnect({{ $connection->id }})" data-confirm="{{ __('ui.chat_disconnect_confirm') }}" class="shrink-0 rounded-full bg-red-100 px-3 py-2 text-xs font-medium text-red-700">{{ __('ui.chat_disconnect') }}</button>
             @endif
         </header>
 
@@ -29,7 +29,7 @@
                 @error('inviteUserId')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 <ul class="mt-2 max-h-28 space-y-1 overflow-y-auto">
                     @foreach ($group->members as $member)
-                        <li wire:key="group-member-{{ $group->id }}-{{ $member->id }}" class="flex items-center justify-between gap-2 text-xs"><span class="truncate">{{ $member->name }} @if ($member->pivot->role === 'admin') · {{ __('ui.chat_group_admin') }} @endif</span>@if ($member->id !== auth()->id() || $group->members->where('pivot.role', 'admin')->count() > 1)<button type="button" wire:click="removeGroupMember({{ $group->id }}, {{ $member->id }})" wire:confirm="{{ __('ui.chat_group_remove_confirm') }}" class="text-red-600">{{ __('ui.chat_group_remove') }}</button>@endif</li>
+                        <li wire:key="group-member-{{ $group->id }}-{{ $member->id }}" class="flex items-center justify-between gap-2 text-xs"><span class="truncate">{{ $member->name }} @if ($member->pivot->role === 'admin') · {{ __('ui.chat_group_admin') }} @endif</span>@if ($member->id !== auth()->id() || $group->members->where('pivot.role', 'admin')->count() > 1)<button type="button" wire:click="removeGroupMember({{ $group->id }}, {{ $member->id }})" data-confirm="{{ __('ui.chat_group_remove_confirm') }}" class="text-red-600">{{ __('ui.chat_group_remove') }}</button>@endif</li>
                     @endforeach
                 </ul>
             </details>

@@ -9,7 +9,7 @@
                 <span class="text-dark/60 transition-transform group-open:rotate-180">⌄</span>
             </summary>
             <div class="mt-3 flex justify-end">
-                <button type="button" wire:click="permanentlyDeleteAll" wire:confirm="{{ __('ui.permanent_delete_all_confirm') }}" wire:loading.attr="disabled" wire:target="permanentlyDeleteAll" aria-label="{{ __('ui.permanent_delete_all') }}" title="{{ __('ui.permanent_delete_all') }}" class="grid size-9 place-items-center rounded-full bg-red-100 text-red-700 disabled:opacity-50"><x-icon name="trash-stack" class="size-5" /></button>
+                <button type="button" wire:click="permanentlyDeleteAll" data-confirm="{{ __('ui.permanent_delete_all_confirm') }}" wire:loading.attr="disabled" wire:target="permanentlyDeleteAll" aria-label="{{ __('ui.permanent_delete_all') }}" title="{{ __('ui.permanent_delete_all') }}" class="grid size-9 place-items-center rounded-full bg-red-100 text-red-700 disabled:opacity-50"><x-icon name="trash-stack" class="size-5" /></button>
             </div>
             <ul class="mt-3 max-h-64 divide-y divide-dark/10 overflow-y-auto overscroll-contain pr-1">
                 @foreach ($items as $item)
@@ -20,7 +20,7 @@
                         </div>
                         <div class="flex shrink-0 gap-2">
                             <button type="button" wire:click="undo('{{ $item['type'] }}', '{{ $item['id'] }}')" aria-label="{{ __('ui.undo') }}" title="{{ __('ui.undo') }}" class="grid size-9 place-items-center rounded-full bg-main text-ink"><x-icon name="undo" class="size-4" /></button>
-                            <button type="button" wire:click="permanentlyDelete('{{ $item['type'] }}', '{{ $item['id'] }}')" wire:confirm="{{ __('ui.permanent_delete_confirm') }}" aria-label="{{ __('ui.permanent_delete') }}" title="{{ __('ui.permanent_delete') }}" class="grid size-9 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
+                            <button type="button" wire:click="permanentlyDelete('{{ $item['type'] }}', '{{ $item['id'] }}')" data-confirm="{{ __('ui.permanent_delete_confirm') }}" aria-label="{{ __('ui.permanent_delete') }}" title="{{ __('ui.permanent_delete') }}" class="grid size-9 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
                         </div>
                     </li>
                 @endforeach

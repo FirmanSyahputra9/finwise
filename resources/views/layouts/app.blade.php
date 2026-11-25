@@ -69,7 +69,17 @@
         @unless(request()->routeIs('chat.conversation'))
         <div class="absolute right-5 top-12 z-40"><livewire:notifications-menu :key="'global-notifications'" /></div>
         @endunless
-        <div id="offline-sync-status" class="fixed bottom-[96px] left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
+        <div id="app-confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/50 p-5" role="presentation" data-confirm-modal>
+            <section class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl" role="alertdialog" aria-modal="true" aria-labelledby="app-confirm-title" aria-describedby="app-confirm-message">
+                <h2 id="app-confirm-title" class="text-lg font-semibold text-dark">{{ __('ui.confirmation') }}</h2>
+                <p id="app-confirm-message" class="mt-3 text-sm leading-relaxed text-dark/70"></p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" data-confirm-cancel class="rounded-full bg-light px-5 py-2 text-sm font-medium text-dark">{{ __('ui.cancel') }}</button>
+                    <button type="button" data-confirm-accept class="rounded-full bg-red-600 px-5 py-2 text-sm font-medium text-white">{{ __('ui.confirm') }}</button>
+                </div>
+            </section>
+        </div>
+        <div id="offline-sync-status" class="fixed top-20 left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
         <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">{{ __('ui.install_app') }}</button>
 
         @unless(request()->routeIs('chat.conversation'))

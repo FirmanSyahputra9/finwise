@@ -336,10 +336,62 @@ function bindBottomNavSwipe() {
     document.addEventListener('livewire:navigated', () => { navigating = false; }, { passive: true });
 }
 
+function bindCustomConfirmations() {
+    const modal = document.querySelector('[data-confirm-modal]');
+    if (!modal || modal.dataset.bound === 'true') return;
+    modal.dataset.bound = 'true';
+
+    const message = modal.querySelector('#app-confirm-message');
+    const cancel = modal.querySelector('[data-confirm-cancel]');
+    const accept = modal.querySelector('[data-confirm-accept]');
+    let pendingButton = null;
+    let previousFocus = null;
+    const close = (confirmed) => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        const button = pendingButton;
+        pendingButton = null;
+        if (confirmed && button?.isConnected && !button.disabled) {
+            button.dataset.confirmApproved = 'true';
+            button.click();
+        }
+        previousFocus?.focus();
+    };
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-confirm]');
+        if (!button) return;
+        if (button.dataset.confirmApproved === 'true') {
+            delete button.dataset.confirmApproved;
+            return;
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (pendingButton) return;
+        pendingButton = button;
+        previousFocus = button;
+        message.textContent = button.dataset.confirm;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        cancel.focus();
+    }, true);
+
+    cancel.addEventListener('click', () => close(false));
+    accept.addEventListener('click', () => close(true));
+    modal.addEventListener('click', (event) => { if (event.target === modal) close(false); });
+    document.addEventListener('keydown', (event) => {
+        if (!pendingButton) return;
+        if (event.key === 'Escape') { event.preventDefault(); close(false); }
+        if (event.key === 'Enter') { event.preventDefault(); close(true); }
+    });
+}
+
 bindDashboardCat();
 bindProfilePhotoInput();
 bindBottomNavSwipe();
+bindCustomConfirmations();
 document.addEventListener('livewire:navigated', () => {
     bindDashboardCat();
     bindProfilePhotoInput();
+    bindCustomConfirmations();
 });

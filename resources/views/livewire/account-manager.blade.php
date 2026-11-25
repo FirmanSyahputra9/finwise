@@ -1,7 +1,7 @@
 <section class="space-y-3" x-data="{ open: @entangle('open') }">
     <div class="flex items-center justify-between">
         <h2 class="font-semibold">{{ __('ui.my_accounts') }}</h2>
-        <button type="button" wire:click="create" class="rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_account') }}</button>
+        <button type="button" wire:click="create" class="dark-contrast-action rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_account') }}</button>
     </div>
     @error('accountId') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
     <div class="space-y-2">
@@ -12,7 +12,7 @@
                     <p class="text-xs text-dark/60">{{ $account->type->label() }}</p>
                     <p class="mt-1 text-sm font-semibold text-dark">{{ \App\Support\Money::rp($account->balance) }}</p>
                 </div>
-                <div class="flex gap-3 text-xs"><button type="button" wire:click="edit({{ $account->id }})" class="text-blue">{{ __('ui.edit') }}</button><button type="button" wire:click="delete({{ $account->id }})" wire:loading.attr="disabled" wire:target="delete" wire:confirm="{{ __('ui.delete_account_confirm') }}" class="text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button></div>
+                <div class="flex gap-3 text-xs"><button type="button" wire:click="edit({{ $account->id }})" class="text-blue">{{ __('ui.edit') }}</button><button type="button" wire:click="delete({{ $account->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete_account_confirm') }}" class="text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button></div>
             </article>
         @empty
             <p class="text-sm text-dark/60">{{ __('ui.no_accounts') }}</p>

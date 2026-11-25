@@ -7,7 +7,7 @@
         <div class="grid grid-cols-3 gap-x-4 gap-y-6">
             @foreach ($categories as $c)
                 <div wire:key="c-{{ $c->id }}" class="group relative text-center">
-                    <button type="button" wire:click="delete({{ $c->id }})" wire:loading.attr="disabled" wire:target="delete" wire:confirm="{{ __('ui.delete_category_confirm', ['category' => $c->name]) }}" aria-label="{{ __('ui.delete') }} {{ $c->name }}" class="absolute -right-2 -top-2 z-10 grid size-7 place-items-center rounded-full bg-red-500 text-lg leading-none text-white shadow disabled:opacity-50">&times;</button>
+                    <button type="button" wire:click="delete({{ $c->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete_category_confirm', ['category' => $c->name]) }}" aria-label="{{ __('ui.delete') }} {{ $c->name }}" class="absolute -right-2 -top-2 z-10 grid size-7 place-items-center rounded-full bg-red-500 text-lg leading-none text-white shadow disabled:opacity-50">&times;</button>
                     <button type="button" wire:click="$set('selectedCategory', {{ $selectedCategory === $c->id ? 'null' : $c->id }})" class="card-3d card-3d-hover w-full grid h-[98px] place-items-center rounded-[26px] text-4xl font-semibold text-mint {{ $selectedCategory === $c->id ? 'bg-dark' : ($loop->first ? 'bg-ocean' : 'bg-sky') }}">
                         {{ mb_strtoupper(mb_substr($c->name, 0, 1)) }}
                     </button>

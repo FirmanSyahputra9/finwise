@@ -17,11 +17,12 @@
         <div class="mb-3 flex items-center justify-between">
             <h2 class="font-semibold text-dark">{{ __('ui.notifications') }}</h2>
             <div class="flex gap-2">
+                <button type="button" data-enable-notifications data-granted-label="{{ __('ui.notifications_allowed') }}" data-denied-label="{{ __('ui.notifications_blocked') }}" data-enable-label="{{ __('ui.enable_notifications') }}" class="rounded-full bg-light px-3 py-1 text-xs text-dark">{{ __('ui.enable_notifications') }}</button>
                 @if ($unreadCount > 0)
                     <button type="button" wire:click="markAllRead" aria-label="{{ __('ui.mark_read') }}" title="{{ __('ui.mark_read') }}" class="grid size-8 place-items-center rounded-full bg-light text-blue"><x-icon name="check-all" class="size-4" /></button>
                 @endif
                 @if ($notifications->isNotEmpty())
-                    <button type="button" wire:click="deleteAll" wire:confirm="{{ __('ui.delete_all_notifications_confirm') }}" aria-label="{{ __('ui.delete_all_notifications') }}" title="{{ __('ui.delete_all_notifications') }}" class="grid size-8 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash-stack" class="size-4" /></button>
+                    <button type="button" wire:click="deleteAll" data-confirm="{{ __('ui.delete_all_notifications_confirm') }}" aria-label="{{ __('ui.delete_all_notifications') }}" title="{{ __('ui.delete_all_notifications') }}" class="grid size-8 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash-stack" class="size-4" /></button>
                 @endif
             </div>
         </div>

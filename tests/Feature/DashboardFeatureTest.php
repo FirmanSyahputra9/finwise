@@ -35,6 +35,22 @@ it('shows no unallocated amount before a monthly budget is configured', function
         ->assertDontSee('Sisa budget yang boleh dipakai');
 });
 
+it('embeds an owner-scoped finance snapshot for offline use', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+    Account::create(['name' => 'Dompet offline', 'type' => 'cash', 'opening_balance' => 25_000]);
+    $other = User::factory()->create();
+    $this->actingAs($other);
+    Account::create(['name' => 'Rahasia orang lain', 'type' => 'cash']);
+    $this->actingAs($user);
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('"name":"Dompet offline"', false)
+        ->assertDontSee('"name":"Rahasia orang lain"', false)
+        ->assertSee('"summary"', false);
+});
+
 it('provides five bottom navigation destinations and dashboard shortcuts for chat and categories', function () {
     $this->actingAs(User::factory()->create());
 
@@ -49,4 +65,15 @@ it('provides five bottom navigation destinations and dashboard shortcuts for cha
         ->assertDontSee('data-bottom-nav-route="categories"', false)
         ->assertSee(route('chat'), false)
         ->assertSee(route('categories'), false);
+});
+
+it('renders the shared custom confirmation dialog in the app layout', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('data-confirm-modal', false)
+        ->assertSee('role="alertdialog"', false)
+        ->assertSee(__('ui.confirmation'))
+        ->assertSee(__('ui.confirm'));
 });

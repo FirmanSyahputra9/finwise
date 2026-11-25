@@ -31,7 +31,7 @@
     <div x-show="open" x-cloak class="fixed inset-0 z-40 grid place-items-center bg-black/50 px-6" x-on:keydown.escape.window="open = false">
         <div x-on:click.outside="open = false" class="w-full max-w-[339px] rounded-[20px] bg-white px-8 py-10 text-center">
             <h2 class="text-xl font-bold capitalize text-dark">End Session</h2>
-            <p class="mt-3 font-spartan text-[17px] text-[#363130]">Are you sure you want to log out?</p>
+            <p class="mt-3 font-spartan text-[17px] text-dark/75">Are you sure you want to log out?</p>
             <div class="mt-8 flex flex-col items-center gap-3">
                 <button wire:click="logout" class="btn w-full max-w-[218px]">Yes, End Session</button>
                 <button x-on:click="open = false" class="btn-soft w-full max-w-[218px]">Cancel</button>

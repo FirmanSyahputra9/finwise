@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Budget;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Support\OfflineFinanceSnapshot;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -22,12 +23,7 @@ class Dashboard extends Component
             ->sum('amount');
 
         $accounts = Account::all();
-        $offlineDataJson = json_encode([
-            'userId' => auth()->id(),
-            'locale' => app()->getLocale(),
-            'accounts' => $accounts->map(fn (Account $account) => ['id' => $account->id, 'name' => $account->name])->values(),
-            'categories' => Category::orderBy('name')->get()->map(fn (Category $category) => ['id' => $category->id, 'name' => $category->name, 'type' => $category->type->value])->values(),
-        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        $offlineDataJson = json_encode(OfflineFinanceSnapshot::forCurrentUser(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
         return view('livewire.dashboard', [
             'totalBalance' => $accounts->sum->balance,

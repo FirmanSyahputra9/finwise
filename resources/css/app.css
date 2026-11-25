@@ -28,7 +28,7 @@
 }
 .card-3d-hover { transition: transform 180ms ease, box-shadow 180ms ease; }
 .card-3d-hover:hover { transform: translateY(-2px); box-shadow: 0 14px 22px -13px rgb(5 34 36 / 52%), 0 5px 9px rgb(5 34 36 / 12%), inset 0 1px 0 rgb(255 255 255 / 45%); }
-html[data-theme="dark"] .card-3d { border-color: rgb(255 255 255 / 7%); box-shadow: 0 10px 18px -12px rgb(0 0 0 / 72%), 0 3px 7px rgb(0 0 0 / 28%), inset 0 1px 0 rgb(255 255 255 / 5%); }
+html[data-theme="dark"] .card-3d { border-color: rgb(195 215 219 / 24%); box-shadow: 0 10px 18px -12px rgb(0 0 0 / 72%), 0 3px 7px rgb(0 0 0 / 28%), inset 0 1px 0 rgb(255 255 255 / 5%); }
 @media (prefers-reduced-motion: reduce) { .card-3d-hover { transition: none; } .card-3d-hover:hover { transform: none; } }
 
 @keyframes cat-wag { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(18deg); } }
@@ -259,6 +259,33 @@ html[data-theme="dark"] .bg-white\/70,
 html[data-theme="dark"] .bg-slate-50 {
     background-color: #1a292e;
 }
+html[data-theme="dark"] .bg-light {
+    outline: 1px solid rgb(195 215 219 / 22%);
+    outline-offset: -1px;
+}
+html[data-theme="dark"] .field,
+html[data-theme="dark"] .transaction-control,
+html[data-theme="dark"] input:not(.transaction-amount):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    border: 1px solid rgb(195 215 219 / 30%);
+}
+html[data-theme="dark"] #bottom-navigation {
+    border: 1px solid rgb(195 215 219 / 38%);
+    border-bottom: 0;
+    box-shadow: 0 -10px 30px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(229 239 240 / 12%);
+}
+html[data-theme="dark"] #bottom-navigation a {
+    border: 1px solid transparent;
+}
+html[data-theme="dark"] #bottom-navigation a[aria-current="page"] {
+    border-color: rgb(229 239 240 / 48%);
+    box-shadow: 0 0 0 2px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 18%);
+    color: #071512;
+}
+html[data-theme="dark"] .dark-contrast-action {
+    color: #071512;
+}
 html[data-theme="dark"] .bg-sky {
     background-color: #263d47;
 }
@@ -309,6 +336,20 @@ html[data-theme="dark"] .border-light {
 html[data-theme="dark"] .bg-red-50 {
     background-color: #432629;
 }
+html[data-theme="dark"] .undo-banner {
+    background-color: #24383e;
+    color: #e5eff0;
+}
+.undo-banner {
+    background-color: #052224;
+    color: #f1fff3;
+}
+html[data-theme="dark"] .summary-progress-fill {
+    background-color: #24383e;
+    color: #ffffff;
+    outline: 1px solid rgb(195 215 219 / 28%);
+    outline-offset: -1px;
+}
 
 html[data-text-color="black"] { --user-text-color: #111827; }
 html[data-text-color="white"] { --user-text-color: #f8fafc; }
@@ -349,6 +390,33 @@ html[data-text-color]:not([data-text-color="default"]) [class~="text-nav/60"] {
 }
 html[data-text-color]:not([data-text-color="default"]) [class~="placeholder:text-dark/50"]::placeholder {
     color: color-mix(in srgb, var(--user-text-color) 55%, transparent);
+}
+
+html[data-theme="dark"][data-text-color] button.dark-contrast-action,
+html[data-theme="dark"][data-text-color] #bottom-navigation a[aria-current="page"] {
+    color: #071512;
+}
+html[data-theme="dark"] .summary-balance-label,
+html[data-theme="dark"] .summary-balance-value,
+html[data-theme="dark"] .goal-progress-percent {
+    color: #f1fff3;
+}
+html[data-theme="dark"] .goal-progress-percent {
+    font-weight: 600;
+}
+html[data-theme="dark"] .savings-progress-card {
+    background-color: #24383e;
+    outline: 1px solid rgb(195 215 219 / 30%);
+}
+html[data-theme="dark"][data-text-color] .analysis-budget-percent,
+html[data-theme="dark"][data-text-color] .goal-progress-percent,
+html[data-theme="dark"][data-text-color] .savings-saved-amount {
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+}
+html[data-theme="dark"][data-text-color] .savings-progress-detail {
+    color: #d1dfe2;
 }
 
 @layer components {

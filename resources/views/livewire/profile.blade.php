@@ -213,7 +213,7 @@
     <div x-show="open" x-cloak class="fixed inset-0 z-40 grid place-items-center bg-black/50 px-6" x-on:keydown.escape.window="open = false">
         <div x-on:click.outside="open = false" class="card-3d w-full max-w-[339px] rounded-[20px] bg-white px-8 py-10 text-center">
             <h2 class="text-xl font-bold capitalize text-dark">{{ __('ui.end_session') }}</h2>
-            <p class="mt-3 font-spartan text-[17px] text-[#363130]">{{ __('ui.logout_confirm') }}</p>
+            <p class="mt-3 font-spartan text-[17px] text-dark/75">{{ __('ui.logout_confirm') }}</p>
             <div class="mt-8 flex flex-col items-center gap-3">
                 <button wire:click="logout" class="btn w-full max-w-[218px]">{{ __('ui.yes_logout') }}</button>
                 <button x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button>

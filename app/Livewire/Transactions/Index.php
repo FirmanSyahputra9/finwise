@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\Budget;
 use App\Notifications\FinanceActivityNotification;
+use App\Support\OfflineFinanceSnapshot;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -114,6 +115,7 @@ class Index extends Component
             'title' => __('ui.notification_saved'),
             'message' => __('ui.notification_recorded', ['type' => __('ui.'.$data['type']), 'amount' => $rp($amount)]),
         ]));
+        $this->dispatch('finance-notification', title: __('ui.notification_saved'), body: __('ui.notification_recorded', ['type' => __('ui.'.$data['type']), 'amount' => $rp($amount)]));
 
         if ($budget && $budget->amount > 0) {
             $spentAfter = $spentBefore + $amount;
@@ -212,12 +214,7 @@ class Index extends Component
         $filterTypes = Transaction::query()->select('type')->distinct()->orderBy('type')->pluck('type')
             ->map(fn ($type) => $type instanceof TransactionType ? $type->value : (string) $type)
             ->all();
-        $offlineDataJson = json_encode([
-            'userId' => auth()->id(),
-            'locale' => app()->getLocale(),
-            'accounts' => $accounts->map(fn (Account $account) => ['id' => $account->id, 'name' => $account->name])->values(),
-            'categories' => $allCategories->map(fn (Category $category) => ['id' => $category->id, 'name' => $category->name, 'type' => $category->type->value])->values(),
-        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        $offlineDataJson = json_encode(OfflineFinanceSnapshot::forCurrentUser(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
         $transactions = Transaction::with(['category', 'account', 'toAccount'])
             ->when($this->filterType, fn ($q) => $q->where('type', $this->filterType))

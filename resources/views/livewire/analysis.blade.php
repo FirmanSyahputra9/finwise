@@ -65,7 +65,7 @@
 
         <div class="mb-3 mt-6 flex items-center justify-between">
             <h2 class="text-[15px] font-medium text-ink">{{ __('ui.monthly_budget') }}</h2>
-            <button type="button" wire:click="createBudget" class="rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_budget') }}</button>
+            <button type="button" wire:click="createBudget" class="dark-contrast-action rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_budget') }}</button>
         </div>
         <form wire:submit="saveMonthlyBudget" class="card-3d mb-4 rounded-2xl bg-light p-4">
             <label for="monthly-budget" class="label mt-0">{{ __('ui.monthly_budget_limit') }}</label>
@@ -84,10 +84,10 @@
                 <div wire:key="budget-{{ $card['id'] }}" class="card-3d relative flex h-[190px] flex-col items-center justify-center gap-2 rounded-[36px] bg-sky px-2">
                     <div class="absolute right-3 top-3 flex gap-2 text-xs font-medium text-white">
                         <button type="button" wire:click="editBudget({{ $card['id'] }})">{{ __('ui.edit') }}</button>
-                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="deleteBudget" wire:confirm="{{ __('ui.delete_category_budget') }}" class="disabled:opacity-50">{{ __('ui.delete') }}</button>
+                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="deleteBudget" data-confirm="{{ __('ui.delete_category_budget') }}" class="disabled:opacity-50">{{ __('ui.delete') }}</button>
                     </div>
                     <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(var(--color-ocean) {{ $card['percentage'] }}%, #F1FFF3 0)">
-                        <div class="grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $card['percentage'] }}%</div>
+                        <div class="analysis-budget-percent grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $card['percentage'] }}%</div>
                     </div>
                     <p class="truncate text-[15px] font-medium text-mint">{{ $card['name'] }}</p>
                     <p class="text-center text-[10px] text-mint/90">{{ \App\Support\Money::rp($card['spent']) }} / {{ \App\Support\Money::rp($card['amount']) }}</p>

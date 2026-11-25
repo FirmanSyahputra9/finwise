@@ -6,43 +6,97 @@
     <meta name="theme-color" content="#00D09E">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icons/finwise.svg" type="image/svg+xml">
-    <title data-i18n="offline_title">Mode offline - finWise</title>
+    <title>finWise</title>
     <link rel="manifest" href="/manifest.webmanifest">
     <style>
-        * { box-sizing: border-box } body { margin: 0; background: #00D09E; color: #093030; font: 16px system-ui, sans-serif }
-        main { max-width: 430px; min-height: 100dvh; margin: auto; padding: 32px 24px 48px; background: #F1FFF3 }
-        h1 { margin: 0 0 8px; font-size: 24px } p { line-height: 1.5 } .card { margin-top: 24px; padding: 20px; border-radius: 24px; background: white }
-        label { display: block; margin-top: 14px; font-size: 13px; font-weight: 600 } input, select, textarea, button { width: 100%; margin-top: 6px; padding: 12px; border: 0; border-radius: 14px; font: inherit }
-        input, select, textarea { background: #DFF7E2 } .types { display: flex; gap: 8px } .types button { background: #DFF7E2; cursor: pointer } .types button[aria-pressed="true"], .save { background: #00D09E }
-        .save { margin-top: 20px; cursor: pointer; font-weight: 700 } .muted { color: #48605d; font-size: 13px } #offline-queue { margin-top: 16px }
-        a { color: #0068FF } .pending-item { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; padding:12px; border-radius:14px; background:#DFF7E2; font-size:13px }
+        * { box-sizing: border-box }
+        body { margin: 0; background: #e2e8f0; color: #093030; font: 15px 'Poppins', ui-sans-serif, system-ui, sans-serif }
+        .app-shell { position: relative; max-width: 430px; min-height: 100dvh; margin: auto; padding-bottom: 100px; background: #00D09E; box-shadow: 0 0 32px #14322d1f }
+        .app-header { padding: max(16px, env(safe-area-inset-top)) 20px 25px }
+        .offline-banner { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid #f4c66b; border-radius: 15px; background: #fff4d6; color: #654400; font-size: 12px; font-weight: 600 }
+        .offline-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: #df8a00; box-shadow: 0 0 0 4px #df8a0020 }
+        .brand { display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 17px; color: #093030; font-size: 22px; font-weight: 700; letter-spacing: -.04em }
+        .brand img { width: 28px; height: 28px }
+        .app-main { min-height: calc(100dvh - 110px); padding: 25px 20px 34px; border-radius: 42px 42px 0 0; background: #F1FFF3 }
+        h1, h2, h3, p { margin-top: 0 } h1 { margin-bottom: 8px; font-size: 22px } h2 { margin: 0 0 12px; font-size: 17px } h3 { margin: 18px 0 8px; font-size: 14px }
+        p { line-height: 1.5 } .muted { color: #48605d; font-size: 12px }
+        .card { margin-top: 14px; padding: 16px; border-radius: 21px; background: white; box-shadow: 0 5px 18px #14322d0b }
+        label { display: block; margin-top: 14px; font-size: 13px; font-weight: 600 }
+        input, select, textarea, button { width: 100%; margin-top: 6px; padding: 12px; border: 0; border-radius: 14px; font: inherit }
+        input, select, textarea { background: #e7f8eb; color: #093030 }
+        .types { display: flex; gap: 8px } .types button { background: #e7f8eb; cursor: pointer; font-size: 13px }
+        .types button[aria-pressed="true"], .save { background: #00D09E }
+        .save { margin-top: 20px; cursor: pointer; font-weight: 700 }
+        #offline-queue { margin: 10px 0 0 } #offline-pending-list { margin-top: 6px }
+        .pending-item { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; padding:10px; border-radius:14px; background:#e7f8eb; font-size:12px }
+        .pending-item button { width:auto; margin:0; padding:6px 10px; background:#fff; color:#b42318 }
+        .offline-view { display:none } .offline-view.active { display:block }
+        .metric { padding:18px; border-radius:22px; background:#093030; color:#b8ffeb }
+        .metric-label { margin:0; font-size:13px; opacity:.85 } .metric strong { display:block; margin-top:5px; font-size:25px }
+        .data-row { display:flex; justify-content:space-between; gap:12px; padding:12px 2px; border-bottom:1px solid #e4efec; font-size:13px }
+        .data-row:last-child { border-bottom:0 } .data-row small { display:block; margin-top:3px; color:#647774; font-size:11px }
+        .meter { height:8px; margin-top:8px; border-radius:99px; background:#e3ece9; overflow:hidden }
+        .meter span { display:block; height:100%; border-radius:inherit; background:#00a880 }
+        .offline-tools { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+        .offline-tools button { margin:0; background:#fff; text-align:left; font-size:13px; font-weight:600; box-shadow:0 5px 18px #14322d0b; cursor:pointer }
+        .offline-tools button span { display:block; margin-bottom:5px; font-size:19px }
+        .bottom-nav { position:fixed; inset:auto 0 0; z-index:20; display:flex; align-items:center; justify-content:space-around; gap:4px; width:min(430px, 100%); height:calc(82px + env(safe-area-inset-bottom)); margin:auto; padding:8px 9px env(safe-area-inset-bottom); border-radius:34px 34px 0 0; background:#fff; box-shadow:0 -8px 30px #14322d1f }
+        .bottom-nav button { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:0; height:56px; margin:0; padding:4px 2px; border-radius:16px; background:transparent; color:#48605d; cursor:pointer }
+        .bottom-nav button[aria-selected="true"] { background:#F1FFF3; color:#093030 }
+        .nav-icon { font-size:19px; line-height:1 } .nav-label { overflow:hidden; max-width:100%; font-size:9px; font-weight:600; text-overflow:ellipsis; white-space:nowrap }
+        .try-online { display:inline-block; margin-top:18px; color:#087a60; font-size:12px; font-weight:600 }
     </style>
 </head>
 <body>
-<main>
-    <h1 data-i18n="heading">Mode offline</h1>
-    <p class="muted" data-i18n="offline_intro">Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.</p>
-    <p id="offline-queue" class="muted" role="status"></p>
-    <section id="offline-pending-list" aria-label="Transaksi menunggu sinkronisasi" data-i18n-aria="offline_pending"></section>
-    <form id="offline-transaction-form" class="card">
-        <div class="types" role="group" aria-label="Jenis transaksi" data-i18n-aria="transaction_kind">
-            <button type="button" data-type="expense" data-i18n="expense">Pengeluaran</button>
-            <button type="button" data-type="income" data-i18n="income">Pemasukan</button>
-            <button type="button" data-type="transfer" data-i18n="transfer">Transfer</button>
-        </div>
-        <label for="offline-amount-display"><span data-i18n="amount_label">Jumlah (Rp)</span>
-            <input id="offline-amount-display" type="text" inputmode="numeric" autocomplete="off" required>
-            <input id="offline-amount" name="amount" type="hidden">
-        </label>
-        <label for="offline-account"><span data-i18n="from_account">Dari akun</span><select id="offline-account" name="account_id" autocomplete="off" required></select></label>
-        <label id="category-wrap" for="offline-category"><span data-i18n="category">Kategori</span><select id="offline-category" name="category_id" autocomplete="off"></select></label>
-        <label id="to-account-wrap" for="offline-to-account" hidden><span data-i18n="to_account">Ke akun</span><select id="offline-to-account" name="to_account_id" autocomplete="off"></select></label>
-        <label for="offline-date"><span data-i18n="date">Tanggal</span><input id="offline-date" name="date" type="date" autocomplete="off" required></label>
-        <label for="offline-note"><span data-i18n="note">Catatan</span><textarea id="offline-note" name="note" autocomplete="off" maxlength="255" rows="2"></textarea></label>
-        <button class="save" data-i18n="save_offline">Simpan di perangkat</button>
-    </form>
-    <p class="muted"><a href="/dashboard" data-i18n="try_again">Coba buka aplikasi lagi</a></p>
-</main>
+<div class="app-shell">
+    <header class="app-header">
+        <div class="offline-banner" role="status"><span class="offline-dot" aria-hidden="true"></span><span data-i18n="offlineBanner">Anda sedang offline · Menampilkan data terakhir yang tersimpan</span></div>
+        <div class="brand"><img src="/icons/finwise.svg" alt=""><span>finWise</span></div>
+    </header>
+    <main class="app-main">
+        <h1 id="offline-page-title" data-i18n="home">Beranda</h1>
+        <p id="offline-snapshot-status" class="muted" role="status"></p>
+        <p id="offline-queue" class="muted" role="status"></p>
+        <section id="offline-pending-list" aria-label="Transaksi menunggu sinkronisasi" data-i18n-aria="offline_pending"></section>
+        <section id="view-dashboard" class="offline-view active"></section>
+        <section id="view-transactions" class="offline-view">
+            <div id="offline-transactions" class="card"></div>
+            <form id="offline-transaction-form" class="card">
+                <h2 data-i18n="add_transaction">Tambah transaksi</h2>
+                <div class="types" role="group" aria-label="Jenis transaksi" data-i18n-aria="transaction_kind">
+                    <button type="button" data-type="expense" data-i18n="expense">Pengeluaran</button>
+                    <button type="button" data-type="income" data-i18n="income">Pemasukan</button>
+                    <button type="button" data-type="transfer" data-i18n="transfer">Transfer</button>
+                </div>
+                <label for="offline-amount-display"><span data-i18n="amount_label">Jumlah (Rp)</span>
+                    <input id="offline-amount-display" type="text" inputmode="numeric" autocomplete="off" required>
+                    <input id="offline-amount" name="amount" type="hidden">
+                </label>
+                <label for="offline-account"><span data-i18n="from_account">Dari akun</span><select id="offline-account" name="account_id" autocomplete="off" required></select></label>
+                <label id="category-wrap" for="offline-category"><span data-i18n="category">Kategori</span><select id="offline-category" name="category_id" autocomplete="off"></select></label>
+                <label id="to-account-wrap" for="offline-to-account" hidden><span data-i18n="to_account">Ke akun</span><select id="offline-to-account" name="to_account_id" autocomplete="off"></select></label>
+                <label for="offline-date"><span data-i18n="date">Tanggal</span><input id="offline-date" name="date" type="date" autocomplete="off" required></label>
+                <label for="offline-note"><span data-i18n="note">Catatan</span><textarea id="offline-note" name="note" autocomplete="off" maxlength="255" rows="2"></textarea></label>
+                <button class="save" data-i18n="save_offline">Simpan di perangkat</button>
+            </form>
+        </section>
+        <section id="view-analysis" class="offline-view card"></section>
+        <section id="view-goals" class="offline-view card"></section>
+        <section id="view-more" class="offline-view">
+            <h2 data-i18n="more">Lainnya</h2>
+            <div class="offline-tools">
+                <button type="button" data-view="accounts"><span>◉</span><span data-i18n="accounts">Akun</span></button>
+                <button type="button" data-view="categories"><span>▦</span><span data-i18n="categories">Kategori</span></button>
+                <button type="button" data-view="budgets"><span>◷</span><span data-i18n="budgets">Budget</span></button>
+            </div>
+        </section>
+        <section id="view-accounts" class="offline-view card"></section>
+        <section id="view-categories" class="offline-view card"></section>
+        <section id="view-budgets" class="offline-view card"></section>
+        <a class="try-online" href="/dashboard" data-i18n="try_again">Coba buka aplikasi online</a>
+    </main>
+    <nav id="offline-tabs" class="bottom-nav" aria-label="Navigasi aplikasi"></nav>
+</div>
 <script src="/offline.js"></script>
 </body>
 </html>
