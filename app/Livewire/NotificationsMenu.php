@@ -19,9 +19,18 @@ class NotificationsMenu extends Component
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
     }
 
+    public function deleteAll(): void
+    {
+        auth()->user()->notifications()->update(['deleted_at' => now()]);
+    }
+
     public function delete(string $id): void
     {
-        $this->notification($id)?->delete();
+        $notification = $this->notification($id);
+        $notification?->delete();
+        if ($notification) {
+            $this->dispatch('deletion-made', type: 'notification', id: $notification->id);
+        }
     }
 
     private function notification(string $id): ?DatabaseNotification

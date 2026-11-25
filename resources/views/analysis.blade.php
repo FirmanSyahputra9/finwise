@@ -42,7 +42,7 @@
             @forelse ($targets as $b)
                 @php $pct = $b->amount > 0 ? min(100, (int) round($b->spent() / $b->amount * 100)) : 0; @endphp
                 <div class="flex h-[167px] flex-col items-center justify-center gap-2 rounded-[50px] bg-sky">
-                    <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(#0068FF {{ $pct }}%, #F1FFF3 0)">
+                    <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(var(--color-ocean) {{ $pct }}%, #F1FFF3 0)">
                         <div class="grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $pct }}%</div>
                     </div>
                     <p class="text-[15px] font-medium text-mint">{{ $b->category->name }}</p>

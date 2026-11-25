@@ -11,11 +11,11 @@
         </div>
 
         <details class="group relative mt-4">
-            <summary class="flex cursor-pointer list-none items-center justify-between rounded-2xl bg-white/70 px-4 py-3 text-sm font-medium text-ink shadow-sm">
+            <summary class="card-3d flex cursor-pointer list-none items-center justify-between rounded-2xl bg-white/70 px-4 py-3 text-sm font-medium text-ink">
                 <span>{{ __('ui.category_filter') }} <span class="font-normal text-dark/60">({{ count($analysisCategoryIds) ? count($analysisCategoryIds).' '.__('ui.selected') : __('ui.all_categories') }})</span></span>
                 <span class="text-dark/60 transition group-open:rotate-180">⌄</span>
             </summary>
-            <div class="mt-2 max-h-64 overflow-y-auto rounded-2xl border border-dark/10 bg-white p-2 shadow-sm">
+            <div class="card-3d mt-2 max-h-64 overflow-y-auto rounded-2xl bg-white p-2">
                 @forelse ($analysisCategories as $category)
                     @php($active = in_array($category->id, array_map('intval', $analysisCategoryIds), true))
                     <button type="button" wire:key="analysis-category-{{ $category->id }}" wire:click="toggleAnalysisCategory({{ $category->id }})" aria-pressed="{{ $active ? 'true' : 'false' }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm hover:bg-light">
@@ -37,7 +37,7 @@
             </p>
         @endif
 
-        <div class="mt-5 rounded-[50px] bg-light px-7 py-6">
+        <div class="card-3d mt-5 rounded-[50px] bg-light px-7 py-6">
             <p class="text-[15px] font-medium text-ink">{{ __('ui.income_expense') }}</p>
             <div class="mt-5 flex h-[132px] items-end justify-around gap-2 border-b border-dark px-2">
                 @foreach ($rows as $r)
@@ -67,13 +67,13 @@
             <h2 class="text-[15px] font-medium text-ink">{{ __('ui.monthly_budget') }}</h2>
             <button type="button" wire:click="createBudget" class="rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_budget') }}</button>
         </div>
-        <form wire:submit="saveMonthlyBudget" class="mb-4 rounded-2xl bg-light p-4">
+        <form wire:submit="saveMonthlyBudget" class="card-3d mb-4 rounded-2xl bg-light p-4">
             <label for="monthly-budget" class="label mt-0">{{ __('ui.monthly_budget_limit') }}</label>
-            <div class="flex gap-2"><x-money-input id="monthly-budget" model="monthlyBudget" :value="$monthlyBudget" name="monthly_budget" placeholder="1,500,000" class="field" /><button class="btn shrink-0 px-5">{{ __('ui.save') }}</button></div>
+            <div class="flex gap-2"><x-money-input id="monthly-budget" model="monthlyBudget" :value="$monthlyBudget" name="monthly_budget" placeholder="1,500,000" class="field" /><button class="btn inline-flex shrink-0 items-center gap-2 px-5"><span wire:loading wire:target="saveMonthlyBudget" class="app-spinner"></span>{{ __('ui.save') }}</button></div>
             @error('monthlyBudget')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
             @if ($monthlyBudget)
                 <p class="mt-2 text-xs text-dark/70">{{ __('ui.allocated') }} {{ \App\Support\Money::rp($allocatedBudget) }} {{ __('ui.of') }} {{ \App\Support\Money::rp($monthlyBudget) }}</p>
-                <p class="mt-1 text-xs text-dark/70">{{ __('ui.spent') }} {{ \App\Support\Money::rp($expense) }} · {{ __('ui.remaining_month') }} {{ \App\Support\Money::rp(max(0, $monthlyBudget - $expense)) }}</p>
+                <p class="mt-1 text-xs text-dark/70">{{ __('ui.spent') }} {{ \App\Support\Money::rp($expense) }} · {{ __('ui.remaining_month') }} {{ \App\Support\Money::rp($monthlyBudget - $expense) }}</p>
             @endif
         </form>
         <div class="grid grid-cols-2 gap-4">
@@ -81,12 +81,12 @@
                 <p class="col-span-2 text-center text-sm text-nav/60">{{ __('ui.no_budget') }}</p>
             @endif
             @foreach ($budgetCards as $card)
-                <div wire:key="budget-{{ $card['id'] }}" class="relative flex h-[190px] flex-col items-center justify-center gap-2 rounded-[36px] bg-sky px-2">
+                <div wire:key="budget-{{ $card['id'] }}" class="card-3d relative flex h-[190px] flex-col items-center justify-center gap-2 rounded-[36px] bg-sky px-2">
                     <div class="absolute right-3 top-3 flex gap-2 text-xs font-medium text-white">
                         <button type="button" wire:click="editBudget({{ $card['id'] }})">{{ __('ui.edit') }}</button>
-                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:confirm="{{ __('ui.delete_category_budget') }}">{{ __('ui.delete') }}</button>
+                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="deleteBudget" wire:confirm="{{ __('ui.delete_category_budget') }}" class="disabled:opacity-50">{{ __('ui.delete') }}</button>
                     </div>
-                    <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(#0068FF {{ $card['percentage'] }}%, #F1FFF3 0)">
+                    <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(var(--color-ocean) {{ $card['percentage'] }}%, #F1FFF3 0)">
                         <div class="grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $card['percentage'] }}%</div>
                     </div>
                     <p class="truncate text-[15px] font-medium text-mint">{{ $card['name'] }}</p>
@@ -95,7 +95,7 @@
             @endforeach
         </div>
     <div x-data="{ open: @entangle('budgetModal') }" x-show="open" x-cloak class="fixed inset-0 z-40 grid place-items-center bg-black/50 px-6" x-on:keydown.escape.window="open = false">
-        <form wire:submit="saveBudget" x-on:click.outside="open = false" class="w-full max-w-[339px] rounded-[20px] bg-white p-7">
+        <form wire:submit="saveBudget" x-on:click.outside="open = false" class="card-3d w-full max-w-[339px] rounded-[20px] bg-white p-7">
             <h2 class="text-center text-xl font-bold text-dark">{{ $budgetId ? __('ui.edit_budget') : __('ui.new_budget') }}</h2>
             <label for="budget-category" class="label">{{ __('ui.expense_category') }}</label>
             <select id="budget-category" name="category_id" autocomplete="off" wire:model="categoryId" class="field">
@@ -108,7 +108,7 @@
             <label for="budget-amount" class="label">{{ __('ui.budget_limit_rp') }}</label>
             <x-money-input id="budget-amount" model="budgetAmount" :value="$budgetAmount" name="amount" placeholder="1,000,000" class="field" />
             @error('budgetAmount') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-            <div class="mt-6 flex flex-col items-center gap-3"><button class="btn w-full max-w-[218px]">{{ __('ui.save') }}</button><button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button></div>
+            <div class="mt-6 flex flex-col items-center gap-3"><button class="btn inline-flex items-center justify-center gap-2 w-full max-w-[218px]"><span wire:loading wire:target="saveBudget" class="app-spinner"></span>{{ __('ui.save') }}</button><button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button></div>
         </form>
     </div>
 </x-screen>

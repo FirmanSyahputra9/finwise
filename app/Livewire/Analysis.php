@@ -43,7 +43,7 @@ class Analysis extends Component
 
     public function saveMonthlyBudget(): void
     {
-        $data = $this->validate(['monthlyBudget' => ['required', 'integer', 'min:1']]);
+        $data = $this->validate(['monthlyBudget' => ['required', 'integer', 'min:1', 'max:9999999999999']]);
         $allocated = (int) Budget::where('month', now()->month)->where('year', now()->year)->sum('amount');
 
         if ($allocated > $data['monthlyBudget']) {
@@ -55,6 +55,7 @@ class Analysis extends Component
             ['user_id' => auth()->id(), 'month' => now()->month, 'year' => now()->year],
             ['amount' => $data['monthlyBudget'], 'updated_at' => now(), 'created_at' => now()]
         );
+        $this->dispatch('app-toast', message: __('ui.saved'));
     }
 
     public function createBudget(): void
@@ -77,6 +78,11 @@ class Analysis extends Component
         $budget = $this->budgetId ? Budget::whereKey($this->budgetId)->firstOrFail() : null;
         $month = now()->month;
         $year = now()->year;
+        $trashedBudget = $budget ? null : Budget::onlyTrashed()
+            ->where('category_id', $this->categoryId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->first();
         $limit = (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->value('amount');
         $allocated = (int) Budget::where('month', $month)->where('year', $year)->when($budget, fn ($q) => $q->where('id', '<>', $budget->id))->sum('amount');
 
@@ -86,8 +92,8 @@ class Analysis extends Component
         }
 
         $data = $this->validate([
-            'categoryId' => ['required', Rule::exists('categories', 'id')->where('user_id', auth()->id())->where('type', 'expense')],
-            'budgetAmount' => ['required', 'integer', 'min:1'],
+            'categoryId' => ['required', Rule::exists('categories', 'id')->where('user_id', auth()->id())->where('type', 'expense')->whereNull('deleted_at')],
+            'budgetAmount' => ['required', 'integer', 'min:1', 'max:9999999999999'],
         ]);
 
         if ($limit && $allocated + $data['budgetAmount'] > $limit) {
@@ -96,22 +102,32 @@ class Analysis extends Component
         }
 
         validator(['categoryId' => $data['categoryId']], [
-            'categoryId' => [Rule::unique('budgets', 'category_id')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->ignore($budget?->id)],
+            'categoryId' => [Rule::unique('budgets', 'category_id')->where('user_id', auth()->id())->where('month', $month)->where('year', $year)->ignore($budget?->id ?? $trashedBudget?->id)],
         ], ['categoryId.unique' => __('ui.category_budget_exists')])->validate();
 
         if ($budget) {
             $budget->update(['category_id' => $data['categoryId'], 'amount' => $data['budgetAmount']]);
+        } elseif ($trashedBudget) {
+            $trashedBudget->restore();
+            $trashedBudget->update(['amount' => $data['budgetAmount']]);
         } else {
             Budget::create(['category_id' => $data['categoryId'], 'amount' => $data['budgetAmount'], 'month' => $month, 'year' => $year]);
         }
 
         $this->budgetModal = false;
         $this->reset('budgetId', 'categoryId', 'budgetAmount');
+        $this->dispatch('app-toast', message: __('ui.saved'));
     }
 
     public function deleteBudget(int $id): void
     {
-        Budget::whereKey($id)->firstOrFail()->delete();
+        $budget = Budget::whereKey($id)->first();
+        if (! $budget) {
+            return;
+        }
+
+        $budget->delete();
+        $this->dispatch('deletion-made', type: 'budget', id: $budget->id);
     }
 
     private function buckets(): array

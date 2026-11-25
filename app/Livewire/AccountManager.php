@@ -41,7 +41,7 @@ class AccountManager extends Component
         $data = $this->validate([
             'name' => ['required', 'string', 'max:80'],
             'type' => ['required', Rule::enum(AccountType::class)],
-            'openingBalance' => ['required', 'integer', 'min:0'],
+            'openingBalance' => ['required', 'integer', 'min:0', 'max:9999999999999'],
         ]);
 
         $values = ['name' => $data['name'], 'type' => $data['type'], 'opening_balance' => $data['openingBalance']];
@@ -52,12 +52,19 @@ class AccountManager extends Component
         }
 
         $this->reset('accountId', 'name', 'type', 'openingBalance', 'open');
+        $this->dispatch('app-toast', message: __('ui.saved'));
     }
 
     public function delete(int $id): void
     {
-        $account = Account::findOrFail($id);
-        $hasTransactions = Transaction::where('account_id', $id)->orWhere('to_account_id', $id)->exists();
+        $account = Account::find($id);
+        if (! $account) {
+            return;
+        }
+
+        $hasTransactions = Transaction::withTrashed()->where(function ($query) use ($id) {
+            $query->where('account_id', $id)->orWhere('to_account_id', $id);
+        })->exists();
         if ($hasTransactions) {
             $this->addError('accountId', __('ui.account_has_transactions'));
 
@@ -65,6 +72,7 @@ class AccountManager extends Component
         }
 
         $account->delete();
+        $this->dispatch('deletion-made', type: 'account', id: $account->id);
     }
 
     public function render()

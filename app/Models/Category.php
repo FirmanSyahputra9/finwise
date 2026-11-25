@@ -6,10 +6,11 @@ use App\Enums\TransactionType;
 use App\Models\Concerns\BelongsToUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use BelongsToUser;
+    use BelongsToUser, SoftDeletes;
 
     protected $guarded = [];
 

@@ -28,7 +28,7 @@ it('preserves large nominal values without JavaScript number rounding', function
     $this->actingAs(User::factory()->create());
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
     $category = Category::create(['name' => 'Belanja', 'type' => 'expense']);
-    $amount = '9007199254740993';
+    $amount = '9007199254740';
 
     Livewire::test(Transactions::class)
         ->set('account_id', $account->id)
@@ -39,6 +39,30 @@ it('preserves large nominal values without JavaScript number rounding', function
         ->assertHasNoErrors();
 
     expect((string) Transaction::firstOrFail()->amount)->toBe($amount);
+});
+
+it('rejects a transaction amount longer than 13 digits', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $category = Category::create(['name' => 'Belanja', 'type' => 'expense']);
+
+    Livewire::test(Transactions::class)
+        ->set('account_id', $account->id)
+        ->set('category_id', $category->id)
+        ->set('amount', '10000000000000')
+        ->set('date', today()->toDateString())
+        ->call('save')
+        ->assertHasErrors(['amount']);
+
+    expect(Transaction::count())->toBe(0);
+});
+
+it('defers formatted amount input updates until the form action', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('transactions'))
+        ->assertOk()
+        ->assertSee('$wire.set(this.model, digits || null, false)', false);
 });
 
 it('rejects a category that belongs to another transaction type', function () {

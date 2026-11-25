@@ -63,21 +63,26 @@
     @livewireStyles
 </head>
 <body class="bg-slate-200 font-poppins">
-    <div class="relative mx-auto min-h-dvh max-w-[430px] bg-main pb-24 shadow-xl">
+    <div class="relative mx-auto min-h-dvh max-w-[430px] bg-main {{ request()->routeIs('chat.conversation') ? 'pb-0' : 'pb-24' }} shadow-xl">
         {{ $slot }}
+        <livewire:deletion-undo />
+        @unless(request()->routeIs('chat.conversation'))
         <div class="absolute right-5 top-12 z-40"><livewire:notifications-menu :key="'global-notifications'" /></div>
+        @endunless
         <div id="offline-sync-status" class="fixed bottom-[96px] left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
         <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">{{ __('ui.install_app') }}</button>
 
-        <nav wire:transition.navigate="bottom-navigation" class="fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[88px] max-w-[430px] items-center justify-between rounded-t-[50px] bg-light px-9">
-            @foreach ([['dashboard', 'home', __('ui.home')], ['analysis', 'analysis', __('ui.analysis')], ['transactions', 'transactions', __('ui.transactions')], ['savings-goals', 'savings', __('ui.savings')], ['categories', 'category', __('ui.categories')], ['profile', 'profile', __('ui.profile')]] as [$route, $icon, $label])
+        @unless(request()->routeIs('chat.conversation'))
+        <nav id="bottom-navigation" wire:transition.navigate="bottom-navigation" class="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-[88px] max-w-[430px] items-center justify-around gap-1.5 rounded-t-[36px] bg-light px-3 shadow-[0_-8px_30px_rgba(20,50,45,.12)]">
+            @foreach ([['dashboard', 'home', __('ui.home')], ['analysis', 'analysis', __('ui.analysis')], ['transactions', 'transactions', __('ui.transactions')], ['savings-goals', 'savings', __('ui.savings')], ['profile', 'profile', __('ui.profile')]] as [$route, $icon, $label])
                 <a href="{{ route($route) }}" wire:navigate
-                   aria-label="{{ $label }}" class="flex h-[58px] min-w-10 flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 text-nav {{ request()->routeIs($route) ? 'bg-main' : '' }}">
+                   data-bottom-nav-item="{{ $loop->index }}" data-bottom-nav-route="{{ $route }}" aria-current="{{ request()->routeIs($route) ? 'page' : 'false' }}" aria-label="{{ $label }}" class="flex h-[58px] min-w-14 flex-1 flex-col items-center justify-center gap-1 rounded-[18px] px-1 text-nav {{ request()->routeIs($route) ? 'bg-main text-dark' : '' }}">
                     <x-icon :name="$icon" class="size-5" />
-                    <span class="text-[9px] font-medium leading-none">{{ $label }}</span>
+                    <span class="text-[10px] font-medium leading-none">{{ $label }}</span>
                 </a>
             @endforeach
         </nav>
+        @endunless
     </div>
     @livewireScripts
     <script src="{{ asset('offline.js') }}" defer data-navigate-once></script>

@@ -34,3 +34,19 @@ it('shows no unallocated amount before a monthly budget is configured', function
         ->assertOk()
         ->assertDontSee('Sisa budget yang boleh dipakai');
 });
+
+it('provides five bottom navigation destinations and dashboard shortcuts for chat and categories', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('data-bottom-nav-item="0"', false)
+        ->assertSee('data-bottom-nav-item="4"', false)
+        ->assertSee('data-bottom-nav-route="dashboard"', false)
+        ->assertSee('data-bottom-nav-route="profile"', false)
+        ->assertDontSee('data-bottom-nav-item="5"', false)
+        ->assertDontSee('data-bottom-nav-route="chat"', false)
+        ->assertDontSee('data-bottom-nav-route="categories"', false)
+        ->assertSee(route('chat'), false)
+        ->assertSee(route('categories'), false);
+});

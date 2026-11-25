@@ -22,6 +22,7 @@ class SavingsGoals extends Component
     public function create(): void
     {
         $this->resetForm();
+        $this->dispatch('app-toast', message: __('ui.saved'));
         $this->formOpen = true;
     }
 
@@ -39,7 +40,7 @@ class SavingsGoals extends Component
     {
         $this->validate([
             'name' => ['required', 'string', 'max:80'],
-            'targetAmount' => ['required', 'integer', 'min:1', 'max:999999999999'],
+            'targetAmount' => ['required', 'integer', 'min:1', 'max:9999999999999'],
             'targetDate' => ['nullable', 'date', 'after_or_equal:today'],
         ]);
 
@@ -55,16 +56,23 @@ class SavingsGoals extends Component
 
     public function addContribution(int $id): void
     {
-        $this->validate(['contribution' => ['required', 'integer', 'min:1', 'max:999999999999']]);
+        $this->validate(['contribution' => ['required', 'integer', 'min:1', 'max:9999999999999']]);
         $goal = Goal::findOrFail($id);
         $goal->saved_amount += (int) $this->contribution;
         $goal->save();
         $this->reset('contribution');
+        $this->dispatch('app-toast', message: __('ui.saved'));
     }
 
     public function delete(int $id): void
     {
-        Goal::findOrFail($id)->delete();
+        $goal = Goal::find($id);
+        if (! $goal) {
+            return;
+        }
+
+        $goal->delete();
+        $this->dispatch('deletion-made', type: 'goal', id: $goal->id);
     }
 
     private function resetForm(): void

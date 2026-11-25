@@ -6,13 +6,13 @@
     @error('accountId') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
     <div class="space-y-2">
         @forelse ($accounts as $account)
-            <article wire:key="account-{{ $account->id }}" class="flex items-center justify-between rounded-2xl bg-white/70 p-4">
+            <article wire:key="account-{{ $account->id }}" class="card-3d flex items-center justify-between rounded-2xl bg-white/70 p-4">
                 <div>
                     <p class="font-medium text-dark">{{ $account->name }}</p>
                     <p class="text-xs text-dark/60">{{ $account->type->label() }}</p>
                     <p class="mt-1 text-sm font-semibold text-dark">{{ \App\Support\Money::rp($account->balance) }}</p>
                 </div>
-                <div class="flex gap-3 text-xs"><button type="button" wire:click="edit({{ $account->id }})" class="text-blue">{{ __('ui.edit') }}</button><button type="button" wire:click="delete({{ $account->id }})" wire:confirm="{{ __('ui.delete_account_confirm') }}" class="text-red-600">{{ __('ui.delete') }}</button></div>
+                <div class="flex gap-3 text-xs"><button type="button" wire:click="edit({{ $account->id }})" class="text-blue">{{ __('ui.edit') }}</button><button type="button" wire:click="delete({{ $account->id }})" wire:loading.attr="disabled" wire:target="delete" wire:confirm="{{ __('ui.delete_account_confirm') }}" class="text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button></div>
             </article>
         @empty
             <p class="text-sm text-dark/60">{{ __('ui.no_accounts') }}</p>
@@ -20,7 +20,7 @@
     </div>
 
     <div x-show="open" x-cloak class="fixed inset-0 z-40 grid place-items-center bg-black/50 px-6" x-on:keydown.escape.window="open = false">
-        <form wire:submit="save" x-on:click.outside="open = false" class="w-full max-w-[339px] rounded-[20px] bg-white p-7">
+        <form wire:submit="save" x-on:click.outside="open = false" class="card-3d w-full max-w-[339px] rounded-[20px] bg-white p-7">
             <h2 class="text-center text-xl font-bold text-dark">{{ $accountId ? __('ui.edit_account') : __('ui.new_account') }}</h2>
             <label for="account-name" class="label">{{ __('ui.account_name') }}</label><input id="account-name" name="name" autocomplete="off" wire:model="name" placeholder="BCA" class="field">
             @error('name') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
@@ -28,7 +28,7 @@
             <select id="account-type" name="type" autocomplete="off" wire:model="type" class="field"><option value="cash">{{ __('ui.cash') }}</option><option value="bank">{{ __('ui.bank') }}</option><option value="ewallet">{{ __('ui.ewallet') }}</option></select>
             <label for="account-opening-balance" class="label">{{ __('ui.opening_balance') }}</label><x-money-input id="account-opening-balance" model="openingBalance" :value="$openingBalance" name="opening_balance" placeholder="0" class="field" />
             @error('openingBalance') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
-            <div class="mt-6 flex flex-col items-center gap-3"><button class="btn w-full max-w-[218px]">{{ __('ui.save') }}</button><button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button></div>
+            <div class="mt-6 flex flex-col items-center gap-3"><button class="btn inline-flex items-center justify-center gap-2 w-full max-w-[218px]"><span wire:loading wire:target="save" class="app-spinner"></span>{{ __('ui.save') }}</button><button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button></div>
         </form>
     </div>
 </section>

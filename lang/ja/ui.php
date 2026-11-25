@@ -1,13 +1,17 @@
 <?php
 
 return [
+    'chat_search_contacts' => '相手やグループを検索…', 'chat_conversations' => '会話', 'chat_no_search_results' => '相手やグループが見つかりません。',
+    'chat_group_no_contacts' => '招待できる接続済みの連絡先はありません。', 'chat_group_search_contacts' => '接続済みの連絡先を検索…',
+    'chat_group_create' => 'グループを作成', 'chat_group_name' => 'グループ名', 'chat_group_invite_hint' => '接続済みの連絡先を招待（任意）', 'chat_groups' => 'グループ', 'chat_groups_empty' => 'グループはまだありません。', 'chat_group_members_short' => '人', 'chat_group_invite_connected_only' => 'グループに招待できるのは接続済みの連絡先のみです。', 'chat_group_created' => 'グループを作成しました。', 'chat_group_manage' => 'メンバーを管理', 'chat_group_choose_invite' => '招待する連絡先を選択', 'chat_group_invite' => '招待', 'chat_group_admin' => '管理者', 'chat_group_remove' => '削除', 'chat_group_remove_confirm' => 'このメンバーをグループから削除しますか？', 'chat_group_last_admin' => 'グループには少なくとも1人の管理者が必要です。', 'chat_group_delete' => 'グループを削除', 'chat_group_delete_confirm' => 'すべてのメッセージとメンバーを含めてグループを削除しますか？', 'chat_group_deleted' => 'グループとそのデータを削除しました。',
+    'quick_access' => 'クイックアクセス',
     'home' => 'ホーム', 'analysis' => '分析', 'transactions' => '取引',
     'savings' => '貯蓄', 'categories' => 'カテゴリー', 'profile' => 'プロフィール',
     'language' => '言語', 'language_hint' => 'アプリの言語を選択',
     'indonesian' => 'インドネシア語', 'english' => '英語', 'japanese' => '日本語',
     'appearance' => 'アプリの表示', 'appearance_hint' => '設定はこの端末に保存されます',
     'theme' => 'テーマ', 'light' => 'ライト', 'dark' => 'ダーク', 'accent' => 'アクセントカラー',
-    'text_color' => '本文の色', 'font' => 'フォント', 'font_size' => '文字サイズ',
+    'text_color' => '文字と入力欄の色', 'font' => 'フォント', 'font_size' => '文字サイズ',
     'preview' => 'ライブプレビュー', 'preview_text' => 'アプリ表示の例',
     'preview_button' => 'ボタンの例', 'saved' => '変更を適用して保存しました。',
     'savings_goals' => '貯蓄目標',
@@ -22,6 +26,12 @@ return [
     'dreams' => '夢をひとつずつ', 'savings_progress' => '貯蓄の進捗を記録しましょう。', 'create_goal' => '目標を作成', 'target' => '目標', 'no_deadline' => '期限なし', 'from_amount' => '/', 'collected' => '%達成', 'reached' => '達成しました！🎉', 'short_by' => '残り', 'savings_amount' => '貯蓄額', 'add' => '追加', 'no_goals' => '貯蓄目標はまだありません', 'dream_start' => '叶えたい夢から始めましょう。', 'first_goal' => '最初の目標を作成', 'new_goal' => '新しい目標', 'edit_goal' => '目標を編集', 'goal_name' => '目標名', 'goal_amount' => '貯めたい金額', 'deadline' => '期限', 'optional' => '（任意）', 'save_goal' => '目標を保存',
     'notifications' => '通知', 'mark_read' => 'すべて既読にする', 'financial_activity' => '家計のアクティビティ', 'read' => '既読', 'delete_notification' => '通知を削除', 'no_notifications' => '通知はありません。', 'accounts' => '口座', 'categories_label' => 'カテゴリー', 'more' => 'その他', 'manage' => '管理',
     'theme_green' => '緑', 'theme_blue' => '青', 'theme_pink' => 'ピンク', 'theme_purple' => '紫', 'theme_orange' => 'オレンジ', 'theme_red' => '赤', 'auto_theme' => 'テーマに合わせる', 'black' => '黒', 'white' => '白',
+    'cat_color' => '猫の毛色', 'ball_color' => '毛糸玉の色', 'gray' => 'グレー', 'yellow' => '黄色',
+    'deleted_temporarily' => '一時的に削除しました。3日以内なら元に戻せます。', 'undo' => '元に戻す',
+    'recently_deleted' => '最近削除した項目', 'undo_period' => '3日以内に復元できます', 'permanent_delete' => '完全に削除', 'permanent_delete_confirm' => 'この項目を完全に削除しますか？復元できません。', 'permanent_delete_all' => 'すべて完全に削除', 'permanent_delete_all_confirm' => 'この一覧の項目をすべて完全に削除しますか？元に戻せません。', 'delete_all_notifications' => '通知をすべて削除', 'delete_all_notifications_confirm' => 'すべての通知を最近削除した項目に移動しますか？',
+    'deleted_item_account' => '口座：:name', 'deleted_item_category' => 'カテゴリ：:name', 'deleted_item_transaction' => '取引：:type · :amount', 'deleted_item_budget' => '予算：:name', 'deleted_item_goal' => '目標：:name',
+    'sparkle_style' => 'クリック時のエフェクト', 'sparkle_count' => 'クリックごとの数', 'sparkle_color' => 'エフェクトの色', 'sparkle_heart' => 'ハート', 'sparkle_star' => '星', 'sparkle_twinkle' => 'きらめき', 'sparkle_flower' => '花',
+    'profile_photo' => 'プロフィール写真', 'change_photo' => '写真を変更', 'photo_crop' => '写真を切り抜く', 'photo_crop_hint' => '写真をドラッグして位置を調整し、必要に応じて拡大してください。', 'photo_zoom' => '写真を拡大', 'photo_converting' => 'WebPに変換中…', 'photo_uploading' => '写真をアップロード中…', 'photo_convert_error' => '写真を処理できませんでした。別の画像をお試しください。', 'photo_upload_error' => '写真をアップロードできませんでした。もう一度お試しください。', 'photo_save_error' => '写真をアップロードしましたが保存できませんでした。もう一度お試しください。', 'photo_invalid' => '写真はWebP形式、1024 × 1024ピクセル以下にしてください。', 'photo_saved' => 'プロフィール写真を保存しました。',
     'logout' => 'ログアウト', 'edit_profile' => 'プロフィールを編集', 'security' => 'セキュリティ', 'help' => 'ヘルプ', 'name' => '名前', 'email' => 'メールアドレス', 'current_password' => '現在のパスワード', 'new_password' => '新しいパスワード', 'repeat_password' => '新しいパスワードを再入力', 'update' => '更新', 'understood' => 'わかりました', 'help_text' => '取引メニューで収入、支出、振替を記録できます。カテゴリーはカテゴリー画面で管理できます。取引通知と予算アラートはベルアイコンから確認できます。', 'end_session' => 'セッションを終了', 'logout_confirm' => 'ログアウトしますか？', 'yes_logout' => 'ログアウトする',
     'install_app' => 'finWiseをインストール',
     'login_title' => 'ログイン · finWise', 'login_headline' => 'お金を安心して管理しましょう。', 'login_intro' => 'ログインして家計の概要を確認します。', 'login' => 'ログイン', 'register' => '新規登録', 'create_account' => 'アカウントを作成', 'repeat_password_short' => 'パスワードを再入力', 'already_account' => 'アカウントをお持ちですか？', 'no_account' => 'アカウントをお持ちでないですか？', 'remember_me' => 'ログイン状態を保持', 'register_intro' => 'ウォレットと初期カテゴリーを用意します。',
@@ -33,4 +43,6 @@ return [
     'invalid_credentials' => 'メールアドレスまたはパスワードが正しくありません。', 'offline_wrong_user' => '現在のアカウントはオフライン取引を作成したアカウントと異なります。', 'offline_max_batch' => '一度に同期できる取引は最大50件です。', 'offline_invalid_format' => 'オフライン取引の形式が正しくありません。', 'offline_invalid_data' => '取引データが正しくありません。口座とカテゴリーを確認してください。', 'notification_offline_synced' => 'オフライン取引を同期しました', 'notification_offline_recorded' => ':type :amountを保存しました。',
     'delete_category_confirm' => ':categoryカテゴリーを削除しますか？関連する取引はカテゴリーなしで保持されます。',
     'password_incorrect' => '現在のパスワードが正しくありません。', 'password_confirmation' => 'パスワードの確認が一致しません。',
+    'account_id' => 'アカウントID', 'chat' => 'チャット', 'chat_text_only' => 'プライベートテキストチャット · 写真や添付ファイルなし', 'chat_connect_title' => '相手とつながる', 'chat_connect_hint' => 'チャットしたい相手のアカウントIDを入力してください。相手の承認後にメッセージを送れます。', 'chat_account_placeholder' => 'アカウントIDを入力', 'chat_connect' => '接続する', 'chat_user_not_found' => 'アカウントIDが見つかりません。', 'chat_already_connected' => 'すでにつながっています。', 'chat_request_sent' => 'リクエストを送信しました。承認をお待ちください。', 'chat_request_received' => 'この相手からリクエストが届いています。チャットリクエストから承認してください。', 'chat_connected' => 'つながりました。', 'chat_request_declined' => 'リクエストを拒否しました。', 'chat_requests' => '受信したリクエスト', 'chat_waiting' => '承認待ち', 'chat_pending' => '保留中', 'chat_connections' => 'つながっている相手', 'chat_empty' => 'まだつながっている相手はいません。アカウントIDを入力してください。', 'chat_choose_first' => '先につながっている相手を選択してください。', 'chat_first_message' => '最初のメッセージを送信してください。', 'chat_message_placeholder' => 'メッセージを書く…', 'chat_send' => '送信', 'accept' => '承認', 'decline' => '拒否',
+    'close' => '閉じる', 'profile_updated' => 'プロフィールを更新しました。', 'password_updated' => 'パスワードを更新しました。', 'chat_disconnect' => '接続を解除', 'chat_disconnect_confirm' => 'この相手との接続を解除しますか？チャット履歴は削除されます。', 'chat_disconnected' => 'チャットの接続を解除しました。',
 ];

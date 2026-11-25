@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kucing Tailwind</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  /* Salin bagian `extend` ini ke tailwind.config.js project FinWise kamu */
+  tailwind.config = {
+    theme: {
+      extend: {
+        keyframes: {
+          wag:    { '0%,100%': { transform: 'rotate(-15deg)' }, '50%': { transform: 'rotate(18deg)' } },
+          look:   { from: { transform: 'translateX(-4px)' }, to: { transform: 'translateX(4px)' } },
+          ballx:  { from: { transform: 'translateX(-62px)' }, to: { transform: 'translateX(62px)' } },
+          bally:  { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-26px)' } },
+          blink:  { '0%,94%,100%': { transform: 'scaleY(1)' }, '97%': { transform: 'scaleY(.1)' } },
+          twitch: { '0%,90%,100%': { transform: 'rotate(0)' }, '93%': { transform: 'rotate(-12deg)' }, '96%': { transform: 'rotate(3deg)' } },
+        },
+        animation: {
+          wag:    'wag 1.6s ease-in-out infinite',
+          look:   'look 3s ease-in-out infinite alternate',
+          ballx:  'ballx 3s ease-in-out infinite alternate',
+          bally:  'bally .75s ease-in infinite alternate',
+          blink:  'blink 5s infinite',
+          twitch: 'twitch 6s infinite',
+        },
+      },
+    },
+  };
+</script>
+</head>
+<body class="min-h-screen grid place-items-center bg-slate-100 dark:bg-slate-900">
+
+  <div class="rounded-3xl bg-white dark:bg-slate-800 shadow-lg p-8 text-center">
+
+    <!-- ====== KUCING (inline SVG + Tailwind) ====== -->
+    <svg viewBox="0 0 240 220" role="img" aria-label="Kucing hitam memperhatikan bola wol"
+         class="w-60 h-auto mx-auto">
+
+      <!-- bayangan -->
+      <ellipse cx="120" cy="206" rx="100" ry="7" class="fill-black opacity-10"/>
+
+      <!-- ekor -->
+      <path d="M150 150 C200 150 205 90 178 74" stroke-width="14" stroke-linecap="round"
+            class="fill-none stroke-[#2B2B3A] animate-wag motion-reduce:animate-none
+                   [transform-box:fill-box] origin-[0%_100%]"/>
+
+      <!-- badan & kaki -->
+      <ellipse cx="120" cy="140" rx="44" ry="40" class="fill-[#2B2B3A]"/>
+      <ellipse cx="100" cy="172" rx="12" ry="7" class="fill-[#3d3d52]"/>
+      <ellipse cx="140" cy="172" rx="12" ry="7" class="fill-[#3d3d52]"/>
+
+      <!-- telinga kiri (bergerak) -->
+      <g class="animate-twitch motion-reduce:animate-none [transform-box:fill-box] origin-[50%_100%]">
+        <polygon points="88,62 86,28 112,46" class="fill-[#2B2B3A]"/>
+        <polygon points="91,56 90,38 105,46" class="fill-[#C96B85]"/>
+      </g>
+      <!-- telinga kanan -->
+      <polygon points="152,62 154,28 128,46" class="fill-[#2B2B3A]"/>
+      <polygon points="149,56 150,38 135,46" class="fill-[#C96B85]"/>
+
+      <!-- kepala -->
+      <circle cx="120" cy="82" r="36" class="fill-[#2B2B3A]"/>
+
+      <!-- mata (kedip) + pupil (ngikutin bola) -->
+      <g class="animate-blink motion-reduce:animate-none [transform-box:fill-box] origin-center">
+        <ellipse cx="105" cy="80" rx="9" ry="10" class="fill-[#FFD84D]"/>
+        <ellipse cx="135" cy="80" rx="9" ry="10" class="fill-[#FFD84D]"/>
+        <g class="animate-look motion-reduce:animate-none">
+          <ellipse cx="105" cy="80" rx="3.2" ry="8" class="fill-[#111]"/>
+          <ellipse cx="135" cy="80" rx="3.2" ry="8" class="fill-[#111]"/>
+        </g>
+      </g>
+
+      <!-- hidung, mulut, kumis -->
+      <path d="M116 93 h8 l-4 5 z" class="fill-[#F7A8B8]"/>
+      <path d="M120 98 q-5 5 -10 1 M120 98 q5 5 10 1" stroke-width="1.8" stroke-linecap="round"
+            class="fill-none stroke-[#aaa]"/>
+      <path d="M94 95 l-22 -3 M94 99 l-22 4 M146 95 l22 -3 M146 99 l22 4" stroke-width="1.5" stroke-linecap="round"
+            class="fill-none stroke-[#ddd] opacity-85"/>
+
+      <!-- bola wol: geser kiri-kanan > mantul > berputar -->
+      <g transform="translate(120 190)">
+        <g class="animate-ballx motion-reduce:animate-none">
+          <g class="animate-bally motion-reduce:animate-none [transform-box:fill-box] origin-[50%_100%]">
+            <g class="animate-[spin_3s_linear_infinite] motion-reduce:animate-none [transform-box:fill-box] origin-center">
+              <circle r="11" class="fill-[#E5516B]"/>
+              <path d="M-9 -4 q9 6 18 0 M-10 3 q10 6 20 0 M-4 -10 q6 10 0 20" stroke-width="1.8" stroke-linecap="round"
+                    class="fill-none stroke-[#FF9AA9]"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+    <!-- ====== END KUCING ====== -->
+
+    <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Belum ada transaksi, main sama kucing dulu 🐾</p>
+  </div>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\HasSummary;
 use App\Models\Category;
+use App\Support\DeletionRetention;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -26,11 +27,18 @@ class Categories extends Component
 
         $this->reset('name');
         $this->dispatch('saved');
+        $this->dispatch('app-toast', message: __('ui.saved'));
     }
 
     public function delete(int $id): void
     {
-        Category::findOrFail($id)->delete();
+        $category = Category::find($id);
+        if (! $category) {
+            return;
+        }
+
+        app(DeletionRetention::class)->softDeleteCategory($category);
+        $this->dispatch('deletion-made', type: 'category', id: $category->id);
     }
 
     public function render()

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUser;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SavingsGoal extends Model
 {
-    use BelongsToUser;
+    use BelongsToUser, SoftDeletes;
 
     protected $guarded = [];
 

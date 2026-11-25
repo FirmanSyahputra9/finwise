@@ -56,18 +56,18 @@ class Index extends Component
     {
         return [
             'type' => ['required', Rule::enum(TransactionType::class)],
-            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', auth()->id())],
+            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', auth()->id())->whereNull('deleted_at')],
             'to_account_id' => [
                 Rule::requiredIf($this->type === 'transfer'),
                 'nullable', 'different:account_id',
-                Rule::exists('accounts', 'id')->where('user_id', auth()->id()),
+                Rule::exists('accounts', 'id')->where('user_id', auth()->id())->whereNull('deleted_at'),
             ],
             'category_id' => [
                 Rule::requiredIf($this->type !== 'transfer'),
                 'nullable',
-                Rule::exists('categories', 'id')->where('user_id', auth()->id())->where('type', $this->type),
+                Rule::exists('categories', 'id')->where('user_id', auth()->id())->where('type', $this->type)->whereNull('deleted_at'),
             ],
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'integer', 'min:1', 'max:9999999999999'],
             'date' => ['required', 'date'],
             'note' => ['nullable', 'string', 'max:255'],
         ];
@@ -76,28 +76,6 @@ class Index extends Component
     public function save(): void
     {
         $data = $this->validate();
-
-        if ($data['type'] === 'expense') {
-            $transactionDate = \Illuminate\Support\Carbon::parse($data['date']);
-            $monthlyLimit = (int) \Illuminate\Support\Facades\DB::table('monthly_budget_limits')
-                ->where('user_id', auth()->id())
-                ->where('month', $transactionDate->month)
-                ->where('year', $transactionDate->year)
-                ->value('amount');
-
-            if ($monthlyLimit > 0) {
-                $spentThisMonth = Transaction::ofType(TransactionType::Expense)
-                    ->inMonth($transactionDate->year, $transactionDate->month)
-                    ->when($this->editingId, fn ($query) => $query->where('id', '<>', $this->editingId))
-                    ->sum('amount');
-
-                if ((int) $spentThisMonth + (int) $data['amount'] > $monthlyLimit) {
-                    $remaining = max(0, $monthlyLimit - (int) $spentThisMonth);
-                    $this->addError('amount', __('ui.expense_over_limit', ['amount' => number_format($remaining, 0, ',', '.') ]));
-                    return;
-                }
-            }
-        }
 
         if ($data['type'] === 'transfer') {
             $data['category_id'] = null;
@@ -117,6 +95,7 @@ class Index extends Component
         if ($this->editingId) {
             Transaction::findOrFail($this->editingId)->update($data);
             $this->dispatch('transaction-saved');
+            $this->dispatch('app-toast', message: __('ui.saved'));
             $this->reset('editingId', 'amount', 'note', 'category_id', 'to_account_id');
             $this->resetPage();
 
@@ -124,6 +103,7 @@ class Index extends Component
         }
 
         Transaction::create($data);
+        $this->dispatch('app-toast', message: __('ui.saved'));
 
         $amount = (int) $data['amount'];
         $rp = fn (int $value) => 'Rp '.number_format($value, 0, ',', '.');
@@ -162,7 +142,13 @@ class Index extends Component
 
     public function delete(int $id): void
     {
-        Transaction::findOrFail($id)->delete();
+        $transaction = Transaction::find($id);
+        if (! $transaction) {
+            return;
+        }
+
+        $transaction->delete();
+        $this->dispatch('deletion-made', type: 'transaction', id: $transaction->id);
     }
 
     public function edit(int $id): void

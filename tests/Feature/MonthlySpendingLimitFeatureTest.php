@@ -30,7 +30,7 @@ it('allows monthly expenses up to the budget even when no category budgets are a
         ->and(Transaction::sum('amount'))->toBe(1_000_000);
 });
 
-it('blocks monthly expense totals above the budget ceiling', function () {
+it('allows monthly expenses to exceed the budget ceiling', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
@@ -44,15 +44,16 @@ it('blocks monthly expense totals above the budget ceiling', function () {
     Livewire::test(Transactions::class)
         ->set('account_id', $account->id)
         ->set('category_id', $category->id)
-        ->set('amount', 30_000)
+        ->set('amount', 130_000)
         ->set('date', today()->toDateString())
         ->call('save')
-        ->assertHasErrors(['amount']);
+        ->assertHasNoErrors();
 
-    expect(Transaction::count())->toBe(1);
+    expect(Transaction::count())->toBe(2)
+        ->and(Transaction::sum('amount'))->toBe(210_000);
 });
 
-it('checks the full monthly ceiling when an existing expense is edited', function () {
+it('allows an edited expense to exceed the monthly budget ceiling', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
@@ -67,12 +68,12 @@ it('checks the full monthly ceiling when an existing expense is edited', functio
         ->call('edit', $transaction->id)
         ->set('amount', 110_000)
         ->call('save')
-        ->assertHasErrors(['amount']);
+        ->assertHasNoErrors();
 
-    expect($transaction->fresh()->amount)->toBe(80_000);
+    expect($transaction->fresh()->amount)->toBe(110_000);
 });
 
-it('enforces the monthly ceiling while syncing offline expenses', function () {
+it('syncs offline expenses even when their total exceeds the monthly ceiling', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
@@ -94,6 +95,7 @@ it('enforces the monthly ceiling while syncing offline expenses', function () {
 
     $response->assertOk()
         ->assertJsonPath('synced.0', $firstId)
-        ->assertJsonPath('failed.0.client_id', $secondId);
-    expect(Transaction::sum('amount'))->toBe(70_000);
+        ->assertJsonPath('synced.1', $secondId)
+        ->assertJsonPath('failed', []);
+    expect(Transaction::sum('amount'))->toBe(110_000);
 });

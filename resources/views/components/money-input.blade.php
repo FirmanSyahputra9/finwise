@@ -21,9 +21,10 @@
         this.display = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     },
     update(event) {
-        const digits = event.target.value.replace(/\D/g, '');
+        const digits = event.target.value.replace(/\D/g, '').slice(0, 13);
         this.sync(digits);
-        $wire.set(this.model, digits || null);
+        // Keep each keystroke client-side; submit/save actions sync the pending value.
+        $wire.set(this.model, digits || null, false);
     }
 }">
     <input

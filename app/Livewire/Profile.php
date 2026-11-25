@@ -52,6 +52,7 @@ class Profile extends Component
 
         auth()->user()->update(['name' => $this->name, 'email' => $this->email]);
         $this->dispatch('profile-updated');
+        $this->dispatch('app-toast', message: __('ui.profile_updated'));
     }
 
     public function updatePassword(): void
@@ -67,6 +68,7 @@ class Profile extends Component
         auth()->user()->update(['password' => Hash::make($this->newPassword)]);
         $this->reset('currentPassword', 'newPassword', 'newPassword_confirmation');
         $this->dispatch('password-updated');
+        $this->dispatch('app-toast', message: __('ui.password_updated'));
     }
 
     public function logout()
