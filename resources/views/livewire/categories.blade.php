@@ -28,7 +28,7 @@
                     <select wire:model.live="typeFilter" class="transaction-control text-sm"><option value="">{{ __('ui.all_types') }}</option><option value="income">{{ __('ui.income') }}</option><option value="expense">{{ __('ui.expense') }}</option></select>
                     <span></span><input type="date" wire:model.live="dateFrom" class="transaction-control text-sm" aria-label="{{ __('ui.from_date') }}"><input type="date" wire:model.live="dateTo" class="transaction-control text-sm" aria-label="{{ __('ui.to_date') }}">
                 </div>
-                <ul class="mt-3 divide-y divide-dark/10">@forelse ($transactions as $transaction)<li class="flex justify-between py-2 text-sm"><span>{{ $transaction->date->translatedFormat('d M Y') }} · {{ $transaction->account->name }}</span><strong>{{ $transaction->type->value === 'income' ? '+' : '-' }}{{ \App\Support\Money::rp($transaction->amount) }}</strong></li>@empty<li class="py-3 text-sm text-dark/60">{{ __('ui.no_transactions_filter') }}</li>@endforelse</ul>
+                <ul class="mt-3 divide-y divide-dark/10">@forelse ($transactions as $transaction)<li class="flex justify-between gap-2 py-2 text-sm"><span class="min-w-0"><x-date-label :date="$transaction->date" /> · {{ $transaction->account->name }}</span><strong data-fit-amount class="max-w-[52%] text-right">{{ $transaction->type->value === 'income' ? '+' : '-' }}{{ \App\Support\Money::rp($transaction->amount) }}</strong></li>@empty<li class="py-3 text-sm text-dark/60">{{ __('ui.no_transactions_filter') }}</li>@endforelse</ul>
             </section>
         @endif
     </x-screen>

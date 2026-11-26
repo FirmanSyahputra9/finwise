@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 #[Layout('layouts.app')]
 class Profile extends Component
@@ -34,6 +34,7 @@ class Profile extends Component
     {
         if (! in_array($language, ['id', 'en', 'ja'], true)) {
             $this->language = session('locale', 'id');
+
             return;
         }
 

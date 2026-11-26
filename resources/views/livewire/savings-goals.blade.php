@@ -1,5 +1,5 @@
 @php($rp = fn ($n) => 'Rp '.number_format($n, 0, ',', '.'))
-<div x-data>
+<div x-data class="min-w-0 max-w-full overflow-x-clip">
     <x-screen :title="__('ui.savings_goals')">
         <x-slot:top>
             <x-summary :balance="$balance" :income="$income" :expense="$expense" />
@@ -16,16 +16,16 @@
                 <article wire:key="goal-{{ $goal->id }}" class="card-3d rounded-[22px] bg-white p-4">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0"><h3 class="truncate font-semibold text-ink">{{ $goal->name }}</h3>
-                            <p class="mt-1 text-xs text-dark/60">{{ $goal->target_date ? __('ui.target').' '.$goal->target_date->translatedFormat('d M Y') : __('ui.no_deadline') }}</p></div>
+                            <p class="mt-1 text-xs text-dark/60">{{ $goal->target_date ? __('ui.target').' ' : '' }}@if ($goal->target_date)<x-date-label :date="$goal->target_date" />@else{{ __('ui.no_deadline') }}@endif</p></div>
                         <div class="flex shrink-0 gap-2">
                             <button type="button" wire:click="edit({{ $goal->id }})" class="rounded-full bg-light px-3 py-1 text-xs text-dark">{{ __('ui.edit') }}</button>
                             <button type="button" wire:click="delete({{ $goal->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete') }} {{ $goal->name }}?" class="rounded-full bg-red-50 px-3 py-1 text-xs text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button>
                         </div>
                     </div>
                     <div class="savings-progress-card mt-4 rounded-2xl p-3">
-                        <div class="flex items-end justify-between"><p class="savings-saved-amount text-lg font-bold text-dark">{{ $rp($goal->saved_amount) }}</p><p class="savings-progress-detail text-xs text-dark/60">{{ __('ui.from_amount') }} {{ $rp($goal->target_amount) }}</p></div>
+                        <div class="flex min-w-0 items-end justify-between gap-2"><p data-fit-amount class="savings-saved-amount min-w-0 text-lg font-bold text-dark">{{ $rp($goal->saved_amount) }}</p><p class="savings-progress-detail min-w-0 text-right text-xs text-dark/60">{{ __('ui.from_amount') }} {{ $rp($goal->target_amount) }}</p></div>
                         <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-light"><div class="h-full rounded-full bg-main transition-all" style="width: {{ $pct }}%"></div></div>
-                        <div class="mt-1 flex justify-between text-[11px] text-dark/60"><span class="goal-progress-percent">{{ $pct }}{{ __('ui.collected') }}</span><span class="savings-progress-detail">{{ $goal->saved_amount >= $goal->target_amount ? __('ui.reached') : __('ui.short_by').' '.$rp($goal->target_amount - $goal->saved_amount) }}</span></div>
+                        <div class="mt-1 flex min-w-0 justify-between gap-2 text-[11px] text-dark/60"><span class="goal-progress-percent shrink-0">{{ $pct }}{{ __('ui.collected') }}</span><span class="savings-progress-detail min-w-0 text-right">{{ $goal->saved_amount >= $goal->target_amount ? __('ui.reached') : __('ui.short_by').' '.$rp($goal->target_amount - $goal->saved_amount) }}</span></div>
                     </div>
                     <form wire:submit="addContribution({{ $goal->id }})" class="mt-4 flex gap-2">
                         <x-money-input model="contribution" :value="$contribution" name="contribution" placeholder="{{ __('ui.savings_amount') }}" class="field flex-1" aria-label="{{ __('ui.savings_amount') }}" />

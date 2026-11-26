@@ -10,7 +10,7 @@
                 <div>
                     <p class="font-medium text-dark">{{ $account->name }}</p>
                     <p class="text-xs text-dark/60">{{ $account->type->label() }}</p>
-                    <p class="mt-1 text-sm font-semibold text-dark">{{ \App\Support\Money::rp($account->balance) }}</p>
+                    <p data-fit-amount class="mt-1 text-sm font-semibold text-dark">{{ \App\Support\Money::rp($account->balance) }}</p>
                 </div>
                 <div class="flex gap-3 text-xs"><button type="button" wire:click="edit({{ $account->id }})" class="text-blue">{{ __('ui.edit') }}</button><button type="button" wire:click="delete({{ $account->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete_account_confirm') }}" class="text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button></div>
             </article>

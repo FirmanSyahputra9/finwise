@@ -14,6 +14,7 @@
             @if ($group && $isGroupAdmin)
                 <button type="button" wire:click="deleteGroup({{ $group->id }})" data-confirm="{{ __('ui.chat_group_delete_confirm') }}" aria-label="{{ __('ui.chat_group_delete') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
             @elseif ($connection)
+                <button type="button" data-voice-call-start data-start-url="{{ route('chat.calls.start', $connection->id) }}" data-remote-name="{{ $person?->name }}" aria-label="{{ __('ui.chat_call_start') }}" title="{{ __('ui.chat_call_start') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-light text-nav">☎</button>
                 <button type="button" wire:click="disconnect({{ $connection->id }})" data-confirm="{{ __('ui.chat_disconnect_confirm') }}" class="shrink-0 rounded-full bg-red-100 px-3 py-2 text-xs font-medium text-red-700">{{ __('ui.chat_disconnect') }}</button>
             @endif
         </header>
@@ -68,7 +69,9 @@
                             @if ($group)<p class="mb-1 truncate text-[10px] font-medium text-dark/60 {{ $chatMessage->sender_id === auth()->id() ? 'text-right' : '' }}">{{ $chatMessage->sender?->name }}</p>@endif
                             @php($attachments = $chatMessage->imageAttachments())
                             <div class="rounded-2xl px-2 py-2 text-sm {{ $chatMessage->sender_id === auth()->id() ? ($group ? 'rounded-tr-md' : 'rounded-br-md').' bg-main text-dark' : ($group ? 'rounded-tl-md' : 'rounded-bl-md').' bg-light text-dark' }}">
-                                @if ($attachments !== [])
+                                @if ($sticker = $chatMessage->sticker())
+                                    <p role="img" aria-label="{{ __('ui.chat_sticker') }}" class="px-2 py-1 text-5xl leading-none">{{ $sticker }}</p>
+                                @elseif ($attachments !== [])
                                     @php($gallery = collect($attachments)->map(function ($image, $index) use ($chatMessage) { $uuid = App\Support\ChatConversationUuid::from('attachment', $chatMessage->id, $index); $url = route('chat.attachment', $uuid); return ['url' => $url, 'downloadUrl' => $url.'?download=1', 'downloadName' => 'putraganteng-'.$uuid.'.webp']; })->values()->all())
                                     <div class="{{ count($attachments) > 1 ? 'grid w-full max-w-56 grid-cols-2 gap-1' : 'w-fit' }}">
                                         @foreach (range(0, min(count($attachments), 4) - 1) as $index)
@@ -85,7 +88,7 @@
                                 @else
                                     <p class="whitespace-pre-wrap break-words px-1">{{ $chatMessage->body }}</p>
                                 @endif
-                                <time wire:ignore data-chat-local-time datetime="{{ $chatMessage->created_at->copy()->utc()->toIso8601String() }}" class="mt-1 block text-right text-[10px] opacity-60">{{ $chatMessage->created_at->format('H:i') }}</time>
+                                <time wire:ignore data-chat-local-time datetime="{{ $chatMessage->created_at->copy()->utc()->toIso8601String() }}" class="mt-1 block text-right text-[10px] opacity-60">{{ $chatMessage->created_at->copy()->timezone('Asia/Jakarta')->format('H:i') }}</time>
                             </div>
                         </div>
                     </div>
@@ -98,14 +101,21 @@
             @endif
         </div>
 
-        <form wire:submit="send" data-chat-composer class="shrink-0 border-t border-dark/10 bg-white p-3">
-            <div class="flex items-end gap-2">
-                <label class="btn-soft grid size-11 shrink-0 cursor-pointer place-items-center px-0" aria-label="{{ __('ui.chat_add_photo') }}" title="{{ __('ui.chat_add_photo') }}"><x-icon name="image" class="size-5" /><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-chat-photo-input data-chat-photo-converting="{{ __('ui.chat_photo_converting') }}" data-chat-photo-uploading="{{ __('ui.chat_photo_uploading') }}" data-chat-photo-ready="{{ __('ui.chat_photo_ready') }}" data-chat-photo-error="{{ __('ui.chat_photo_conversion_error') }}" data-chat-photo-failed="{{ __('ui.chat_photo_failed') }}" data-chat-photo-limit-error="{{ __('ui.chat_photo_too_many') }}" data-chat-photo-busy="{{ __('ui.chat_photo_busy') }}" class="sr-only"></label>
-                <textarea wire:model="message" rows="1" maxlength="2000" class="field max-h-28 min-h-11 resize-y flex-1" placeholder="{{ __('ui.chat_message_placeholder') }}"></textarea>
-                <button data-chat-send-button class="btn relative size-11 shrink-0 px-0" aria-label="{{ __('ui.chat_send') }}"><x-icon name="transactions" wire:loading.remove wire:target="send" class="mx-auto size-5 rotate-90" /><span wire:loading wire:target="send" class="app-spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></span></button>
+        <form wire:submit="send" data-chat-composer class="chat-composer shrink-0 border-t p-2">
+            @if ($showStickerPicker)
+                <div role="group" aria-label="{{ __('ui.chat_stickers') }}" class="chat-sticker-picker mb-3 grid grid-cols-6 gap-2 rounded-2xl p-3">
+                    @foreach (App\Models\ChatMessage::STICKERS as $sticker)
+                        <button type="button" wire:key="chat-sticker-{{ md5($sticker) }}" wire:click="sendSticker('{{ $sticker }}')" aria-label="{{ __('ui.chat_send_sticker') }}" title="{{ __('ui.chat_send_sticker') }}" class="chat-sticker-option grid aspect-square place-items-center rounded-xl text-3xl">{{ $sticker }}</button>
+                    @endforeach
+                </div>
+            @endif
+            <div class="flex items-end gap-1.5">
+                <button type="button" wire:click="toggleStickerPicker" aria-label="{{ __('ui.chat_stickers') }}" aria-expanded="{{ $showStickerPicker ? 'true' : 'false' }}" class="chat-composer-action grid size-10 shrink-0 place-items-center rounded-full transition"><span class="text-[25px] leading-none">☺</span></button>
+                <textarea wire:model="message" rows="1" maxlength="2000" class="chat-composer-input min-h-11 max-h-28 min-w-0 flex-1 resize-none rounded-[22px] border-0 px-4 py-2.5 text-[15px] leading-5 outline-none" placeholder="{{ __('ui.chat_message_placeholder') }}"></textarea>
+                <label class="chat-composer-action grid size-10 shrink-0 cursor-pointer place-items-center rounded-full transition" aria-label="{{ __('ui.chat_add_photo') }}" title="{{ __('ui.chat_add_photo') }}"><x-icon name="image" class="size-5" /><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-chat-photo-input data-chat-photo-converting="{{ __('ui.chat_photo_converting') }}" data-chat-photo-uploading="{{ __('ui.chat_photo_uploading') }}" data-chat-photo-ready="{{ __('ui.chat_photo_ready') }}" data-chat-photo-error="{{ __('ui.chat_photo_conversion_error') }}" data-chat-photo-failed="{{ __('ui.chat_photo_failed') }}" data-chat-photo-limit-error="{{ __('ui.chat_photo_too_many') }}" data-chat-photo-busy="{{ __('ui.chat_photo_busy') }}" class="sr-only"></label>
+                <button data-chat-send-button class="relative grid size-11 shrink-0 place-items-center rounded-full bg-[#00a884] text-white transition hover:bg-[#008f72] disabled:cursor-not-allowed disabled:opacity-60" aria-label="{{ __('ui.chat_send') }}"><x-icon name="send" wire:loading.remove wire:target="send" class="size-5" /><span wire:loading wire:target="send" class="app-spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></span></button>
             </div>
             <div data-chat-photo-queue wire:ignore hidden aria-live="polite" class="mt-2 max-h-24 space-y-1 overflow-y-auto"></div>
-            <p class="mt-1 pl-1 text-[10px] text-dark/40">{{ __('ui.chat_photo_limit') }}</p>
         </form>
         @error('message') <p class="shrink-0 px-4 pb-3 text-xs text-red-600">{{ $message }}</p> @enderror
         @error('photos') <p class="shrink-0 px-4 pb-3 text-xs text-red-600">{{ $message }}</p> @enderror

@@ -50,6 +50,7 @@ class Index extends Component
     public function mount(): void
     {
         $this->date = now()->toDateString();
+        $this->dateTo = now()->toDateString();
         $this->account_id = Account::value('id');
     }
 
@@ -176,6 +177,7 @@ class Index extends Component
     public function resetFilters(): void
     {
         $this->reset('filterType', 'search', 'filterAccount', 'filterCategory', 'dateFrom', 'dateTo');
+        $this->dateTo = now()->toDateString();
         $this->resetPage();
     }
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatAttachmentController;
+use App\Http\Controllers\ChatCallController;
 use App\Http\Controllers\OfflineTransactionSyncController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Livewire\Analysis;
@@ -35,6 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat', Chat::class)->name('chat');
     Route::get('/chat/{type}/{id}', Chat::class)->whereIn('type', ['direct', 'group'])->whereUuid('id')->name('chat.conversation');
     Route::get('/chat/attachments/{uuid}', ChatAttachmentController::class)->whereUuid('uuid')->name('chat.attachment');
+    Route::post('/chat/{connectionId}/calls', [ChatCallController::class, 'start'])->whereNumber('connectionId')->middleware('throttle:10,1')->name('chat.calls.start');
+    Route::get('/chat/calls/incoming', [ChatCallController::class, 'incoming'])->middleware('throttle:60,1')->name('chat.calls.incoming');
+    Route::post('/chat/calls/{uuid}/accept', [ChatCallController::class, 'accept'])->whereUuid('uuid')->middleware('throttle:30,1')->name('chat.calls.accept');
+    Route::post('/chat/calls/{uuid}/reject', [ChatCallController::class, 'reject'])->whereUuid('uuid')->middleware('throttle:30,1')->name('chat.calls.reject');
+    Route::post('/chat/calls/{uuid}/end', [ChatCallController::class, 'end'])->whereUuid('uuid')->middleware('throttle:30,1')->name('chat.calls.end');
+    Route::get('/chat/calls/{uuid}/signals', [ChatCallController::class, 'signals'])->whereUuid('uuid')->middleware('throttle:90,1')->name('chat.calls.signals');
+    Route::post('/chat/calls/{uuid}/signals', [ChatCallController::class, 'sendSignal'])->whereUuid('uuid')->middleware('throttle:180,1')->name('chat.calls.signal');
     Route::post('/profile/photo', ProfilePhotoController::class)->middleware('throttle:10,1')->name('profile.photo');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::post('/transactions/sync', OfflineTransactionSyncController::class)->middleware('throttle:30,1')->name('transactions.sync');

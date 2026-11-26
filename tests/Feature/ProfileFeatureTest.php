@@ -3,6 +3,7 @@
 use App\Livewire\Profile;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 it('builds the profile ID from registration time and same-second sequence', function () {
@@ -20,7 +21,7 @@ it('builds the profile ID from registration time and same-second sequence', func
 });
 
 it('lets the user choose Indonesian, English, or Japanese for the current session', function () {
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
 
     $this->actingAs($user);
     Livewire::test(Profile::class)
@@ -42,12 +43,20 @@ it('shows selectable click effects, particle counts, and colors in profile appea
     $this->get(route('profile'))
         ->assertOk()
         ->assertSee('data-sparkle-setting="type"', false)
+        ->assertSee('data-screen-scroll', false)
+        ->assertSee('data-screen-hero', false)
         ->assertSee('data-sparkle-value="heart"', false)
         ->assertSee('data-sparkle-value="flower"', false)
         ->assertSee('data-sparkle-setting="count"', false)
         ->assertSee('data-sparkle-value="16"', false)
         ->assertSee('data-sparkle-setting="color"', false)
-        ->assertSee('data-sparkle-value="purple"', false);
+        ->assertSee('data-sparkle-value="purple"', false)
+        ->assertSee('Fuzzy Duck')
+        ->assertSee('Rare Snake')
+        ->assertSee('fuzzy-duck-40')
+        ->assertSee('rare-snake-68')
+        ->assertSee(asset('pattern/fuzzy-duck-40/style.css').'?v=2', false)
+        ->assertSee(asset('pattern/rare-snake-68/style.css').'?v=2', false);
 });
 
 it('links the saved profile photo from the public storage disk in the avatar', function () {
@@ -93,6 +102,3 @@ it('starts the registration sequence again in a different second', function () {
 
     expect($later->profileId())->toBe('1932142411261');
 });
-
-
-\n

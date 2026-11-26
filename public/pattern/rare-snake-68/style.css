@@ -1,0 +1,14 @@
+.pattern-rare-snake-68,
+html[data-pattern="rare-snake-68"] body > div.relative::before {
+    --s: 200px;
+    --c1: var(--pattern-accent, #00d09e);
+    --c2: var(--pattern-neutral, #fff);
+    --_g: var(--c2) 4% 14%, var(--c1) 14% 24%, var(--c2) 22% 34%,
+        var(--c1) 34% 44%, var(--c2) 44% 56%, var(--c1) 56% 66%,
+        var(--c2) 66% 76%, var(--c1) 76% 86%, var(--c2) 86% 96%;
+    background:
+        radial-gradient(100% 100% at 100% 0, var(--c1) 4%, var(--_g), #0008 96%, transparent),
+        radial-gradient(100% 100% at 0 100%, transparent, #0008 4%, var(--_g), var(--c1) 96%)
+            var(--c1);
+    background-size: var(--s) var(--s);
+}

@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ChatMessage extends Model
 {
+    public const STICKERS = ['😻', '😹', '😿', '😽', '🐱', '🐈‍⬛', '🐾', '❤️', '👍', '🎉', '😂', '🥰'];
+
+    public const STICKER_PREFIX = '__finwise_sticker:';
+
     protected $fillable = ['connection_id', 'group_id', 'sender_id', 'body'];
 
     protected function casts(): array
@@ -44,6 +48,17 @@ class ChatMessage extends Model
     public function imageAttachment(): ?array
     {
         return $this->imageAttachments()[0] ?? null;
+    }
+
+    public function sticker(): ?string
+    {
+        if (! str_starts_with($this->body, self::STICKER_PREFIX)) {
+            return null;
+        }
+
+        $sticker = substr($this->body, strlen(self::STICKER_PREFIX));
+
+        return in_array($sticker, self::STICKERS, true) ? $sticker : null;
     }
 
     public function deleteAttachmentFile(): void

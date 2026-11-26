@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Chat;
+use App\Models\ChatCall;
+use App\Models\ChatCallSignal;
 use App\Models\ChatConnection;
 use App\Models\ChatGroup;
 use App\Models\ChatMessage;
@@ -74,7 +76,113 @@ it('allows text chat only after the recipient accepts the connection', function 
         'id' => ChatConversationUuid::from('direct', $connection->id),
     ]))->assertOk()
         ->assertSee('data-chat-local-time', false)
-        ->assertSee($savedMessage->created_at->copy()->utc()->toIso8601String(), false);
+        ->assertSee($savedMessage->created_at->copy()->utc()->toIso8601String(), false)
+        ->assertSee($savedMessage->created_at->copy()->timezone('Asia/Jakarta')->format('H:i'), false);
+});
+
+it('sends encrypted stickers only to an authorized chat', function () {
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($sender->id, $receiver->id),
+        'user_two_id' => max($sender->id, $receiver->id),
+        'requested_by' => $sender->id,
+        'status' => 'accepted',
+    ]);
+
+    Livewire::actingAs($sender)
+        ->test(Chat::class)
+        ->set('selectedConnection', $connection->id)
+        ->call('toggleStickerPicker')
+        ->assertSee('😻')
+        ->call('sendSticker', '😻')
+        ->assertHasNoErrors()
+        ->assertSee('😻')
+        ->assertSee(__('ui.chat_stickers'));
+
+    $stickerMessage = ChatMessage::query()->where('connection_id', $connection->id)->firstOrFail();
+    expect($stickerMessage->sticker())->toBe('😻')
+        ->and(DB::table('chat_messages')->where('id', $stickerMessage->id)->value('body'))->not->toContain('😻');
+
+    Livewire::actingAs(User::factory()->create())
+        ->test(Chat::class)
+        ->set('selectedConnection', $connection->id)
+        ->call('sendSticker', '😻')
+        ->assertNotFound();
+
+    Livewire::actingAs($sender)
+        ->test(Chat::class)
+        ->set('selectedConnection', $connection->id)
+        ->call('sendSticker', 'not-a-sticker')
+        ->assertStatus(422);
+});
+
+it('allows voice calls and exchanges encrypted WebRTC signals only between connected users', function () {
+    $caller = User::factory()->create();
+    $callee = User::factory()->create();
+    $outsider = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($caller->id, $callee->id),
+        'user_two_id' => max($caller->id, $callee->id),
+        'requested_by' => $caller->id,
+        'status' => 'accepted',
+    ]);
+    $this->actingAs($caller)->get(route('chat.conversation', [
+        'type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connection->id),
+    ]))->assertOk()->assertSee('data-voice-call-start', false)->assertSee('data-voice-call-manager', false);
+
+    $this->actingAs($caller)->postJson(route('chat.calls.start', $connection->id))
+        ->assertCreated()->assertJsonPath('status', 'ringing');
+    $call = ChatCall::query()->firstOrFail();
+    $this->actingAs($caller)->postJson(route('chat.calls.start', $connection->id))->assertConflict();
+
+    $this->actingAs($callee)->getJson(route('chat.calls.incoming'))
+        ->assertOk()->assertJsonPath('call.id', $call->uuid)->assertJsonPath('call.caller', $caller->name);
+    $this->actingAs($callee)->postJson(route('chat.calls.accept', $call->uuid))
+        ->assertOk()->assertJsonPath('status', 'accepted');
+
+    $offer = ['type' => 'offer', 'sdp' => 'private-offer-sdp'];
+    $this->actingAs($caller)->postJson(route('chat.calls.signal', $call->uuid), [
+        'type' => 'offer', 'payload' => $offer,
+    ])->assertCreated();
+
+    $signal = ChatCallSignal::query()->firstOrFail();
+    expect($signal->payload)->toBe($offer)
+        ->and(DB::table('chat_call_signals')->where('id', $signal->id)->value('payload'))->not->toContain('private-offer-sdp');
+
+    $this->actingAs($callee)->getJson(route('chat.calls.signals', ['uuid' => $call->uuid, 'after' => 0]))
+        ->assertOk()->assertJsonPath('signals.0.type', 'offer')->assertJsonPath('signals.0.payload.sdp', 'private-offer-sdp');
+
+    $this->actingAs($outsider)->getJson(route('chat.calls.signals', ['uuid' => $call->uuid, 'after' => 0]))->assertNotFound();
+    $this->actingAs($outsider)->postJson(route('chat.calls.start', $connection->id))->assertNotFound();
+});
+
+it('returns an empty incoming-call response when there is no call to answer', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->getJson(route('chat.calls.incoming'))
+        ->assertOk()->assertExactJson(['call' => null]);
+});
+
+it('rejects calls from pending connections and prevents a third user from ending a call', function () {
+    $caller = User::factory()->create();
+    $callee = User::factory()->create();
+    $outsider = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($caller->id, $callee->id),
+        'user_two_id' => max($caller->id, $callee->id),
+        'requested_by' => $caller->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($caller)->postJson(route('chat.calls.start', $connection->id))->assertNotFound();
+    $connection->update(['status' => 'accepted']);
+    $this->actingAs($caller)->postJson(route('chat.calls.start', $connection->id))->assertCreated();
+    $call = ChatCall::query()->firstOrFail();
+    $this->actingAs($outsider)->postJson(route('chat.calls.end', $call->uuid))->assertNotFound();
+    $this->actingAs($callee)->postJson(route('chat.calls.reject', $call->uuid))->assertOk()->assertJsonPath('status', 'rejected');
+    $this->actingAs($caller)->getJson(route('chat.calls.signals', ['uuid' => $call->uuid, 'after' => 0]))
+        ->assertOk()->assertJsonPath('status', 'rejected');
 });
 
 it('lets a connected user disconnect and removes that connection history', function () {

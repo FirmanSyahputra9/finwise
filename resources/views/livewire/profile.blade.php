@@ -1,4 +1,4 @@
-<div x-data="{ open: false, edit: false, security: false, help: false, appearance: { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16' }, init() { this.appearance = window.finwiseAppearance.read() }, saveAppearance() { this.appearance = window.finwiseAppearance.save(this.appearance); window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: @js(__('ui.saved')), type: 'success' } })) } }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
+            <div x-data="{ open: false, edit: false, security: false, help: false, appearance: { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none' }, init() { this.appearance = window.finwiseAppearance.read() }, saveAppearance() { this.appearance = window.finwiseAppearance.save(this.appearance); window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: @js(__('ui.saved')), type: 'success' } })) } }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
     <x-screen :title="__('ui.profile')">
         <x-slot:top>
             <div class="mt-6 flex justify-center" data-profile-photo-area>
@@ -90,6 +90,14 @@
                         @foreach ([['green', '#00d09e', __('ui.theme_green')], ['blue', '#3984d8', __('ui.theme_blue')], ['pink', '#e779ad', __('ui.theme_pink')], ['purple', '#9272dc', __('ui.theme_purple')], ['orange', '#f0a24d', __('ui.theme_orange')], ['red', '#e66e70', __('ui.theme_red')]] as [$value, $color, $label])
                             <button type="button" class="appearance-dot" style="background:{{ $color }}" aria-label="{{ $label }}" title="{{ $label }}" x-bind:aria-pressed="appearance.accent === '{{ $value }}'" x-on:click="appearance.accent = '{{ $value }}'; saveAppearance()"></button>
                         @endforeach
+                    </div>
+                </div>
+                <div class="card-3d flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-mint px-4 py-3">
+                    <p class="text-sm font-medium text-dark">{{ __('ui.pattern') }}</p>
+                    <div class="flex flex-wrap gap-2" role="group" aria-label="{{ __('ui.pattern') }}">
+                        <button type="button" class="appearance-choice" x-bind:aria-pressed="appearance.pattern === 'none'" x-on:click="appearance.pattern = 'none'; saveAppearance()">{{ __('ui.pattern_none') }}</button>
+                        <button type="button" class="appearance-choice flex items-center gap-2" x-bind:aria-pressed="appearance.pattern === 'fuzzy-duck-40'" x-on:click="appearance.pattern = 'fuzzy-duck-40'; saveAppearance()"><span aria-hidden="true" class="pattern-fuzzy-duck-40 size-7 rounded-md"></span>{{ __('ui.pattern_fuzzy_duck') }}</button>
+                        <button type="button" class="appearance-choice flex items-center gap-2" x-bind:aria-pressed="appearance.pattern === 'rare-snake-68'" x-on:click="appearance.pattern = 'rare-snake-68'; saveAppearance()"><span aria-hidden="true" class="pattern-rare-snake-68 size-7 rounded-md"></span>{{ __('ui.pattern_rare_snake') }}</button>
                     </div>
                 </div>
                 <div class="card-3d flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-mint px-4 py-3">
@@ -221,7 +229,3 @@
         </div>
     </div>
 </div>
-
-
-
-\n

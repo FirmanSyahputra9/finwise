@@ -1,3 +1,5 @@
+import './voice-calls.js';
+
 window.finwiseToast = window.finwiseToast || {
     show(message, type = 'success', duration = 3000) {
         window.dispatchEvent(new CustomEvent('app-toast', { detail: { message, type, duration } }));
@@ -73,6 +75,14 @@ function bindDashboardCat() {
 
     if (!cat) return;
 
+    const catSound = new Audio(cat.dataset.sound);
+    catSound.preload = 'auto';
+    catSound.addEventListener('play', () => cat.classList.add('cat-speaking'));
+    const stopCatSpeaking = () => cat.classList.remove('cat-speaking');
+    catSound.addEventListener('ended', stopCatSpeaking);
+    catSound.addEventListener('pause', stopCatSpeaking);
+    catSound.addEventListener('error', stopCatSpeaking);
+
     if (cat.dataset.interactive !== 'true') {
         cat.dataset.interactive = 'true';
 
@@ -130,6 +140,8 @@ function bindDashboardCat() {
 
         const play = (event) => {
             showSparkles(event);
+            catSound.currentTime = 0;
+            catSound.play().catch(stopCatSpeaking);
             cat.classList.remove('cat-playing');
             void cat.getBoundingClientRect();
             cat.classList.add('cat-playing');
@@ -416,6 +428,35 @@ function bindChatPhotoInputs() {
         delete form.dataset.photoQueueActive;
         queueActive = false;
     }, true);
+
+    document.addEventListener('paste', (event) => {
+        const form = event.target?.closest?.('[data-chat-composer]');
+        if (!form) return;
+
+        const clipboard = event.clipboardData;
+        const itemFiles = Array.from(clipboard?.items || [])
+            .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+            .map((item) => item.getAsFile())
+            .filter(Boolean);
+        // Some mobile keyboards expose pasted stickers through files instead of items.
+        const files = itemFiles.length > 0 ? itemFiles : Array.from(clipboard?.files || [])
+            .filter((file) => file.type.startsWith('image/'));
+        const input = form.querySelector('[data-chat-photo-input]');
+        if (files.length === 0 || !input || typeof DataTransfer === 'undefined') return;
+
+        event.preventDefault();
+        const transfer = new DataTransfer();
+        files.forEach((file) => transfer.items.add(file));
+        const textarea = form.querySelector('textarea');
+        const pastedText = clipboard?.getData('text/plain');
+        if (textarea && pastedText) {
+            textarea.setRangeText(pastedText, textarea.selectionStart, textarea.selectionEnd, 'end');
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        input.files = transfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
     document.addEventListener('submit', (event) => {
         const form = event.target.closest?.('[data-chat-composer]');
@@ -737,6 +778,122 @@ function bindCustomConfirmations() {
     });
 }
 
+function bindScreenScroll() {
+    if (document.documentElement.dataset.screenScrollBound === 'true') return;
+    document.documentElement.dataset.screenScrollBound = 'true';
+
+    let frame = 0;
+    let collapsed = false;
+    const update = () => {
+        frame = 0;
+        if (!collapsed && window.scrollY > 64) collapsed = true;
+        else if (collapsed && window.scrollY < 12) collapsed = false;
+        document.querySelectorAll('[data-screen-scroll]').forEach((screen) => {
+            const state = String(collapsed);
+            if (screen.dataset.scrolled === state) return;
+            screen.dataset.scrolled = state;
+        });
+    };
+    const requestUpdate = () => {
+        if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    document.addEventListener('livewire:navigated', requestUpdate, { passive: true });
+    requestUpdate();
+}
+
+let dashboardBalanceHidden = false;
+let dashboardBalanceInitialized = false;
+let amountFitObserver;
+let amountFitMutationObserver;
+
+function fitAmount(element, force = false) {
+    if (!element.isConnected || !element.clientWidth) return;
+    const width = String(element.clientWidth);
+    if (!force && element.dataset.fitLastWidth === width) return;
+    element.dataset.fitLastWidth = width;
+    if (!element.dataset.fitBaseSize) {
+        element.dataset.fitBaseSize = getComputedStyle(element).fontSize;
+    }
+
+    const baseSize = Number.parseFloat(element.dataset.fitBaseSize);
+    const minSize = Math.max(10, baseSize * 0.62);
+    let size = baseSize;
+    element.style.fontSize = `${baseSize}px`;
+    while (element.scrollWidth > element.clientWidth + 1 && size > minSize) {
+        size = Math.max(minSize, size - 0.5);
+        element.style.fontSize = `${size}px`;
+    }
+}
+
+function bindAmountFit(root = document) {
+    if (!amountFitObserver) {
+        amountFitObserver = new ResizeObserver((entries) => entries.forEach(({ target }) => fitAmount(target)));
+    }
+
+    const observe = (element) => {
+        if (element.dataset.fitObserved === 'true') return;
+        element.dataset.fitObserved = 'true';
+        amountFitObserver.observe(element);
+        fitAmount(element, true);
+    };
+
+    if (root.matches?.('[data-fit-amount]')) observe(root);
+    root.querySelectorAll?.('[data-fit-amount]').forEach(observe);
+
+    if (amountFitMutationObserver || !document.body) return;
+    amountFitMutationObserver = new MutationObserver((mutations) => {
+        const changed = new Set();
+        mutations.forEach((mutation) => {
+            const parent = mutation.target.nodeType === Node.ELEMENT_NODE ? mutation.target : mutation.target.parentElement;
+            const amount = parent?.closest('[data-fit-amount]');
+            if (amount) changed.add(amount);
+            mutation.addedNodes?.forEach((node) => {
+                if (node.nodeType !== Node.ELEMENT_NODE) return;
+                if (node.matches('[data-fit-amount]')) changed.add(node);
+                node.querySelectorAll('[data-fit-amount]').forEach((element) => changed.add(element));
+            });
+        });
+        changed.forEach((element) => {
+            observe(element);
+            fitAmount(element, true);
+        });
+    });
+    amountFitMutationObserver.observe(document.body, { childList: true, characterData: true, subtree: true });
+}
+
+function bindDashboardBalanceVisibility() {
+    if (!dashboardBalanceInitialized) {
+        try { dashboardBalanceHidden = localStorage.getItem('finwise-balance-hidden') === 'true'; } catch (_) {}
+        dashboardBalanceInitialized = true;
+    }
+
+    const render = () => {
+        document.querySelectorAll('[data-balance-value]').forEach((value) => {
+            value.textContent = dashboardBalanceHidden ? '••••••' : value.dataset.balanceValue;
+        });
+        document.querySelectorAll('[data-balance-toggle]').forEach((button) => {
+            button.setAttribute('aria-pressed', String(dashboardBalanceHidden));
+            button.setAttribute('aria-label', dashboardBalanceHidden ? button.dataset.showLabel : button.dataset.hideLabel);
+            const openEye = button.querySelector('[data-balance-eye-open]');
+            const closedEye = button.querySelector('[data-balance-eye-closed]');
+            if (openEye) openEye.classList.toggle('hidden', dashboardBalanceHidden);
+            if (closedEye) closedEye.classList.toggle('hidden', !dashboardBalanceHidden);
+        });
+    };
+
+    render();
+    if (document.documentElement.dataset.balanceToggleBound === 'true') return;
+    document.documentElement.dataset.balanceToggleBound = 'true';
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-balance-toggle]')) return;
+        dashboardBalanceHidden = !dashboardBalanceHidden;
+        try { localStorage.setItem('finwise-balance-hidden', String(dashboardBalanceHidden)); } catch (_) {}
+        render();
+    });
+}
+
 bindDashboardCat();
 bindProfilePhotoInput();
 bindChatPhotoInputs();
@@ -745,6 +902,9 @@ bindChatLocalTimes();
 bindChatReadObserver();
 bindBottomNavSwipe();
 bindCustomConfirmations();
+bindScreenScroll();
+bindDashboardBalanceVisibility();
+bindAmountFit();
 document.addEventListener('livewire:navigated', () => {
     bindDashboardCat();
     bindProfilePhotoInput();
@@ -753,4 +913,7 @@ document.addEventListener('livewire:navigated', () => {
     bindChatLocalTimes();
     bindChatReadObserver();
     bindCustomConfirmations();
+    bindScreenScroll();
+    bindDashboardBalanceVisibility();
+    bindAmountFit();
 });

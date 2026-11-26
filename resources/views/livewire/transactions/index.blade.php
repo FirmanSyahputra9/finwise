@@ -135,13 +135,13 @@
                         <p class="break-words font-medium">
                             {{ $t->category?->name ?? ($t->type->value === 'transfer' ? __('ui.transfer_to') . ' ' . $t->toAccount?->name : $t->type->label()) }}
                         </p>
-                        <p class="text-gray-500">{{ $t->date->translatedFormat('d M Y') }} ·
+                        <p class="text-gray-500"><x-date-label :date="$t->date" /> ·
                             {{ $t->account->name }}{{ $t->note ? ' · ' . $t->note : '' }}</p>
                     </div>
                     <div
                         class="flex min-w-0 items-center justify-between gap-2 min-[380px]:flex-col min-[380px]:items-end">
-                        <span
-                            class="whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm {{ $t->type->value === 'income' ? 'text-emerald-600' : 'text-red-500' }}">
+                        <span data-fit-amount
+                            class="max-w-[58%] min-w-0 whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm {{ $t->type->value === 'income' ? 'text-emerald-600' : 'text-red-500' }}">
                             {{ $t->type->value === 'income' ? '+' : '-' }}{{ $rp($t->amount) }}
                         </span>
                         <div class="flex shrink-0 gap-3">

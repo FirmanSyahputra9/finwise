@@ -54,11 +54,11 @@
             <div class="mt-5 grid grid-cols-2 text-center">
                 <div>
                     <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-main"></span>{{ __('ui.income') }}</p>
-                    <p class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($totalIncome) }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($totalIncome) }}</p>
                 </div>
                 <div>
                     <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-ocean"></span>{{ __('ui.expense') }}</p>
-                    <p class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($totalExpense) }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($totalExpense) }}</p>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
                         <div class="analysis-budget-percent grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $card['percentage'] }}%</div>
                     </div>
                     <p class="truncate text-[15px] font-medium text-mint">{{ $card['name'] }}</p>
-                    <p class="text-center text-[10px] text-mint/90">{{ \App\Support\Money::rp($card['spent']) }} / {{ \App\Support\Money::rp($card['amount']) }}</p>
+                    <p data-fit-amount class="max-w-full text-center text-[10px] text-mint/90">{{ \App\Support\Money::rp($card['spent']) }} / {{ \App\Support\Money::rp($card['amount']) }}</p>
                 </div>
             @endforeach
         </div>

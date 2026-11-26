@@ -1,0 +1,13 @@
+.pattern-fuzzy-duck-40,
+html[data-pattern="fuzzy-duck-40"] body > div.relative::before {
+    --s: 60px;
+    --c1: var(--pattern-neutral, #fff);
+    --c2: var(--pattern-accent, #00d09e);
+    --_g: radial-gradient(25% 25% at 25% 25%, var(--c1) 99%, transparent 101%);
+    background:
+        var(--_g) var(--s) var(--s) / calc(2 * var(--s)) calc(2 * var(--s)),
+        var(--_g) 0 0 / calc(2 * var(--s)) calc(2 * var(--s)),
+        radial-gradient(50% 50%, var(--c2) 98%, transparent) 0 0 / var(--s) var(--s),
+        repeating-conic-gradient(var(--c2) 0 50%, var(--c1) 0 100%)
+            calc(.5 * var(--s)) 0 / calc(2 * var(--s)) var(--s);
+}

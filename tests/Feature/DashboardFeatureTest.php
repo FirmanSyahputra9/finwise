@@ -67,6 +67,18 @@ it('provides five bottom navigation destinations and dashboard shortcuts for cha
         ->assertSee(route('categories'), false);
 });
 
+it('shows the account avatar and balance visibility control in the dashboard header', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee(route('profile'), false)
+        ->assertSee('data-balance-toggle', false)
+        ->assertSee('data-balance-value="Rp 0"', false)
+        ->assertSee('data-hide-label="Sembunyikan saldo"', false)
+        ->assertSee('data-show-label="Tampilkan saldo"', false);
+});
+
 it('renders the shared custom confirmation dialog in the app layout', function () {
     $this->actingAs(User::factory()->create());
 

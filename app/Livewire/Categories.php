@@ -19,6 +19,11 @@ class Categories extends Component
     public string $dateFrom = '';
     public string $dateTo = '';
 
+    public function mount(): void
+    {
+        $this->dateTo = now()->toDateString();
+    }
+
     public function save(): void
     {
         $this->validate(['name' => ['required', 'string', 'max:40']]);

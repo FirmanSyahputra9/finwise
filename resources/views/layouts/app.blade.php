@@ -8,13 +8,14 @@
     <script>
         (() => {
             if (window.finwiseAppearance) return;
-            const defaults = { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16' };
+            const defaults = { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none' };
             const allowed = {
                 theme: ['light', 'dark'],
                 accent: ['green', 'blue', 'pink', 'purple', 'orange', 'red'],
                 textColor: ['default', 'black', 'white', 'blue', 'pink', 'green'],
                 font: ['poppins', 'system', 'arial', 'georgia'],
                 size: ['14', '16', '18', '20'],
+                pattern: ['none', 'fuzzy-duck-40', 'rare-snake-68'],
             };
             const normalize = (value = {}) => Object.fromEntries(
                 Object.keys(defaults).map((key) => [key, allowed[key].includes(value[key]) ? value[key] : defaults[key]])
@@ -27,6 +28,7 @@
                 root.dataset.textColor = settings.textColor;
                 root.dataset.font = settings.font;
                 root.dataset.fontSize = settings.size;
+                root.dataset.pattern = settings.pattern;
                 return settings;
             };
             window.finwiseAppearance = {
@@ -60,15 +62,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('pattern/fuzzy-duck-40/style.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('pattern/rare-snake-68/style.css') }}?v=3">
     @livewireStyles
 </head>
 <body class="bg-slate-200 font-poppins">
-    <div class="relative mx-auto min-h-dvh max-w-[430px] bg-main {{ request()->routeIs('chat.conversation') ? 'pb-0' : 'pb-24' }} shadow-xl">
+    <div class="relative mx-auto min-h-dvh max-w-[430px] bg-main shadow-xl">
         {{ $slot }}
         <livewire:deletion-undo />
-        @unless(request()->routeIs('chat.conversation'))
-        <div class="absolute right-5 top-12 z-40"><livewire:notifications-menu :key="'global-notifications'" /></div>
-        @endunless
         <div id="app-confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/50 p-5" role="presentation" data-confirm-modal>
             <section class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl" role="alertdialog" aria-modal="true" aria-labelledby="app-confirm-title" aria-describedby="app-confirm-message">
                 <h2 id="app-confirm-title" class="text-lg font-semibold text-dark">{{ __('ui.confirmation') }}</h2>
@@ -81,6 +82,30 @@
         </div>
         <div id="offline-sync-status" class="fixed top-20 left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
         <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">{{ __('ui.install_app') }}</button>
+        @auth
+        <div data-voice-call-manager wire:ignore data-incoming-url="{{ route('chat.calls.incoming') }}" data-csrf="{{ csrf_token() }}"
+            data-label-calling="{{ __('ui.chat_call_calling') }}" data-label-connecting="{{ __('ui.chat_call_connecting') }}"
+            data-label-active="{{ __('ui.chat_call_active') }}" data-label-permission="{{ __('ui.chat_call_permission') }}"
+            data-label-failed="{{ __('ui.chat_call_failed') }}" data-label-ended="{{ __('ui.chat_call_ended') }}"
+            data-label-incoming="{{ __('ui.chat_call_incoming') }}" data-label-missed="{{ __('ui.chat_call_missed') }}">
+            <div data-call-overlay hidden role="dialog" aria-modal="true" aria-label="{{ __('ui.chat_call_title') }}" class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5">
+                <section class="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+                    <div class="mx-auto grid size-20 place-items-center rounded-full bg-sky/15 text-4xl text-nav">☎</div>
+                    <h2 data-call-title class="mt-4 text-lg font-semibold text-dark">{{ __('ui.chat_call_title') }}</h2>
+                    <p data-call-status aria-live="polite" class="mt-2 text-sm text-dark/60"></p>
+                    <audio data-call-remote autoplay playsinline></audio>
+                    <div data-call-incoming-actions hidden class="mt-6 flex justify-center gap-3">
+                        <button type="button" data-call-reject class="rounded-full bg-red-600 px-5 py-3 font-medium text-white">{{ __('ui.chat_call_reject') }}</button>
+                        <button type="button" data-call-accept class="rounded-full bg-emerald-600 px-5 py-3 font-medium text-white">{{ __('ui.chat_call_accept') }}</button>
+                    </div>
+                    <div data-call-active-actions hidden class="mt-6 flex justify-center gap-3">
+                        <button type="button" data-call-mute aria-pressed="false" class="rounded-full bg-light px-5 py-3 text-sm font-medium text-dark">{{ __('ui.chat_call_mute') }}</button>
+                        <button type="button" data-call-end class="rounded-full bg-red-600 px-5 py-3 font-medium text-white">{{ __('ui.chat_call_end') }}</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+        @endauth
 
         @unless(request()->routeIs('chat.conversation'))
         <nav id="bottom-navigation" wire:transition.navigate="bottom-navigation" class="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-[88px] max-w-[430px] items-center justify-around gap-1.5 rounded-t-[36px] bg-light px-3 shadow-[0_-8px_30px_rgba(20,50,45,.12)]">

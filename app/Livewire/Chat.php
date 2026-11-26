@@ -29,6 +29,8 @@ class Chat extends Component
     /** @var array<int, TemporaryUploadedFile> */
     public array $photos = [];
 
+    public bool $showStickerPicker = false;
+
     public ?int $selectedConnection = null;
 
     public ?int $selectedGroup = null;
@@ -404,6 +406,31 @@ class Chat extends Component
         ChatMessage::create($data);
         $this->reset('message', 'photos');
         $this->dispatch('chat-photos-sent');
+    }
+
+    public function toggleStickerPicker(): void
+    {
+        $this->showStickerPicker = ! $this->showStickerPicker;
+    }
+
+    public function sendSticker(string $sticker): void
+    {
+        abort_unless(in_array($sticker, ChatMessage::STICKERS, true), 422);
+        if (! $this->selectedConnection && ! $this->selectedGroup) {
+            throw ValidationException::withMessages(['message' => __('ui.chat_choose_first')]);
+        }
+
+        $data = ['sender_id' => auth()->id(), 'body' => ChatMessage::STICKER_PREFIX.$sticker];
+        if ($this->selectedConnection) {
+            $this->authorizedConnection($this->selectedConnection);
+            $data['connection_id'] = $this->selectedConnection;
+        } else {
+            $this->authorizedGroup((int) $this->selectedGroup);
+            $data['group_id'] = $this->selectedGroup;
+        }
+
+        ChatMessage::create($data);
+        $this->showStickerPicker = false;
     }
 
     private function authorizedConnection(int $id): ChatConnection

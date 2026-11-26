@@ -7,6 +7,13 @@ use App\Models\Transaction;
 use App\Models\User;
 use Livewire\Livewire;
 
+it('defaults the category transaction filter end date to today on mount', function () {
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test(Categories::class)
+        ->assertSet('dateTo', today()->toDateString());
+});
+
 it('creates a category and rejects an empty name', function () {
     $this->actingAs(User::factory()->create());
 

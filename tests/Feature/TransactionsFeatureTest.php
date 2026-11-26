@@ -7,6 +7,39 @@ use App\Models\Transaction;
 use App\Models\User;
 use Livewire\Livewire;
 
+it('defaults the transaction filter end date to today on mount', function () {
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test(Transactions::class)
+        ->assertSet('dateTo', today()->toDateString());
+
+    Livewire::test(Transactions::class)
+        ->set('dateTo', today()->subDay()->toDateString())
+        ->call('resetFilters')
+        ->assertSet('dateTo', today()->toDateString());
+});
+
+it('labels today and yesterday dates in the transaction list', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $category = Category::create(['name' => 'Makan', 'type' => 'expense']);
+
+    foreach ([today(), today()->subDay()] as $date) {
+        Transaction::create([
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'type' => 'expense',
+            'amount' => 10_000,
+            'date' => $date,
+        ]);
+    }
+
+    Livewire::test(Transactions::class)
+        ->set('dateFrom', today()->subDay()->toDateString())
+        ->assertSee(__('ui.today'))
+        ->assertSee(__('ui.yesterday'));
+});
+
 it('creates a categorized expense with an integer amount', function () {
     $this->actingAs(User::factory()->create());
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
@@ -62,7 +95,15 @@ it('defers formatted amount input updates until the form action', function () {
 
     $this->get(route('transactions'))
         ->assertOk()
-        ->assertSee('$wire.set(this.model, digits || null, false)', false);
+        ->assertSee('$wire.set(this.model, digits || null, false)', false)
+        ->assertSee('beforeInput($event)', false)
+        ->assertSee('beforePaste($event)', false)
+        ->assertSee('/[^\\d.]/', false)
+        ->assertSee('existingDigits - selectedDigits + insertedDigits > 13', false)
+        ->assertSee("nextDigits.startsWith('00')", false)
+        ->assertSee('input.value = this.display', false)
+        ->assertSee('digits.length > 13', false)
+        ->assertSee("digits.replace(/^0{2,}/, '0')", false);
 });
 
 it('rejects a category that belongs to another transaction type', function () {

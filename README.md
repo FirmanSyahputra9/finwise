@@ -11,8 +11,9 @@ Aplikasi pencatatan keuangan pribadi berbasis Laravel dan Livewire. finWise memb
 - **Anggaran:** tetapkan batas pengeluaran bulanan dan alokasikan sebagian ke kategori. Total alokasi kategori tidak boleh melebihi batas bulanan. Pengeluaran online maupun transaksi offline yang disinkronkan mengikuti batas ini.
 - **Kategori:** lihat transaksi per kategori dan filter berdasarkan jenis serta tanggal.
 - **Target simpanan:** buat target dan catat kontribusi.
+- **Chat:** terhubung dengan kontak dan buat grup untuk bertukar pesan, stiker emoji, serta foto. Foto dapat dipilih lewat tombol lampiran atau ditempel dari clipboard; stiker gambar dari keypad ponsel dapat ditempel jika browser menyediakan gambar tersebut sebagai data clipboard. Chat pribadi juga mendukung panggilan suara WebRTC peer-to-peer tanpa relay media; koneksi tertentu dapat gagal jika jaringan memerlukan TURN.
 - **Mode offline:** transaksi dapat disimpan di perangkat saat offline dan disinkronkan kembali saat online.
-- **Tampilan:** pilih tema terang/gelap, warna aksen dan teks, font, serta ukuran font.
+- **Tampilan:** pilih tema terang/gelap, warna aksen dan teks, pola latar Fuzzy Duck atau Rare Snake, font, serta ukuran font. Warna netral pola mengikuti tema; warna lainnya mengikuti aksen.
 - **Bahasa:** seluruh teks bawaan aplikasi, termasuk formulir, validasi, notifikasi, dan mode offline, tersedia dalam Bahasa Indonesia, Inggris, dan Jepang. Ubah bahasa dari Profil → Tampilan aplikasi; pilihan disimpan pada sesi. Nama kategori, akun, dan target yang dibuat pengguna tetap mengikuti teks yang dimasukkan.
 - **Nominal:** angka ditampilkan dengan pemisah ribuan; nilai yang disimpan tetap numerik.
 

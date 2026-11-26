@@ -13,6 +13,9 @@ it('renders the analysis page with daily chart buckets', function () {
 
     Livewire::test(Analysis::class)
         ->assertOk()
+        ->assertSee('data-summary-card', false)
+        ->assertSee(__('ui.total_balance'))
+        ->assertSee(__('ui.looks_good'))
         ->assertSee('Pemasukan & Pengeluaran')
         ->assertSee('Budget Bulan Ini');
 });

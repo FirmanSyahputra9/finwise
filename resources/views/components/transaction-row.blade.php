@@ -5,10 +5,10 @@
     </div>
     <div class="min-w-0 flex-1">
         <p class="truncate text-[15px] font-medium text-nav">{{ $t->category?->name ?? 'Transfer' }}</p>
-        <p class="text-xs font-semibold text-ocean">{{ $t->date->translatedFormat('d M Y') }} · {{ $t->account->name }}</p>
+        <p class="text-xs font-semibold text-ocean"><x-date-label :date="$t->date" /> · {{ $t->account->name }}</p>
     </div>
     <div class="text-right">
-        <p class="text-[15px] font-medium {{ $t->type->value === 'income' ? 'text-ink' : 'text-ocean' }}">
+        <p data-fit-amount class="text-[15px] font-medium {{ $t->type->value === 'income' ? 'text-ink' : 'text-ocean' }}">
             {{ $t->type->value === 'expense' ? '-' : '' }}{{ \App\Support\Money::rp($t->amount) }}
         </p>
         @if ($t->note)
