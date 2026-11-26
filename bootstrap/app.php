@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Middleware\EnvironmentMaintenanceMode;
+use App\Http\Middleware\PurgeExpiredUserDeletions;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use App\Http\Middleware\SetLocale;
-use App\Http\Middleware\PurgeExpiredUserDeletions;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(EnvironmentMaintenanceMode::class);
         $middleware->web(append: [SetLocale::class, PurgeExpiredUserDeletions::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

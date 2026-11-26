@@ -85,6 +85,22 @@ Untuk membuat aset frontend siap produksi:
 
     npm run build
 
+### Halaman error dan maintenance
+
+Halaman error finWise tersedia untuk HTTP 4xx/5xx umum. Di shared hosting, maintenance dapat diaktifkan hanya dengan mengubah `.env`; middleware membaca file itu langsung pada setiap request, termasuk saat konfigurasi Laravel dicache. Tidak perlu menjalankan perintah Artisan:
+
+    APP_MAINTENANCE=true
+
+Set `APP_MAINTENANCE=false` untuk membuka aplikasi kembali. Pesan dan interval refresh bisa diatur melalui `APP_MAINTENANCE_MESSAGE` dan `APP_MAINTENANCE_RETRY` (detik). Kosongkan pesan untuk memakai teks standar yang diterjemahkan.
+
+Untuk penggunaan Artisan, halaman maintenance khusus juga tersedia:
+
+    php artisan down --render=errors::maintenance --retry=60
+
+Aktifkan kembali aplikasi setelah pekerjaan selesai:
+
+    php artisan up
+
 ## Pengembangan dan tes
 
 Jalankan seluruh tes:
