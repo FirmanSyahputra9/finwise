@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\OfflineTransactionSyncController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Livewire\Analysis;
@@ -12,6 +11,8 @@ use App\Livewire\Dashboard;
 use App\Livewire\Profile;
 use App\Livewire\SavingsGoals;
 use App\Livewire\Transactions\Index as TransactionsIndex;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => Auth::check()
     ? redirect()->route('dashboard')
@@ -32,7 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/savings-goals', SavingsGoals::class)->name('savings-goals');
     Route::get('/profile', Profile::class)->name('profile');
     Route::get('/chat', Chat::class)->name('chat');
-    Route::get('/chat/{type}/{id}', Chat::class)->whereIn('type', ['direct', 'group'])->whereNumber('id')->name('chat.conversation');
+    Route::get('/chat/{type}/{id}', Chat::class)->whereIn('type', ['direct', 'group'])->whereUuid('id')->name('chat.conversation');
+    Route::get('/chat/attachments/{uuid}', ChatAttachmentController::class)->whereUuid('uuid')->name('chat.attachment');
     Route::post('/profile/photo', ProfilePhotoController::class)->middleware('throttle:10,1')->name('profile.photo');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::post('/transactions/sync', OfflineTransactionSyncController::class)->middleware('throttle:30,1')->name('transactions.sync');

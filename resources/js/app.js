@@ -195,17 +195,25 @@ function bindProfilePhotoInput() {
             };
             let dragging = false;
             let pointer = null;
+            const canvasPoint = (event) => {
+                const bounds = canvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX - bounds.left) * cropSize / bounds.width,
+                    y: (event.clientY - bounds.top) * cropSize / bounds.height,
+                };
+            };
             const move = (event) => {
                 if (!dragging || !pointer) return;
-                offsetX += event.clientX - pointer.x;
-                offsetY += event.clientY - pointer.y;
-                pointer = { x: event.clientX, y: event.clientY };
+                const point = canvasPoint(event);
+                offsetX += point.x - pointer.x;
+                offsetY += point.y - pointer.y;
+                pointer = point;
                 clamp(); draw();
             };
             const endDrag = () => { dragging = false; pointer = null; };
             canvas.onpointerdown = (event) => {
                 dragging = true;
-                pointer = { x: event.clientX, y: event.clientY };
+                pointer = canvasPoint(event);
                 canvas.setPointerCapture(event.pointerId);
             };
             canvas.onpointermove = move;
@@ -236,8 +244,10 @@ function bindProfilePhotoInput() {
                     const output = document.createElement('canvas');
                     output.width = output.height = 1024;
                     const out = output.getContext('2d');
-                    const ratio = output.width / cropSize;
-                    out.drawImage(bitmap, -offsetX * ratio, -offsetY * ratio, bitmap.width * scale * ratio, bitmap.height * scale * ratio);
+                    const sourceX = -offsetX / scale;
+                    const sourceY = -offsetY / scale;
+                    const sourceSize = cropSize / scale;
+                    out.drawImage(bitmap, sourceX, sourceY, sourceSize, sourceSize, 0, 0, output.width, output.height);
                     try {
                         let blob = null;
                         for (const quality of [.86, .76, .66, .56]) {
@@ -285,6 +295,347 @@ function bindProfilePhotoInput() {
             input.value = '';
         }
     });
+}
+
+async function compressChatPhoto(file) {
+    const bitmap = await createImageBitmap(file);
+    try {
+        let best = null;
+        for (const maxDimension of [1600, 1400, 1200, 1000, 800]) {
+            const ratio = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+            canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+            const context = canvas.getContext('2d');
+            if (!context) throw new Error('Canvas is unavailable.');
+            context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+            for (const quality of [.84, .74, .64, .54]) {
+                const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+                if (!blob || blob.type !== 'image/webp') throw new Error('WebP encoding is unavailable.');
+                if (!best || blob.size < best.size) best = blob;
+                if (blob.size <= 1.5 * 1024 * 1024) return blob;
+            }
+        }
+
+        if (!best || best.size > 5 * 1024 * 1024) throw new Error('The compressed photo is too large.');
+        return best;
+    } finally {
+        bitmap.close();
+    }
+}
+
+function bindChatPhotoInputs() {
+    if (document.documentElement.dataset.chatPhotoBound === 'true') return;
+    document.documentElement.dataset.chatPhotoBound = 'true';
+    let queueActive = false;
+
+    document.addEventListener('change', async (event) => {
+        const input = event.target.closest?.('[data-chat-photo-input]');
+        if (!input) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const files = Array.from(input.files || []);
+        input.value = '';
+        if (files.length === 0) return;
+
+        const form = input.closest('form');
+        const queue = form.querySelector('[data-chat-photo-queue]');
+        const sendButton = form.querySelector('[data-chat-send-button]');
+        if (form.dataset.photoQueueActive === 'true') {
+            window.finwiseToast.show(input.dataset.chatPhotoBusy || 'Wait for the current photo queue to finish.', 'info', 4000);
+            return;
+        }
+        const queuedCount = Number(form.dataset.photoCount || 0);
+        if (files.length + queuedCount > 20) {
+            window.finwiseToast.show(input.dataset.chatPhotoLimitError || 'You can send up to 20 photos in one message.', 'error', 5000);
+            return;
+        }
+
+        const component = window.Livewire?.all().find((item) => item.el.contains(input));
+        const wire = component?.$wire;
+        if (!wire?.uploadMultiple) {
+            window.finwiseToast.show(input.dataset.chatPhotoError || 'Could not process this photo.', 'error', 5000);
+            return;
+        }
+
+        form.dataset.photoQueueActive = 'true';
+        queueActive = true;
+        input.disabled = true;
+        sendButton.disabled = true;
+        queue.hidden = false;
+
+        for (let index = 0; index < files.length; index++) {
+            const file = files[index];
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 rounded-xl bg-light px-2 py-1.5 text-[10px]';
+            const icon = document.createElement('span');
+            icon.className = 'grid size-7 shrink-0 place-items-center rounded-lg bg-white text-nav';
+            icon.textContent = `${index + 1}/${files.length}`;
+            const details = document.createElement('div');
+            details.className = 'min-w-0 flex-1';
+            const name = document.createElement('div');
+            name.className = 'truncate font-medium text-dark';
+            name.textContent = file.name;
+            const state = document.createElement('div');
+            state.className = 'text-dark/50';
+            state.textContent = input.dataset.chatPhotoConverting || 'Compressing photo to WebP…';
+            const track = document.createElement('div');
+            track.className = 'mt-1 h-1 overflow-hidden rounded-full bg-dark/10';
+            const bar = document.createElement('div');
+            bar.className = 'h-full w-0 rounded-full bg-nav transition-[width]';
+            track.append(bar);
+            details.append(name, state, track);
+            row.append(icon, details);
+            queue.append(row);
+
+            try {
+                if (!file.type.startsWith('image/')) throw new Error('Unsupported photo.');
+                const blob = await compressChatPhoto(file);
+                const converted = new File([blob], `chat-photo-${Date.now()}-${index}.webp`, { type: 'image/webp' });
+                state.textContent = input.dataset.chatPhotoUploading || 'Uploading photo…';
+                await new Promise((resolve, reject) => {
+                    wire.uploadMultiple('photos', [converted], resolve, () => reject(new Error('Upload failed.')), (progressEvent) => {
+                        const progress = progressEvent.detail?.progress ?? 0;
+                        bar.style.width = `${progress}%`;
+                    });
+                });
+                bar.style.width = '100%';
+                state.textContent = input.dataset.chatPhotoReady || 'Ready to send';
+                form.dataset.photoCount = String(Number(form.dataset.photoCount || 0) + 1);
+            } catch (_) {
+                row.classList.add('text-red-600');
+                state.textContent = input.dataset.chatPhotoFailed || 'Processing failed';
+                bar.classList.add('bg-red-500');
+            }
+        }
+
+        input.disabled = false;
+        sendButton.disabled = false;
+        delete form.dataset.photoQueueActive;
+        queueActive = false;
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest?.('[data-chat-composer]');
+        if (queueActive || form?.dataset.photoQueueActive === 'true') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+
+    document.addEventListener('chat-photos-sent', () => {
+        const queue = document.querySelector('[data-chat-photo-queue]');
+        if (queue) {
+            queue.replaceChildren();
+            queue.hidden = true;
+        }
+        const form = document.querySelector('[data-chat-composer]');
+        if (form) delete form.dataset.photoCount;
+    });
+}
+
+function bindChatImageViewer() {
+    if (document.documentElement.dataset.chatImageViewerBound === 'true') return;
+    document.documentElement.dataset.chatImageViewerBound = 'true';
+
+    let lastImageButton = null;
+    let imageGallery = [];
+    let imageIndex = 0;
+    let swipeStart = null;
+    const renderImageStrip = (viewer) => {
+        const strip = viewer.querySelector('[data-chat-image-strip]');
+        const position = viewer.querySelector('[data-chat-image-position]');
+        strip.replaceChildren();
+        strip.hidden = imageGallery.length < 2;
+        position.hidden = imageGallery.length < 2;
+
+        imageGallery.forEach((image, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.chatImageThumb = 'true';
+            button.dataset.imageIndex = String(index);
+            button.className = 'relative size-14 shrink-0 overflow-hidden rounded-lg border-2 border-transparent';
+            button.setAttribute('aria-label', `${index + 1} / ${imageGallery.length}`);
+            const thumbnail = document.createElement('img');
+            thumbnail.src = image.url;
+            thumbnail.alt = '';
+            thumbnail.loading = 'lazy';
+            thumbnail.className = 'size-full object-cover';
+            const number = document.createElement('span');
+            number.className = 'absolute bottom-0 right-0 rounded-tl bg-black/70 px-1 text-[9px] text-white';
+            number.textContent = String(index + 1);
+            button.append(thumbnail, number);
+            strip.append(button);
+        });
+    };
+    const showImage = (viewer, index) => {
+        imageIndex = (index + imageGallery.length) % imageGallery.length;
+        const image = imageGallery[imageIndex];
+        viewer.querySelector('[data-chat-image-full]').src = image.url;
+        const download = viewer.querySelector('[data-chat-image-download]');
+        download.href = image.downloadUrl;
+        download.download = image.downloadName;
+        const position = viewer.querySelector('[data-chat-image-position]');
+        position.textContent = viewer.dataset.photoPosition
+            .replace(':current', String(imageIndex + 1))
+            .replace(':total', String(imageGallery.length));
+        viewer.querySelectorAll('[data-chat-image-thumb]').forEach((button, index) => {
+            button.classList.toggle('border-white', index === imageIndex);
+            button.classList.toggle('border-transparent', index !== imageIndex);
+            button.setAttribute('aria-current', index === imageIndex ? 'true' : 'false');
+            if (index === imageIndex) button.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        });
+    };
+    const closeViewer = (viewer) => {
+        const image = viewer.querySelector('[data-chat-image-full]');
+        const download = viewer.querySelector('[data-chat-image-download]');
+        viewer.hidden = true;
+        image.removeAttribute('src');
+        download.href = '#';
+        download.removeAttribute('download');
+        imageGallery = [];
+        imageIndex = 0;
+        viewer.querySelector('[data-chat-image-strip]').replaceChildren();
+        viewer.querySelector('[data-chat-image-position]').textContent = '';
+        lastImageButton?.focus();
+        lastImageButton = null;
+    };
+
+    document.addEventListener('click', (event) => {
+        const openButton = event.target.closest?.('[data-chat-image-open]');
+        if (openButton) {
+            const viewer = document.querySelector('[data-chat-image-viewer]');
+            if (!viewer) return;
+            lastImageButton = openButton;
+            try {
+                imageGallery = JSON.parse(openButton.dataset.imageGallery || '[]');
+            } catch (_) { imageGallery = []; }
+            if (imageGallery.length === 0) return;
+            viewer.hidden = false;
+            renderImageStrip(viewer);
+            showImage(viewer, Number(openButton.dataset.imageIndex || 0));
+            viewer.querySelector('[data-chat-image-close]').focus();
+            return;
+        }
+
+        const viewer = document.querySelector('[data-chat-image-viewer]');
+        const thumbnail = event.target.closest?.('[data-chat-image-thumb]');
+        if (viewer && !viewer.hidden && thumbnail) {
+            showImage(viewer, Number(thumbnail.dataset.imageIndex));
+            return;
+        }
+        if (viewer && !viewer.hidden && (event.target === viewer || event.target.closest?.('[data-chat-image-close]'))) {
+            closeViewer(viewer);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const viewer = document.querySelector('[data-chat-image-viewer]');
+        if (viewer && !viewer.hidden) closeViewer(viewer);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        const viewer = document.querySelector('[data-chat-image-viewer]');
+        if (!viewer || viewer.hidden || imageGallery.length < 2) return;
+        if (event.key === 'ArrowLeft') showImage(viewer, imageIndex - 1);
+        if (event.key === 'ArrowRight') showImage(viewer, imageIndex + 1);
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+        const stage = event.target.closest?.('[data-chat-image-stage]');
+        const viewer = document.querySelector('[data-chat-image-viewer]');
+        if (!stage || !viewer || viewer.hidden || imageGallery.length < 2) return;
+        swipeStart = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+    });
+
+    document.addEventListener('pointerup', (event) => {
+        if (!swipeStart || swipeStart.pointerId !== event.pointerId) return;
+        const deltaX = event.clientX - swipeStart.x;
+        const deltaY = event.clientY - swipeStart.y;
+        swipeStart = null;
+        if (Math.abs(deltaX) < 45 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
+        const viewer = document.querySelector('[data-chat-image-viewer]');
+        if (viewer && !viewer.hidden) showImage(viewer, imageIndex + (deltaX < 0 ? 1 : -1));
+    });
+
+    document.addEventListener('pointercancel', () => { swipeStart = null; });
+}
+
+function bindChatLocalTimes() {
+    const messages = document.getElementById('chat-messages');
+    if (!messages) return;
+
+    const localize = () => {
+        const locale = document.documentElement.lang || undefined;
+        messages.querySelectorAll('time[data-chat-local-time][datetime]').forEach((time) => {
+            const date = new Date(time.dateTime);
+            if (Number.isNaN(date.getTime())) return;
+            const formatted = new Intl.DateTimeFormat(locale, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hourCycle: 'h23',
+            }).format(date);
+            if (time.textContent !== formatted) time.textContent = formatted;
+        });
+    };
+
+    localize();
+    if (messages.dataset.localTimeBound === 'true') return;
+    messages.dataset.localTimeBound = 'true';
+    new MutationObserver(localize).observe(messages, { childList: true, characterData: true, subtree: true });
+}
+
+function bindChatReadObserver() {
+    const feed = document.getElementById('chat-messages');
+    if (!feed || feed.dataset.readObserverBound === 'true') return;
+    feed.dataset.readObserverBound = 'true';
+
+    let root = feed;
+    while (root && !root.hasAttribute('wire:id')) root = root.parentElement;
+    const componentId = root?.getAttribute('wire:id');
+    const seen = new Set();
+    const pending = new Set();
+    let timer = null;
+
+    const flush = () => {
+        timer = null;
+        if (pending.size === 0 || !componentId || !window.Livewire) return;
+        const ids = [...pending];
+        pending.clear();
+        window.Livewire.find(componentId)?.$wire.markMessagesRead(ids);
+    };
+    const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
+            const message = entry.target;
+            const id = message.dataset.chatMessageId;
+            if (!id || message.dataset.chatSenderId === feed.dataset.chatUserId || seen.has(id)) continue;
+            seen.add(id);
+            pending.add(id);
+            if (!timer) timer = setTimeout(flush, 250);
+            observer.unobserve(message);
+        }
+    }, { root: feed, threshold: 0.5 });
+
+    const watch = (node) => {
+        if (!(node instanceof Element)) return;
+        if (node.matches('[data-chat-message-id]')) observer.observe(node);
+        node.querySelectorAll('[data-chat-message-id]').forEach((message) => observer.observe(message));
+    };
+    feed.querySelectorAll('[data-chat-message-id]').forEach((message) => observer.observe(message));
+    new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => mutation.addedNodes.forEach(watch));
+    }).observe(feed, { childList: true, subtree: true });
+
+    const unread = feed.querySelector('[data-chat-first-unread]');
+    if (unread) {
+        feed.scrollTop = unread.getBoundingClientRect().top - feed.getBoundingClientRect().top + feed.scrollTop;
+    } else {
+        feed.scrollTop = feed.scrollHeight;
+    }
 }
 
 function bindBottomNavSwipe() {
@@ -388,10 +739,18 @@ function bindCustomConfirmations() {
 
 bindDashboardCat();
 bindProfilePhotoInput();
+bindChatPhotoInputs();
+bindChatImageViewer();
+bindChatLocalTimes();
+bindChatReadObserver();
 bindBottomNavSwipe();
 bindCustomConfirmations();
 document.addEventListener('livewire:navigated', () => {
     bindDashboardCat();
     bindProfilePhotoInput();
+    bindChatPhotoInputs();
+    bindChatImageViewer();
+    bindChatLocalTimes();
+    bindChatReadObserver();
     bindCustomConfirmations();
 });

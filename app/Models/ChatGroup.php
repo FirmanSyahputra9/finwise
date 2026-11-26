@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ChatGroup extends Model
 {
-    protected $fillable = ['name', 'creator_id'];
+    protected $fillable = ['name', 'creator_id', 'retention_days'];
 
     public function creator(): BelongsTo
     {

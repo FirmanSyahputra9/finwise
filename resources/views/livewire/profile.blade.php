@@ -4,7 +4,7 @@
             <div class="mt-6 flex justify-center" data-profile-photo-area>
                 <div data-profile-avatar class="size-[117px] overflow-hidden rounded-full bg-sky text-mint ring-4 ring-light">
                     @if ($user->profile_photo_path)
-                        <img src="{{ asset($user->profile_photo_path) }}" alt="{{ __('ui.profile_photo') }}" class="h-full w-full object-cover">
+                        <img src="{{ Storage::disk('public')->url($user->profile_photo_path) }}" alt="{{ __('ui.profile_photo') }}" class="h-full w-full object-cover">
                     @else
                         <div class="grid h-full w-full place-items-center text-5xl font-semibold">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</div>
                     @endif
@@ -221,3 +221,7 @@
         </div>
     </div>
 </div>
+
+
+
+\n

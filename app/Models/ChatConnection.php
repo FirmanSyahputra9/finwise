@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ChatConnection extends Model
 {
-    protected $fillable = ['user_one_id', 'user_two_id', 'requested_by', 'status'];
+    protected $fillable = ['user_one_id', 'user_two_id', 'requested_by', 'status', 'retention_days'];
 
     public function userOne(): BelongsTo
     {

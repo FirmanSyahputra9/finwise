@@ -5,26 +5,53 @@ namespace App\Livewire;
 use App\Models\ChatConnection;
 use App\Models\ChatGroup;
 use App\Models\ChatMessage;
+use App\Models\ChatReadPosition;
 use App\Models\User;
+use App\Support\ChatConversationUuid;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class Chat extends Component
 {
+    use WithFileUploads;
+
     public string $accountId = '';
+
     public string $message = '';
+
+    /** @var array<int, TemporaryUploadedFile> */
+    public array $photos = [];
+
     public ?int $selectedConnection = null;
+
     public ?int $selectedGroup = null;
+
     public string $groupName = '';
+
     public array $selectedInviteIds = [];
+
     public string $contactSearch = '';
+
     public ?int $inviteUserId = null;
+
     public string $notice = '';
+
     public string $activePanel = '';
+
+    public int $visibleMessageCount = 50;
+
+    public int $olderMessageCount = 0;
+
+    public ?int $openedAtUnreadMessageId = null;
+
+    public bool $unreadMarkerVisible = true;
 
     public function togglePanel(string $panel): void
     {
@@ -32,22 +59,36 @@ class Chat extends Component
         $this->activePanel = $this->activePanel === $panel ? '' : $panel;
     }
 
-    public function mount(?string $type = null, ?int $id = null): void
+    public function mount(?string $type = null, ?string $id = null): void
     {
         if ($type === null && $id === null) {
             return;
         }
 
-        abort_unless($type !== null && $id !== null, 404);
+        abort_unless($type !== null && $id !== null && Str::isUuid($id), 404);
         if ($type === 'direct') {
-            $this->authorizedConnection($id);
-            $this->selectedConnection = $id;
+            $connection = ChatConnection::query()
+                ->where('status', 'accepted')
+                ->where(fn ($query) => $query->where('user_one_id', auth()->id())->orWhere('user_two_id', auth()->id()))
+                ->get()
+                ->first(fn (ChatConnection $item) => hash_equals(ChatConversationUuid::from('direct', (int) $item->id), strtolower($id)));
+            abort_unless($connection, 404);
+            $this->selectedConnection = $connection->id;
+            $this->purgeExpiredMessages($connection);
+            $this->openedAtUnreadMessageId = $this->findFirstUnreadMessageId($connection);
+
             return;
         }
 
         abort_unless($type === 'group', 404);
-        $this->authorizedGroup($id);
-        $this->selectedGroup = $id;
+        $group = ChatGroup::query()
+            ->whereHas('members', fn ($query) => $query->where('users.id', auth()->id()))
+            ->get()
+            ->first(fn (ChatGroup $item) => hash_equals(ChatConversationUuid::from('group', (int) $item->id), strtolower($id)));
+        abort_unless($group, 404);
+        $this->selectedGroup = $group->id;
+        $this->purgeExpiredMessages($group);
+        $this->openedAtUnreadMessageId = $this->findFirstUnreadMessageId($group);
     }
 
     public function connect(): void
@@ -56,6 +97,7 @@ class Chat extends Component
         $target = $this->findUserByAccountId(trim($this->accountId));
         if (! $target || $target->is(auth()->user())) {
             $this->addError('accountId', __('ui.chat_user_not_found'));
+
             return;
         }
 
@@ -68,7 +110,7 @@ class Chat extends Component
         );
 
         if ($connection->status === 'accepted') {
-            $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => $connection->id], navigate: true);
+            $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connection->id)], navigate: true);
             $this->notice = __('ui.chat_already_connected');
         } elseif ($connection->requested_by === $me) {
             $this->notice = __('ui.chat_request_sent');
@@ -95,7 +137,7 @@ class Chat extends Component
 
         if ($accept) {
             $connection->update(['status' => 'accepted']);
-            $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => $connection->id], navigate: true);
+            $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connection->id)], navigate: true);
             $this->notice = __('ui.chat_connected');
         } else {
             $connection->delete();
@@ -109,7 +151,7 @@ class Chat extends Component
         $this->authorizedConnection($connectionId);
         $this->selectedConnection = $connectionId;
         $this->selectedGroup = null;
-        $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => $connectionId], navigate: true);
+        $this->redirectRoute('chat.conversation', ['type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connectionId)], navigate: true);
     }
 
     public function createGroup(): void
@@ -125,6 +167,7 @@ class Chat extends Component
         $inviteIds = collect($data['selectedInviteIds'])->map(fn ($id) => (int) $id)->unique()->values();
         if ($inviteIds->diff($allowedIds)->isNotEmpty()) {
             $this->addError('selectedInviteIds', __('ui.chat_group_invite_connected_only'));
+
             return;
         }
 
@@ -134,6 +177,7 @@ class Chat extends Component
             if ($inviteIds->isNotEmpty()) {
                 $group->members()->attach($inviteIds->mapWithKeys(fn ($id) => [$id => ['role' => 'member']])->all());
             }
+
             return $group;
         });
 
@@ -141,7 +185,7 @@ class Chat extends Component
         $this->selectedConnection = null;
         $this->reset('groupName', 'selectedInviteIds');
         $this->dispatch('app-toast', message: __('ui.chat_group_created'));
-        $this->redirectRoute('chat.conversation', ['type' => 'group', 'id' => $group->id], navigate: true);
+        $this->redirectRoute('chat.conversation', ['type' => 'group', 'id' => ChatConversationUuid::from('group', $group->id)], navigate: true);
     }
 
     public function toggleInviteContact(int $userId): void
@@ -164,7 +208,7 @@ class Chat extends Component
         $this->authorizedGroup($groupId);
         $this->selectedGroup = $groupId;
         $this->selectedConnection = null;
-        $this->redirectRoute('chat.conversation', ['type' => 'group', 'id' => $groupId], navigate: true);
+        $this->redirectRoute('chat.conversation', ['type' => 'group', 'id' => ChatConversationUuid::from('group', $groupId)], navigate: true);
     }
 
     public function inviteToGroup(int $groupId): void
@@ -185,6 +229,7 @@ class Chat extends Component
         $member = $group->members()->whereKey($userId)->firstOrFail();
         if ($member->pivot->role === 'admin' && $group->members()->wherePivot('role', 'admin')->count() <= 1) {
             $this->addError('groupMembers', __('ui.chat_group_last_admin'));
+
             return;
         }
         $group->members()->detach($userId);
@@ -196,6 +241,7 @@ class Chat extends Component
     public function deleteGroup(int $groupId): void
     {
         $group = $this->authorizedGroup($groupId, admin: true);
+        ChatMessage::query()->where('group_id', $group->id)->get()->each(fn (ChatMessage $message) => $message->deleteAttachmentFile());
         $group->delete();
         if ($this->selectedGroup === $groupId) {
             $this->redirectRoute('chat', navigate: true);
@@ -209,10 +255,95 @@ class Chat extends Component
         $this->redirectRoute('chat', navigate: true);
     }
 
+    public function loadOlderMessages(): void
+    {
+        if ($this->openedAtUnreadMessageId !== null) {
+            $this->olderMessageCount = min($this->olderMessageCount + 50, 1000);
+
+            return;
+        }
+
+        $this->visibleMessageCount = min($this->visibleMessageCount + 50, 1000);
+    }
+
+    public function loadNewerMessages(): void
+    {
+        $this->visibleMessageCount = min($this->visibleMessageCount + 50, 1000);
+    }
+
+    /** @param array<int, int|string> $messageIds */
+    public function markMessagesRead(array $messageIds): void
+    {
+        if (! $this->selectedConnection && ! $this->selectedGroup) {
+            return;
+        }
+
+        $conversation = $this->selectedConnection
+            ? $this->authorizedConnection($this->selectedConnection)
+            : $this->authorizedGroup((int) $this->selectedGroup);
+        $ids = collect($messageIds)->take(100)->filter(fn ($id) => filter_var($id, FILTER_VALIDATE_INT) !== false)
+            ->map(fn ($id) => (int) $id)->unique()->values();
+        if ($ids->isEmpty()) {
+            return;
+        }
+
+        $lastVisibleIncomingId = $conversation->messages()
+            ->whereIn('id', $ids)
+            ->where('sender_id', '!=', auth()->id())
+            ->max('id');
+        if (! $lastVisibleIncomingId) {
+            return;
+        }
+
+        $identity = ['user_id' => auth()->id()];
+        $identity[$this->selectedConnection ? 'connection_id' : 'group_id'] = $conversation->id;
+        $position = ChatReadPosition::query()->firstOrNew($identity);
+        if ((int) ($position->last_read_message_id ?? 0) < (int) $lastVisibleIncomingId) {
+            $position->last_read_message_id = $lastVisibleIncomingId;
+            $position->save();
+        }
+
+        if ($this->openedAtUnreadMessageId !== null && $lastVisibleIncomingId >= $this->openedAtUnreadMessageId) {
+            $this->unreadMarkerVisible = false;
+        }
+    }
+
+    private function findFirstUnreadMessageId(ChatConnection|ChatGroup $conversation): ?int
+    {
+        $identity = ['user_id' => auth()->id()];
+        $identity[$conversation instanceof ChatConnection ? 'connection_id' : 'group_id'] = $conversation->id;
+        $lastReadMessageId = ChatReadPosition::query()->where($identity)->value('last_read_message_id') ?? 0;
+
+        return $conversation->messages()->where('sender_id', '!=', auth()->id())
+            ->where('id', '>', $lastReadMessageId)->orderBy('id')->value('id');
+    }
+
+    public function updateRetentionDays(int $days): void
+    {
+        abort_unless(in_array($days, [1, 3, 5, 7, 15, 30], true), 422);
+        if ($this->selectedConnection) {
+            $conversation = $this->authorizedConnection($this->selectedConnection);
+        } else {
+            $conversation = $this->authorizedGroup((int) $this->selectedGroup, admin: true);
+        }
+        $conversation->update(['retention_days' => $days]);
+        $this->dispatch('app-toast', message: __('ui.chat_retention_updated'));
+    }
+
+    private function purgeExpiredMessages(ChatConnection|ChatGroup $conversation): void
+    {
+        $cutoff = now()->subDays((int) ($conversation->retention_days ?: 30));
+        $conversation->messages()->where('created_at', '<=', $cutoff)->get()->each(function (ChatMessage $message) {
+            $message->deleteAttachmentFile();
+            $message->delete();
+        });
+    }
+
     public function disconnect(int $connectionId): void
     {
         $connection = $this->authorizedConnection($connectionId);
         DB::transaction(function () use ($connection) {
+            ChatMessage::where('connection_id', $connection->id)->get()->each(fn (ChatMessage $message) => $message->deleteAttachmentFile());
             ChatMessage::where('connection_id', $connection->id)->delete();
             $connection->delete();
         });
@@ -225,24 +356,54 @@ class Chat extends Component
     public function send(): void
     {
         $this->message = trim($this->message);
-        $this->validate(['message' => ['required', 'string', 'max:2000']]);
+        $this->validate([
+            'message' => ['nullable', 'string', 'max:2000'],
+            'photos' => ['array', 'max:20'],
+            'photos.*' => ['image', 'mimes:webp', 'max:5120'],
+        ]);
+        if ($this->message === '' && $this->photos === []) {
+            throw ValidationException::withMessages(['message' => __('ui.chat_message_or_photo_required')]);
+        }
         if (! $this->selectedConnection && ! $this->selectedGroup) {
             throw ValidationException::withMessages(['message' => __('ui.chat_choose_first')]);
         }
 
-        $data = [
-            'sender_id' => auth()->id(),
-            'body' => trim($this->message),
-        ];
         if ($this->selectedConnection) {
             $this->authorizedConnection($this->selectedConnection);
-            $data['connection_id'] = $this->selectedConnection;
         } else {
             $this->authorizedGroup($this->selectedGroup);
+        }
+
+        $body = $this->message;
+        if ($this->photos !== []) {
+            $paths = [];
+            foreach ($this->photos as $photo) {
+                $extension = strtolower($photo->extension() ?: '');
+                abort_unless($extension === 'webp', 422);
+                $path = 'chat-attachments/'.Str::uuid().'.webp';
+                $storedPath = $photo->storeAs('chat-attachments', basename($path), 'local');
+                abort_unless($storedPath !== false, 500);
+                $paths[] = $storedPath;
+            }
+            $body = json_encode([
+                '__finwise_attachment' => 'images',
+                'items' => $paths,
+                'caption' => $this->message,
+            ], JSON_THROW_ON_ERROR);
+        }
+
+        $data = [
+            'sender_id' => auth()->id(),
+            'body' => $body,
+        ];
+        if ($this->selectedConnection) {
+            $data['connection_id'] = $this->selectedConnection;
+        } else {
             $data['group_id'] = $this->selectedGroup;
         }
         ChatMessage::create($data);
-        $this->reset('message');
+        $this->reset('message', 'photos');
+        $this->dispatch('chat-photos-sent');
     }
 
     private function authorizedConnection(int $id): ChatConnection
@@ -282,17 +443,23 @@ class Chat extends Component
 
     private function findUserByAccountId(string $accountId): ?User
     {
-        if (! preg_match('/^(\d{12})(\d+)$/', $accountId, $matches)) return null;
+        if (! preg_match('/^(\d{12})(\d+)$/', $accountId, $matches)) {
+            return null;
+        }
 
         try {
             $second = Carbon::createFromFormat('!siHdmy', $matches[1]);
         } catch (\Throwable) {
             return null;
         }
-        if (! $second) return null;
+        if (! $second) {
+            return null;
+        }
 
         $sequence = (int) $matches[2];
-        if ($sequence < 1) return null;
+        if ($sequence < 1) {
+            return null;
+        }
 
         return User::query()->where('created_at', '>=', $second)
             ->where('created_at', '<', $second->copy()->addSecond())
@@ -323,9 +490,39 @@ class Chat extends Component
             : null;
         $group = $this->selectedGroup ? $groups->firstWhere('id', $this->selectedGroup) : null;
         $group?->load('members');
-        $messages = $connection
-            ? $connection->messages()->with('sender')->latest()->limit(300)->get()->reverse()->values()
-            : ($group ? $group->messages()->with('sender')->latest()->limit(300)->get()->reverse()->values() : collect());
+        $messageQuery = $connection?->messages() ?? $group?->messages();
+        $totalMessageCount = $messageQuery?->count() ?? 0;
+        $unreadMessageId = null;
+        $hasOlderMessages = false;
+        $hasNewerMessages = false;
+        if ($messageQuery && $this->openedAtUnreadMessageId !== null) {
+            $anchorExists = (clone $messageQuery)->whereKey($this->openedAtUnreadMessageId)
+                ->where('sender_id', '!=', $me)->exists();
+            if ($anchorExists) {
+                $unreadMessageId = $this->unreadMarkerVisible ? $this->openedAtUnreadMessageId : null;
+                $olderQuery = (clone $messageQuery)->where('id', '<', $this->openedAtUnreadMessageId);
+                $olderTotal = (clone $olderQuery)->count();
+                $olderMessages = $this->olderMessageCount > 0
+                    ? $olderQuery->with('sender')->latest()->limit($this->olderMessageCount)->get()->reverse()->values()
+                    : collect();
+                $unreadMessages = (clone $messageQuery)->where('id', '>=', $this->openedAtUnreadMessageId)
+                    ->with('sender')->orderBy('id')->limit($this->visibleMessageCount)->get();
+                $latestMessages = (clone $messageQuery)->with('sender')->latest()->limit(50)->get()->reverse()->values();
+                $messages = $olderMessages->concat($unreadMessages)->concat($latestMessages)->unique('id')->sortBy('id')->values();
+                $hasOlderMessages = $this->olderMessageCount < $olderTotal;
+                $lastLoadedAfterUnreadId = $unreadMessages->last()?->id ?? $this->openedAtUnreadMessageId;
+                $hasNewerMessages = (clone $messageQuery)->where('id', '>', $lastLoadedAfterUnreadId)
+                    ->whereNotIn('id', $latestMessages->pluck('id'))->exists();
+            } else {
+                $this->openedAtUnreadMessageId = null;
+            }
+        }
+
+        if ($messageQuery && $this->openedAtUnreadMessageId === null) {
+            $messages = (clone $messageQuery)->with('sender')->latest()->limit($this->visibleMessageCount)->get()->reverse()->values();
+            $hasOlderMessages = $messages->count() < $totalMessageCount;
+        }
+        $messages ??= collect();
         $connectedUsers = $this->connectedUsers();
         $filteredConnectedUsers = trim($this->contactSearch) === ''
             ? $connectedUsers
@@ -339,6 +536,6 @@ class Chat extends Component
 
         $view = $connection || $group ? 'livewire.chat-conversation' : 'livewire.chat';
 
-        return view($view, compact('connections', 'pending', 'outgoing', 'connection', 'group', 'groups', 'messages', 'connectedUsers', 'filteredConnectedUsers', 'filteredGroups', 'inviteableUsers'));
+        return view($view, compact('connections', 'pending', 'outgoing', 'connection', 'group', 'groups', 'messages', 'totalMessageCount', 'unreadMessageId', 'hasOlderMessages', 'hasNewerMessages', 'connectedUsers', 'filteredConnectedUsers', 'filteredGroups', 'inviteableUsers'));
     }
 }

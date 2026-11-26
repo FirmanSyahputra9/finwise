@@ -4,9 +4,14 @@ use App\Livewire\Chat;
 use App\Models\ChatConnection;
 use App\Models\ChatGroup;
 use App\Models\ChatMessage;
+use App\Models\ChatReadPosition;
 use App\Models\User;
+use App\Support\ChatConversationUuid;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 it('sends a connection request using the formatted account ID', function () {
@@ -57,13 +62,19 @@ it('allows text chat only after the recipient accepts the connection', function 
         ->call('send')
         ->assertHasNoErrors()
         ->assertSee('role="region"', false)
-        ->assertSee(asset($receiver->profile_photo_path), false)
+        ->assertSee(Storage::disk('public')->url($receiver->profile_photo_path), false)
         ->call('close')
         ->assertSet('selectedConnection', null);
 
     $savedMessage = ChatMessage::query()->where('connection_id', $connection->id)->firstOrFail();
     expect($savedMessage->body)->toBe('Halo')
         ->and(DB::table('chat_messages')->where('id', $savedMessage->id)->value('body'))->not->toBe('Halo');
+    $this->actingAs($sender)->get(route('chat.conversation', [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ]))->assertOk()
+        ->assertSee('data-chat-local-time', false)
+        ->assertSee($savedMessage->created_at->copy()->utc()->toIso8601String(), false);
 });
 
 it('lets a connected user disconnect and removes that connection history', function () {
@@ -123,7 +134,7 @@ it('creates a group with connected contacts and allows members to send encrypted
         ->assertHasNoErrors()
         ->assertSee('Pesan rahasia grup')
         ->assertSee('Mira Putri')
-        ->assertSee(asset($member->profile_photo_path), false);
+        ->assertSee(Storage::disk('public')->url($member->profile_photo_path), false);
 
     $message = ChatMessage::where('group_id', $group->id)->firstOrFail();
     expect($message->body)->toBe('Pesan rahasia grup')
@@ -220,15 +231,261 @@ it('opens direct chats and groups on their own authorized routes', function () {
     ]);
     $group = ChatGroup::create(['name' => 'Keluarga', 'creator_id' => $owner->id]);
     $group->members()->attach($owner->id, ['role' => 'admin']);
+    $directUuid = ChatConversationUuid::from('direct', $connection->id);
+    $groupUuid = ChatConversationUuid::from('group', $group->id);
 
-    $this->actingAs($owner)->get(route('chat.conversation', ['type' => 'direct', 'id' => $connection->id]))
+    expect($directUuid)->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/')
+        ->and($groupUuid)->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/');
+
+    $this->actingAs($owner)->get(route('chat.conversation', ['type' => 'direct', 'id' => $directUuid]))
         ->assertOk()->assertSee($other->name)
+        ->assertDontSee('\\n', false)
         ->assertDontSee('id="bottom-navigation"', false)
         ->assertDontSee('global-notifications', false);
-    $this->actingAs($owner)->get(route('chat.conversation', ['type' => 'group', 'id' => $group->id]))
+    $this->actingAs($owner)->get(route('chat.conversation', ['type' => 'group', 'id' => $groupUuid]))
         ->assertOk()->assertSee('Keluarga');
-    $this->actingAs($outsider)->get(route('chat.conversation', ['type' => 'direct', 'id' => $connection->id]))
+    $this->actingAs($outsider)->get(route('chat.conversation', ['type' => 'direct', 'id' => $directUuid]))
         ->assertNotFound();
-    $this->actingAs($outsider)->get(route('chat.conversation', ['type' => 'group', 'id' => $group->id]))
+    $this->actingAs($outsider)->get(route('chat.conversation', ['type' => 'group', 'id' => $groupUuid]))
         ->assertNotFound();
+    $this->actingAs($owner)->get('/chat/group/'.$group->id)->assertNotFound();
+});
+
+it('opens at the first unread incoming message and advances the participant read position', function () {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($owner->id, $other->id),
+        'user_two_id' => max($owner->id, $other->id),
+        'requested_by' => $owner->id,
+        'status' => 'accepted',
+    ]);
+    $alreadyRead = ChatMessage::create(['connection_id' => $connection->id, 'sender_id' => $other->id, 'body' => 'Sudah dibaca']);
+    $unread = ChatMessage::create(['connection_id' => $connection->id, 'sender_id' => $other->id, 'body' => 'Belum dibaca']);
+    $ownMessage = ChatMessage::create(['connection_id' => $connection->id, 'sender_id' => $owner->id, 'body' => 'Pesan saya']);
+    $laterUnread = ChatMessage::create(['connection_id' => $connection->id, 'sender_id' => $other->id, 'body' => 'Pesan berikutnya']);
+    $thirdPerson = User::factory()->create();
+    $foreignConnection = ChatConnection::create([
+        'user_one_id' => min($owner->id, $thirdPerson->id),
+        'user_two_id' => max($owner->id, $thirdPerson->id),
+        'requested_by' => $owner->id,
+        'status' => 'accepted',
+    ]);
+    $foreignMessage = ChatMessage::create(['connection_id' => $foreignConnection->id, 'sender_id' => $thirdPerson->id, 'body' => 'Pesan lain']);
+
+    ChatReadPosition::create([
+        'user_id' => $owner->id,
+        'connection_id' => $connection->id,
+        'last_read_message_id' => $alreadyRead->id,
+    ]);
+
+    $component = Livewire::actingAs($owner)->test(Chat::class, [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ])->assertViewHas('unreadMessageId', $unread->id)
+        ->assertSee('Belum dibaca');
+
+    $component->call('markMessagesRead', [$unread->id, $ownMessage->id]);
+    expect(ChatReadPosition::query()->where('user_id', $owner->id)->where('connection_id', $connection->id)->value('last_read_message_id'))
+        ->toBe($unread->id);
+
+    Livewire::actingAs($owner)->test(Chat::class, [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ])->assertViewHas('unreadMessageId', $laterUnread->id);
+
+    $component->call('markMessagesRead', [$foreignMessage->id]);
+    expect(ChatReadPosition::query()->where('user_id', $owner->id)->where('connection_id', $connection->id)->value('last_read_message_id'))
+        ->toBe($unread->id);
+
+    $group = ChatGroup::create(['name' => 'Grup baca', 'creator_id' => $owner->id]);
+    $group->members()->attach($owner->id, ['role' => 'admin']);
+    $group->members()->attach($thirdPerson->id, ['role' => 'member']);
+    $groupUnread = ChatMessage::create(['group_id' => $group->id, 'sender_id' => $thirdPerson->id, 'body' => 'Pesan grup belum dibaca']);
+    Livewire::actingAs($owner)->test(Chat::class, [
+        'type' => 'group',
+        'id' => ChatConversationUuid::from('group', $group->id),
+    ])->assertViewHas('unreadMessageId', $groupUnread->id)
+        ->call('markMessagesRead', [$groupUnread->id]);
+
+    expect(ChatReadPosition::query()->where('user_id', $owner->id)->where('group_id', $group->id)->value('last_read_message_id'))
+        ->toBe($groupUnread->id);
+});
+
+it('sends private encrypted photo messages and only serves them to conversation members', function () {
+    Storage::fake('local');
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+    $outsider = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($sender->id, $receiver->id),
+        'user_two_id' => max($sender->id, $receiver->id),
+        'requested_by' => $sender->id,
+        'status' => 'accepted',
+    ]);
+
+    Livewire::actingAs($sender)->test(Chat::class, ['type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connection->id)])
+        ->set('photos', [UploadedFile::fake()->createWithContent('receipt.webp', base64_decode('UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEAAUAmJaQAA3AA/v89WAAAAA==', true))])
+        ->set('message', 'Lihat ini')
+        ->call('send')
+        ->assertHasNoErrors();
+
+    $message = ChatMessage::query()->where('connection_id', $connection->id)->firstOrFail();
+    $attachment = $message->imageAttachment();
+    expect($attachment)->not->toBeNull()
+        ->and(str_ends_with($attachment['path'], '.webp'))->toBeTrue()
+        ->and($attachment['caption'])->toBe('Lihat ini')
+        ->and(DB::table('chat_messages')->where('id', $message->id)->value('body'))->not->toContain($attachment['path']);
+    Storage::disk('local')->assertExists($attachment['path']);
+
+    $attachmentUuid = ChatConversationUuid::from('attachment', $message->id);
+    $this->actingAs($sender)->get(route('chat.conversation', [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ]))->assertOk()
+        ->assertSee(route('chat.attachment', $attachmentUuid), false)
+        ->assertSee('data-image-index="0"', false)
+        ->assertSee('data-chat-image-viewer', false);
+    $this->actingAs($receiver)->get(route('chat.attachment', $attachmentUuid))
+        ->assertOk()
+        ->assertHeader('Cache-Control', 'no-store, private');
+    $this->actingAs($receiver)->get(route('chat.attachment', $attachmentUuid).'?download=1')
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename="putraganteng-'.$attachmentUuid.'.webp"');
+    $this->actingAs($outsider)->get(route('chat.attachment', $attachmentUuid))->assertNotFound();
+    $this->actingAs($receiver)->get('/chat/attachments/'.$message->id)->assertNotFound();
+    Livewire::actingAs($receiver)->test(Chat::class)->call('disconnect', $connection->id)->assertHasNoErrors();
+    Storage::disk('local')->assertMissing($attachment['path']);
+});
+
+it('serves a group photo only to current group members and removes it with group history', function () {
+    Storage::fake('local');
+    $admin = User::factory()->create();
+    $member = User::factory()->create();
+    $outsider = User::factory()->create();
+    $group = ChatGroup::create(['name' => 'Teman', 'creator_id' => $admin->id]);
+    $group->members()->attach($admin->id, ['role' => 'admin']);
+    $group->members()->attach($member->id, ['role' => 'member']);
+
+    Livewire::actingAs($member)->test(Chat::class, ['type' => 'group', 'id' => ChatConversationUuid::from('group', $group->id)])
+        ->set('photos', [UploadedFile::fake()->createWithContent('photo.webp', base64_decode('UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEAAUAmJaQAA3AA/v89WAAAAA==', true))])
+        ->call('send')
+        ->assertHasNoErrors();
+
+    $message = ChatMessage::query()->where('group_id', $group->id)->firstOrFail();
+    $attachment = $message->imageAttachment();
+    expect($attachment)->not->toBeNull();
+    $attachmentUuid = ChatConversationUuid::from('attachment', $message->id);
+    $this->actingAs($admin)->get(route('chat.attachment', $attachmentUuid))->assertOk();
+    $this->actingAs($outsider)->get(route('chat.attachment', $attachmentUuid))->assertNotFound();
+    Livewire::actingAs($admin)->test(Chat::class)->call('deleteGroup', $group->id)->assertHasNoErrors();
+    Storage::disk('local')->assertMissing($attachment['path']);
+});
+
+it('sends photo batches and shows three photos plus an overflow tile after four', function () {
+    Storage::fake('local');
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($sender->id, $receiver->id),
+        'user_two_id' => max($sender->id, $receiver->id),
+        'requested_by' => $sender->id,
+        'status' => 'accepted',
+    ]);
+    $webp = base64_decode('UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEAAUAmJaQAA3AA/v89WAAAAA==', true);
+    $photos = array_map(
+        fn (int $index) => UploadedFile::fake()->createWithContent('photo-'.$index.'.webp', $webp),
+        range(1, 5),
+    );
+
+    Livewire::actingAs($sender)->test(Chat::class, ['type' => 'direct', 'id' => ChatConversationUuid::from('direct', $connection->id)])
+        ->set('photos', $photos)
+        ->call('send')
+        ->assertHasNoErrors();
+
+    $message = ChatMessage::query()->where('connection_id', $connection->id)->firstOrFail();
+    $attachments = $message->imageAttachments();
+    expect($attachments)->toHaveCount(5);
+
+    $this->actingAs($receiver)->get(route('chat.conversation', [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ]))->assertOk()
+        ->assertSee('+2', false)
+        ->assertSee('data-image-index="3"', false)
+        ->assertSee('data-chat-image-strip', false)
+        ->assertSee('data-chat-image-position', false)
+        ->assertSee('data-chat-image-stage', false)
+        ->assertDontSee('data-chat-image-previous', false)
+        ->assertDontSee('data-chat-image-next', false)
+        ->assertSee('absolute left-4 top-4', false)
+        ->assertSee('absolute right-4 top-4', false)
+        ->assertSee('absolute bottom-3 left-1/2', false);
+
+    $fifthImageUuid = ChatConversationUuid::from('attachment', $message->id, 4);
+    $this->actingAs($receiver)->get(route('chat.attachment', $fifthImageUuid).'?download=1')
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename="putraganteng-'.$fifthImageUuid.'.webp"');
+});
+
+it('purges expired direct messages and their photos when a participant opens the chat', function () {
+    Storage::fake('local');
+    Carbon::setTestNow('2026-11-25 12:00:00');
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+    $connection = ChatConnection::create([
+        'user_one_id' => min($sender->id, $receiver->id),
+        'user_two_id' => max($sender->id, $receiver->id),
+        'requested_by' => $sender->id,
+        'status' => 'accepted',
+        'retention_days' => 2,
+    ]);
+    $path = 'chat-attachments/'.Str::uuid().'.webp';
+    Storage::disk('local')->put($path, 'image');
+    $expired = ChatMessage::create([
+        'connection_id' => $connection->id,
+        'sender_id' => $sender->id,
+        'body' => json_encode(['__finwise_attachment' => 'images', 'items' => [$path], 'caption' => 'old']),
+    ]);
+    $expired->forceFill(['created_at' => now()->subDays(3), 'updated_at' => now()->subDays(3)])->save();
+    $recent = ChatMessage::create(['connection_id' => $connection->id, 'sender_id' => $sender->id, 'body' => 'recent']);
+
+    $this->actingAs($receiver)->get(route('chat.conversation', [
+        'type' => 'direct',
+        'id' => ChatConversationUuid::from('direct', $connection->id),
+    ]))->assertOk()->assertSee('recent');
+
+    expect(ChatMessage::find($expired->id))->toBeNull()
+        ->and(ChatMessage::find($recent->id))->not->toBeNull();
+    Storage::disk('local')->assertMissing($path);
+    Carbon::setTestNow();
+});
+
+it('limits retention settings to group admins and supports staged message loading', function () {
+    $admin = User::factory()->create();
+    $member = User::factory()->create();
+    $group = ChatGroup::create(['name' => 'Keluarga', 'creator_id' => $admin->id]);
+    $group->members()->attach($admin->id, ['role' => 'admin']);
+    $group->members()->attach($member->id, ['role' => 'member']);
+    foreach (range(1, 55) as $number) {
+        ChatMessage::create(['group_id' => $group->id, 'sender_id' => $admin->id, 'body' => 'Pesan '.$number]);
+    }
+
+    Livewire::actingAs($member)->test(Chat::class, ['type' => 'group', 'id' => ChatConversationUuid::from('group', $group->id)])
+        ->call('updateRetentionDays', 7)
+        ->assertForbidden();
+
+    Livewire::actingAs($admin)->test(Chat::class, ['type' => 'group', 'id' => ChatConversationUuid::from('group', $group->id)])
+        ->assertViewHas('messages', fn ($messages) => $messages->count() === 50)
+        ->assertViewHas('totalMessageCount', 55)
+        ->call('updateRetentionDays', 7)
+        ->assertHasNoErrors()
+        ->call('loadOlderMessages')
+        ->assertViewHas('messages', fn ($messages) => $messages->count() === 55);
+
+    Livewire::actingAs($admin)->test(Chat::class, ['type' => 'group', 'id' => ChatConversationUuid::from('group', $group->id)])
+        ->call('updateRetentionDays', 2)
+        ->assertStatus(422);
+
+    expect($group->fresh()->retention_days)->toBe(7);
 });

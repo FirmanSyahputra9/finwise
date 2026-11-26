@@ -89,7 +89,7 @@
                         @foreach ($connections as $item)
                             @php($person = $item->otherUser(auth()->id()))
                             @if ($person && $filteredConnectedUsers->contains('id', $person->id))
-                                <button type="button" wire:key="chat-person-{{ $item->id }}" wire:click="open({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-sky font-semibold text-white">@if ($person->profile_photo_path)<img src="{{ asset($person->profile_photo_path) }}" alt="" class="h-full w-full object-cover">@else{{ mb_strtoupper(mb_substr($person->name ?? '?', 0, 1)) }}@endif</span><span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $person->name }}</span><x-icon name="chat" class="size-4 text-nav" /></button>
+                                <button type="button" wire:key="chat-person-{{ $item->id }}" wire:click="open({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-sky font-semibold text-white">@if ($person->profile_photo_path)<img src="{{ Storage::disk('public')->url($person->profile_photo_path) }}" alt="" class="h-full w-full object-cover">@else{{ mb_strtoupper(mb_substr($person->name ?? '?', 0, 1)) }}@endif</span><span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $person->name }}</span><x-icon name="chat" class="size-4 text-nav" /></button>
                             @endif
                         @endforeach
                     </div>
@@ -98,3 +98,4 @@
         </div>
     </x-screen>
 </div>
+

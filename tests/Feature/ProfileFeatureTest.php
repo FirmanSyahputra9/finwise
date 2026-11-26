@@ -50,14 +50,14 @@ it('shows selectable click effects, particle counts, and colors in profile appea
         ->assertSee('data-sparkle-value="purple"', false);
 });
 
-it('links the saved profile photo from the public path in the avatar', function () {
+it('links the saved profile photo from the public storage disk in the avatar', function () {
     $user = User::factory()->create();
     $user->forceFill(['profile_photo_path' => 'profile-photos/'.$user->id.'/avatar.webp'])->save();
 
     $this->actingAs($user)
         ->get(route('profile'))
         ->assertOk()
-        ->assertSee(asset($user->profile_photo_path), false)
+        ->assertSee(Storage::disk('public')->url($user->profile_photo_path), false)
         ->assertSee('alt="Foto profil"', false);
 });
 
@@ -93,3 +93,6 @@ it('starts the registration sequence again in a different second', function () {
 
     expect($later->profileId())->toBe('1932142411261');
 });
+
+
+\n

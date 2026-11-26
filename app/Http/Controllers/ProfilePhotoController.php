@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -22,25 +23,26 @@ class ProfilePhotoController
         }
 
         $user = $request->user();
-        $directory = public_path('profile-photos/'.$user->id);
-        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-            abort(500, 'Unable to create the profile photo directory.');
-        }
-
         $filename = Str::uuid().'.webp';
         $oldPath = $user->profile_photo_path;
-        $photo->move($directory, $filename);
-        $path = 'profile-photos/'.$user->id.'/'.$filename;
+        $path = 'profile-photos/'.$filename;
+        $photo->storeAs('profile-photos', $filename, 'public');
         $user->update(['profile_photo_path' => $path]);
 
-        if ($oldPath && str_starts_with($oldPath, 'profile-photos/'.$user->id.'/')) {
-            $oldFile = public_path($oldPath);
-            if (is_file($oldFile)) @unlink($oldFile);
+        if ($oldPath && (
+            preg_match('#^profile-photos/[^/]+\.webp$#', $oldPath)
+            || str_starts_with($oldPath, 'profile-photos/'.$user->id.'/')
+        )) {
+            Storage::disk('public')->delete($oldPath);
+            $legacyFile = public_path($oldPath);
+            if (is_file($legacyFile)) {
+                @unlink($legacyFile);
+            }
         }
 
         return response()->json([
             'message' => __('ui.photo_saved'),
-            'url' => asset($path),
+            'url' => Storage::disk('public')->url($path),
         ]);
     }
 }

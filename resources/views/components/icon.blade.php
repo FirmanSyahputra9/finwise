@@ -26,6 +26,10 @@
         'check-all' => 'm2 12 4 4L16 6m-3 10 2 2 7-8',
         'back' => 'M19 12H5m7 7-7-7 7-7',
         'camera' => 'M14 5l1.5 2H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h4.5L10 5zM12 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+        'image' => 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 16l5-5 4 4 3-3 6 6M15 8h.01',
+        'download' => 'M12 3v12m0 0 5-5m-5 5-5-5M5 21h14',
+        'close' => 'M18 6 6 18M6 6l12 12',
+        'chevron-down' => 'm6 9 6 6 6-6',
     ];
 @endphp
 <svg {{ $attributes }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
