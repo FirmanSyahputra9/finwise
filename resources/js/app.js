@@ -477,6 +477,19 @@ function bindChatPhotoInputs() {
     });
 }
 
+function bindChatComposerKeyboard() {
+    if (document.documentElement.dataset.chatComposerKeyboardBound === 'true') return;
+    document.documentElement.dataset.chatComposerKeyboardBound = 'true';
+
+    document.addEventListener('keydown', (event) => {
+        const textarea = event.target.closest?.('[data-chat-composer] textarea');
+        if (!textarea || event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) return;
+
+        event.preventDefault();
+        textarea.closest('form')?.requestSubmit();
+    });
+}
+
 function bindChatImageViewer() {
     if (document.documentElement.dataset.chatImageViewerBound === 'true') return;
     document.documentElement.dataset.chatImageViewerBound = 'true';
@@ -932,6 +945,7 @@ function bindDashboardBalanceVisibility() {
 bindDashboardCat();
 bindProfilePhotoInput();
 bindChatPhotoInputs();
+bindChatComposerKeyboard();
 bindChatImageViewer();
 bindChatLocalTimes();
 bindChatReadObserver();

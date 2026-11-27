@@ -20,6 +20,11 @@ Route::get('/', fn () => Auth::check()
     ? redirect()->route('dashboard')
     : redirect()->route('login'))->name('home');
 
+Route::get('/manifest.webmanifest', fn () => response()->json(config('pwa.manifest'))
+    ->header('Content-Type', 'application/manifest+json; charset=utf-8')
+    ->header('Cache-Control', 'no-cache, must-revalidate'))
+    ->name('pwa.manifest');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:10,1')->name('login.store');

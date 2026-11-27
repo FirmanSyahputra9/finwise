@@ -11,12 +11,11 @@
             @endif
             <div class="min-w-0 flex-1"><h2 class="truncate font-semibold text-dark">{{ $group?->name ?? $person?->name }}</h2>
                 <p class="text-[11px] text-dark/50">{{ $group ? $group->members->count().' '.__('ui.chat_group_members_short') : __('ui.chat_text_only') }}</p></div>
-            <x-balance-visibility-toggle />
             @if ($group && $isGroupAdmin)
                 <button type="button" wire:click="deleteGroup({{ $group->id }})" data-confirm="{{ __('ui.chat_group_delete_confirm') }}" aria-label="{{ __('ui.chat_group_delete') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
             @elseif ($connection)
                 <button type="button" data-voice-call-start data-start-url="{{ route('chat.calls.start', $connection->id) }}" data-remote-name="{{ $person?->name }}" aria-label="{{ __('ui.chat_call_start') }}" title="{{ __('ui.chat_call_start') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-light text-nav">☎</button>
-                <button type="button" wire:click="disconnect({{ $connection->id }})" data-confirm="{{ __('ui.chat_disconnect_confirm') }}" class="shrink-0 rounded-full bg-red-100 px-3 py-2 text-xs font-medium text-red-700">{{ __('ui.chat_disconnect') }}</button>
+                <button type="button" wire:click="disconnect({{ $connection->id }})" data-confirm="{{ __('ui.chat_disconnect_confirm') }}" aria-label="{{ __('ui.chat_disconnect') }}" title="{{ __('ui.chat_disconnect') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><img src="{{ asset('icons/chat-disconnected.svg') }}" alt="" class="size-5" /></button>
             @endif
         </header>
 
