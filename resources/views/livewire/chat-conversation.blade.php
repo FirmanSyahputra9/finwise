@@ -11,6 +11,7 @@
             @endif
             <div class="min-w-0 flex-1"><h2 class="truncate font-semibold text-dark">{{ $group?->name ?? $person?->name }}</h2>
                 <p class="text-[11px] text-dark/50">{{ $group ? $group->members->count().' '.__('ui.chat_group_members_short') : __('ui.chat_text_only') }}</p></div>
+            <x-balance-visibility-toggle />
             @if ($group && $isGroupAdmin)
                 <button type="button" wire:click="deleteGroup({{ $group->id }})" data-confirm="{{ __('ui.chat_group_delete_confirm') }}" aria-label="{{ __('ui.chat_group_delete') }}" class="grid size-9 shrink-0 place-items-center rounded-full bg-red-100 text-red-700"><x-icon name="trash" class="size-4" /></button>
             @elseif ($connection)

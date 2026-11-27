@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatCallController;
 use App\Http\Controllers\OfflineTransactionSyncController;
 use App\Http\Controllers\ProfilePhotoController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Livewire\Analysis;
 use App\Livewire\Categories;
 use App\Livewire\Chat;
@@ -27,6 +28,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/notifications/push-subscription', [PushSubscriptionController::class, 'store'])->middleware('throttle:10,1')->name('notifications.push-subscription.store');
+    Route::delete('/notifications/push-subscription', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:10,1')->name('notifications.push-subscription.destroy');
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/analysis', Analysis::class)->name('analysis');
     Route::get('/transactions', TransactionsIndex::class)->name('transactions');

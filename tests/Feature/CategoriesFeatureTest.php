@@ -45,9 +45,9 @@ it('shows category transactions and applies type and date filters', function () 
         ->set('selectedCategory', $category->id)
         ->set('dateFrom', today()->toDateString())
         ->set('typeFilter', 'expense')
-        ->assertSee('Rp 20.000')
-        ->assertDontSee('Rp 30.000')
-        ->assertDontSee('Rp 90.000');
+        ->assertSee('IDR 20.000')
+        ->assertDontSee('IDR 30.000')
+        ->assertDontSee('IDR 90.000');
 });
 
 it('deletes a category', function () {

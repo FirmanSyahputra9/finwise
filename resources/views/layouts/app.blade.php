@@ -20,9 +20,9 @@
             const normalize = (value = {}) => Object.fromEntries(
                 Object.keys(defaults).map((key) => [key, allowed[key].includes(value[key]) ? value[key] : defaults[key]])
             );
+            const root = document.documentElement;
             const apply = (value) => {
                 const settings = normalize(value);
-                const root = document.documentElement;
                 root.dataset.theme = settings.theme;
                 root.dataset.accent = settings.accent;
                 root.dataset.textColor = settings.textColor;
@@ -52,6 +52,12 @@
                     try { apply(JSON.parse(event.newValue || '{}')); } catch (_) { apply(defaults); }
                 }
             });
+            const appearanceAttributes = ['data-theme', 'data-accent', 'data-text-color', 'data-font', 'data-font-size', 'data-pattern'];
+            new MutationObserver(() => {
+                const settings = window.finwiseAppearance.read();
+                const values = [settings.theme, settings.accent, settings.textColor, settings.font, settings.size, settings.pattern];
+                if (appearanceAttributes.some((attribute, index) => root.getAttribute(attribute) !== values[index])) apply(settings);
+            }).observe(root, { attributes: true, attributeFilter: appearanceAttributes });
         })();
     </script>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
@@ -70,7 +76,7 @@
     <div class="relative mx-auto min-h-dvh max-w-[430px] bg-main shadow-xl">
         {{ $slot }}
         <livewire:deletion-undo />
-        <div id="app-confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/50 p-5" role="presentation" data-confirm-modal>
+        <div id="app-confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/50 p-5" role="presentation" aria-hidden="true" inert data-confirm-modal>
             <section class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl" role="alertdialog" aria-modal="true" aria-labelledby="app-confirm-title" aria-describedby="app-confirm-message">
                 <h2 id="app-confirm-title" class="text-lg font-semibold text-dark">{{ __('ui.confirmation') }}</h2>
                 <p id="app-confirm-message" class="mt-3 text-sm leading-relaxed text-dark/70"></p>
@@ -83,6 +89,19 @@
         <div id="offline-sync-status" class="fixed top-20 left-1/2 z-40 hidden w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-xl bg-white p-3 text-xs text-dark shadow-lg" role="status"></div>
         <button id="pwa-install-button" type="button" class="fixed right-4 top-3 z-40 hidden rounded-full bg-dark px-4 py-2 text-xs font-medium text-mint shadow">{{ __('ui.install_app') }}</button>
         @auth
+        @if ($pushPublicKey = app(\App\Support\WebPushSettings::class)->publicKey())
+        <div data-push-first-prompt hidden class="fixed inset-0 z-[90] flex items-end justify-center bg-black/50 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="push-first-title">
+            <section class="w-full max-w-sm rounded-3xl bg-white p-6 text-dark shadow-2xl">
+                <div class="mx-auto grid size-14 place-items-center rounded-2xl bg-emerald-100 text-2xl" aria-hidden="true">🔔</div>
+                <h2 id="push-first-title" class="mt-4 text-center text-lg font-semibold">{{ __('ui.push_prompt_title') }}</h2>
+                <p class="mt-2 text-center text-sm leading-relaxed text-dark/70">{{ __('ui.push_prompt_message') }}</p>
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                    <button type="button" data-push-prompt-dismiss class="rounded-full bg-light px-4 py-3 text-sm font-medium">{{ __('ui.push_prompt_later') }}</button>
+                    <button type="button" data-enable-notifications data-push-first-allow data-user-id="{{ auth()->id() }}" data-vapid-key="{{ $pushPublicKey }}" data-subscription-url="{{ route('notifications.push-subscription.store') }}" data-granted-label="{{ __('ui.notifications_allowed') }}" data-denied-label="{{ __('ui.notifications_blocked') }}" data-enable-label="{{ __('ui.enable_notifications') }}" data-error-label="{{ __('ui.notifications_setup_failed') }}" class="rounded-full bg-main px-4 py-3 text-sm font-semibold">{{ __('ui.push_prompt_allow') }}</button>
+                </div>
+            </section>
+        </div>
+        @endif
         <div data-voice-call-manager wire:ignore data-incoming-url="{{ route('chat.calls.incoming') }}" data-csrf="{{ csrf_token() }}"
             data-label-calling="{{ __('ui.chat_call_calling') }}" data-label-connecting="{{ __('ui.chat_call_connecting') }}"
             data-label-active="{{ __('ui.chat_call_active') }}" data-label-permission="{{ __('ui.chat_call_permission') }}"

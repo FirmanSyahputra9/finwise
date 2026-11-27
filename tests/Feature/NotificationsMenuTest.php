@@ -14,6 +14,20 @@ it('offers a phone notification permission control', function () {
         ->assertSee(__('ui.enable_notifications'));
 });
 
+it('formats notification time in the application timezone before rendering', function () {
+    $user = User::factory()->create();
+    $user->notify(new FinanceActivityNotification(['title' => 'Satu']));
+    $this->actingAs($user);
+    config(['app.display_timezone' => 'Asia/Jakarta']);
+
+    $notification = $user->notifications()->first();
+    $notification->forceFill(['created_at' => now('UTC')->setTime(5, 7)])->save();
+
+    Livewire::test(NotificationsMenu::class)
+        ->assertSee('12:07')
+        ->assertSee('datetime="'.$notification->created_at->toIso8601String().'"', false);
+});
+
 it('moves all of the current user notifications to soft delete', function () {
     $user = User::factory()->create();
     $user->notify(new FinanceActivityNotification(['title' => 'Satu']));

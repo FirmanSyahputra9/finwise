@@ -1,4 +1,4 @@
-@php($rp = fn ($n) => 'Rp '.number_format($n, 0, ',', '.'))
+@php($rp = fn ($n) => 'IDR '.number_format($n, 0, ',', '.'))
 <div x-data class="min-w-0 max-w-full overflow-x-clip">
     <x-screen :title="__('ui.savings_goals')">
         <x-slot:top>

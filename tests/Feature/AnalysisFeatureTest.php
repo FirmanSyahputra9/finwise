@@ -43,7 +43,7 @@ it('filters analysis totals by multiple selected categories', function () {
         ->call('toggleAnalysisCategory', $first->id)
         ->call('toggleAnalysisCategory', $second->id)
         ->assertSet('analysisCategoryIds', [$first->id, $second->id])
-        ->assertSee('Rp 30.000');
+        ->assertSee('IDR 30.000');
 });
 
 it('toggles a selected analysis category off', function () {

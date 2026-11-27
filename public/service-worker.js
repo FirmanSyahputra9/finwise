@@ -43,11 +43,26 @@ self.addEventListener('message', (event) => {
     }));
 });
 
+self.addEventListener('push', (event) => {
+    let message = {};
+    try { message = event.data?.json() || {}; }
+    catch (_) { message = { body: event.data?.text() || '' }; }
+
+    event.waitUntil(self.registration.showNotification(message.title || 'finWise', {
+        body: message.body || '',
+        icon: '/icons/finwise.svg',
+        badge: '/icons/finwise.svg',
+        data: { url: message.url || '/dashboard' },
+    }));
+});
+
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+        const targetUrl = new URL(event.notification.data?.url || '/dashboard', self.location.origin).href;
         const app = clients.find((client) => new URL(client.url).origin === self.location.origin);
-        return app ? app.focus() : self.clients.openWindow(event.notification.data?.url || '/');
+        if (app) return app.navigate(targetUrl).then(() => app.focus());
+        return self.clients.openWindow(targetUrl);
     }));
 });
 

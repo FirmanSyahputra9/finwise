@@ -24,7 +24,7 @@ it('shows how much of the monthly budget remains after expenses', function () {
     Livewire::test(Dashboard::class)
         ->assertOk()
         ->assertSee('Sisa budget yang boleh dipakai')
-        ->assertSee('Rp 600.000');
+        ->assertSee('IDR 600.000');
 });
 
 it('shows no unallocated amount before a monthly budget is configured', function () {
@@ -74,7 +74,8 @@ it('shows the account avatar and balance visibility control in the dashboard hea
         ->assertOk()
         ->assertSee(route('profile'), false)
         ->assertSee('data-balance-toggle', false)
-        ->assertSee('data-balance-value="Rp 0"', false)
+        ->assertSee('data-balance-value', false)
+        ->assertSee('IDR 0')
         ->assertSee('data-hide-label="Sembunyikan saldo"', false)
         ->assertSee('data-show-label="Tampilkan saldo"', false);
 });

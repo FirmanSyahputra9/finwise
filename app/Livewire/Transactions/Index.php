@@ -108,7 +108,7 @@ class Index extends Component
         $this->dispatch('app-toast', message: __('ui.saved'));
 
         $amount = (int) $data['amount'];
-        $rp = fn (int $value) => 'Rp '.number_format($value, 0, ',', '.');
+        $rp = fn (int $value) => 'IDR '.number_format($value, 0, ',', '.');
         auth()->user()->notify(new FinanceActivityNotification([
             'title_key' => 'notification_saved',
             'message_key' => 'notification_recorded',

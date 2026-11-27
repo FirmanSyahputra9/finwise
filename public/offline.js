@@ -5,9 +5,9 @@ window.__finwiseOfflineInitialized = true;
 const DB_NAME = 'finwise-offline';
 const DB_VERSION = 2;
 const text = {
-    id: { income:'Pemasukan', expense:'Pengeluaran', transfer:'Transfer', waiting:'transaksi menunggu sinkronisasi', review:'perlu diperiksa', all:'Semua transaksi sudah tersinkron.', remove:'Hapus', removeOffline:'Hapus transaksi offline', online:'Online.', offline:'Anda sedang offline.', queue:'Kelola antrean', offlineForm:'Buka formulir offline', wrongUser:'Sinkronisasi dijeda karena akun aktif berbeda. Masuk dengan akun yang digunakan saat mencatat transaksi offline.', title:'Mode offline - finWise', heading:'Mode offline', intro:'Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.', pending:'Transaksi menunggu sinkronisasi', kind:'Jenis transaksi', amount:'Jumlah (Rp)', from:'Dari akun', category:'Kategori', to:'Ke akun', date:'Tanggal', note:'Catatan', save:'Simpan di perangkat', tryAgain:'Coba buka aplikasi lagi', choose:'Pilih kategori', onlineFirst:'Buka aplikasi saat online terlebih dahulu agar data akun tersimpan aman di perangkat.', complete:'Lengkapi jumlah, tanggal, akun, dan kategori atau akun tujuan.', invalidFormat:'Format transaksi offline tidak valid.', invalidData:'Data transaksi tidak valid. Periksa akun dan kategori.', expenseLimit:'Pengeluaran melewati batas budget bulanan. Sisa yang boleh dipakai Rp :amount.' },
-    en: { income:'Income', expense:'Expense', transfer:'Transfer', waiting:'transactions waiting to sync', review:'need review', all:'All transactions are synced.', remove:'Remove', removeOffline:'Remove offline transaction', online:'Online.', offline:'Offline.', queue:'Manage queue', offlineForm:'Open offline form', wrongUser:'Sync paused because a different account is active. Sign in with the account used to record the offline transaction.', title:'Offline mode - finWise', heading:'Offline mode', intro:'Transactions are saved on this device and sent when you reconnect. Do not clear browser data before syncing is complete.', pending:'Transactions waiting to sync', kind:'Transaction type', amount:'Amount (Rp)', from:'From account', category:'Category', to:'To account', date:'Date', note:'Note', save:'Save on device', tryAgain:'Try opening the app again', choose:'Choose a category', onlineFirst:'Open the app while online first so account data can be safely saved on this device.', complete:'Enter the amount, date, account, and category or destination account.', invalidFormat:'The offline transaction format is invalid.', invalidData:'The transaction data is invalid. Check the account and category.', expenseLimit:'This expense exceeds the monthly budget. Remaining amount: Rp :amount.' },
-    ja: { income:'収入', expense:'支出', transfer:'振替', waiting:'件の取引が同期待ちです', review:'件の確認が必要', all:'すべての取引が同期されました。', remove:'削除', removeOffline:'オフライン取引を削除', online:'オンライン。', offline:'オフライン。', queue:'キューを管理', offlineForm:'オフライン入力を開く', wrongUser:'別のアカウントが使用中のため同期を一時停止しました。オフライン取引を記録したアカウントでログインしてください。', title:'オフラインモード - finWise', heading:'オフラインモード', intro:'取引はこの端末に保存され、接続が戻ると送信されます。同期が完了する前にブラウザーのデータを消去しないでください。', pending:'同期待ちの取引', kind:'取引の種類', amount:'金額 (Rp)', from:'振替元口座', category:'カテゴリー', to:'振替先口座', date:'日付', note:'メモ', save:'端末に保存', tryAgain:'もう一度アプリを開く', choose:'カテゴリーを選択', onlineFirst:'口座データを安全に保存するため、オンラインでアプリを開いてください。', complete:'金額、日付、口座、カテゴリーまたは振替先口座を入力してください。', invalidFormat:'オフライン取引の形式が正しくありません。', invalidData:'取引データが正しくありません。口座とカテゴリーを確認してください。', expenseLimit:'支出が月間予算を超えます。残りの使用可能額: Rp :amount。' },
+    id: { income:'Pemasukan', expense:'Pengeluaran', transfer:'Transfer', waiting:'transaksi menunggu sinkronisasi', review:'perlu diperiksa', all:'Semua transaksi sudah tersinkron.', remove:'Hapus', removeOffline:'Hapus transaksi offline', online:'Online.', offline:'Anda sedang offline.', queue:'Kelola antrean', offlineForm:'Buka formulir offline', wrongUser:'Sinkronisasi dijeda karena akun aktif berbeda. Masuk dengan akun yang digunakan saat mencatat transaksi offline.', title:'Mode offline - finWise', heading:'Mode offline', intro:'Transaksi disimpan di perangkat ini dan akan dikirim saat koneksi kembali. Jangan hapus data browser sebelum sinkronisasi selesai.', pending:'Transaksi menunggu sinkronisasi', kind:'Jenis transaksi', amount:'Jumlah (IDR)', from:'Dari akun', category:'Kategori', to:'Ke akun', date:'Tanggal', note:'Catatan', save:'Simpan di perangkat', tryAgain:'Coba buka aplikasi lagi', choose:'Pilih kategori', onlineFirst:'Buka aplikasi saat online terlebih dahulu agar data akun tersimpan aman di perangkat.', complete:'Lengkapi jumlah, tanggal, akun, dan kategori atau akun tujuan.', invalidFormat:'Format transaksi offline tidak valid.', invalidData:'Data transaksi tidak valid. Periksa akun dan kategori.', expenseLimit:'Pengeluaran melewati batas budget bulanan. Sisa yang boleh dipakai IDR :amount.' },
+    en: { income:'Income', expense:'Expense', transfer:'Transfer', waiting:'transactions waiting to sync', review:'need review', all:'All transactions are synced.', remove:'Remove', removeOffline:'Remove offline transaction', online:'Online.', offline:'Offline.', queue:'Manage queue', offlineForm:'Open offline form', wrongUser:'Sync paused because a different account is active. Sign in with the account used to record the offline transaction.', title:'Offline mode - finWise', heading:'Offline mode', intro:'Transactions are saved on this device and sent when you reconnect. Do not clear browser data before syncing is complete.', pending:'Transactions waiting to sync', kind:'Transaction type', amount:'Amount (IDR)', from:'From account', category:'Category', to:'To account', date:'Date', note:'Note', save:'Save on device', tryAgain:'Try opening the app again', choose:'Choose a category', onlineFirst:'Open the app while online first so account data can be safely saved on this device.', complete:'Enter the amount, date, account, and category or destination account.', invalidFormat:'The offline transaction format is invalid.', invalidData:'The transaction data is invalid. Check the account and category.', expenseLimit:'This expense exceeds the monthly budget. Remaining amount: IDR :amount.' },
+    ja: { income:'収入', expense:'支出', transfer:'振替', waiting:'件の取引が同期待ちです', review:'件の確認が必要', all:'すべての取引が同期されました。', remove:'削除', removeOffline:'オフライン取引を削除', online:'オンライン。', offline:'オフライン。', queue:'キューを管理', offlineForm:'オフライン入力を開く', wrongUser:'別のアカウントが使用中のため同期を一時停止しました。オフライン取引を記録したアカウントでログインしてください。', title:'オフラインモード - finWise', heading:'オフラインモード', intro:'取引はこの端末に保存され、接続が戻ると送信されます。同期が完了する前にブラウザーのデータを消去しないでください。', pending:'同期待ちの取引', kind:'取引の種類', amount:'金額 (IDR)', from:'振替元口座', category:'カテゴリー', to:'振替先口座', date:'日付', note:'メモ', save:'端末に保存', tryAgain:'もう一度アプリを開く', choose:'カテゴリーを選択', onlineFirst:'口座データを安全に保存するため、オンラインでアプリを開いてください。', complete:'金額、日付、口座、カテゴリーまたは振替先口座を入力してください。', invalidFormat:'オフライン取引の形式が正しくありません。', invalidData:'取引データが正しくありません。口座とカテゴリーを確認してください。', expenseLimit:'支出が月間予算を超えます。残りの使用可能額: IDR :amount。' },
 };
 const offlineUi = {
     id: { home:'Beranda', transactions:'Transaksi', accounts:'Akun', categories:'Kategori', budgets:'Budget', goals:'Tabungan', analysis:'Analisis', more:'Lainnya', add_transaction:'Tambah transaksi', offlineBanner:'Anda sedang offline · Menampilkan data terakhir yang tersimpan', balance:'Total saldo', incomeTotal:'Pemasukan bulan ini', expenseTotal:'Pengeluaran bulan ini', recent:'Transaksi terbaru', noData:'Belum ada snapshot. Buka finWise saat online terlebih dahulu.', captured:'Data tersimpan di perangkat', noRows:'Belum ada data.', monthBudget:'Batas budget bulanan', remaining:'Sisa', spent:'Terpakai', target:'Target', saved:'Terkumpul', type:'Jenis', amount:'Nominal', date:'Tanggal', categoryName:'Kategori', accountName:'Akun', pending:'Menunggu sinkronisasi', transfer:'Transfer', cash:'Tunai', bank:'Bank', ewallet:'E-Wallet', goalProgress:'Progres target', analysisHint:'Ringkasan dihitung dari transaksi yang tersimpan di perangkat (maksimal 200 terakhir).' },
@@ -31,7 +31,7 @@ function localizeOfflinePage(locale) {
 }
 const ui = (key) => (offlineUi[activeLocale] || offlineUi.id)[key] || offlineUi.id[key] || key;
 const translationAliases = { amount_label: 'amount', from_account: 'from', to_account: 'to', save_offline: 'save', try_again: 'tryAgain', offline_pending: 'pending', transaction_kind: 'kind' };
-const money = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
+const money = (value) => `IDR ${Number(value || 0).toLocaleString('id-ID')}`;
 const node = (tag, className, value) => { const element = document.createElement(tag); if (className) element.className = className; if (value !== undefined) element.textContent = value; return element; };
 function renderRow(container, title, detail, amount = '') {
     const row = node('div', 'data-row');
@@ -182,7 +182,7 @@ async function refreshQueueStatus() {
             const row = document.createElement('div'); row.className = 'pending-item';
             const details = document.createElement('span');
             const syncError = item.sync_error_key ? formatMessage(item.sync_error_key, item.sync_error_params) : item.sync_error;
-            details.textContent = `${t(item.type)} · Rp ${Number(item.amount).toLocaleString('id-ID')} · ${item.date}${syncError ? ` — ${syncError}` : ''}`;
+            details.textContent = `${t(item.type)} · IDR ${Number(item.amount).toLocaleString('id-ID')} · ${item.date}${syncError ? ` — ${syncError}` : ''}`;
             const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = t('remove'); remove.setAttribute('aria-label', t('removeOffline'));
             remove.style.cssText = 'width:auto;margin:0;padding:6px 10px;background:#fff;color:#b42318';
             remove.addEventListener('click', async () => { await deleteQueueItem(item.client_id); await refreshQueueStatus(); });
@@ -362,22 +362,114 @@ document.addEventListener('click', async (event) => {
 }, true);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+window.finwisePushLinkedUsers = window.finwisePushLinkedUsers || new Set();
+function decodePushKey(value) {
+    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(normalized.padEnd(normalized.length + (4 - normalized.length % 4) % 4, '='));
+    return Uint8Array.from(raw, (character) => character.charCodeAt(0));
+}
+async function savePushSubscription(button, subscription) {
+    const response = await fetch(button.dataset.subscriptionUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+        },
+        body: JSON.stringify(subscription.toJSON()),
+    });
+    if (!response.ok) throw new Error('Subscription was not saved.');
+    window.finwisePushLinkedUsers.add(String(button.dataset.userId));
+}
+async function subscribeForPush(button, requestPermission = false) {
+    if (requestPermission && Notification.permission === 'default') {
+        await Notification.requestPermission();
+    }
+    if (Notification.permission !== 'granted') return syncNotificationButton(button);
+
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: decodePushKey(button.dataset.vapidKey),
+        });
+    }
+    await savePushSubscription(button, subscription);
+    button.textContent = button.dataset.grantedLabel;
+    button.disabled = true;
+}
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-enable-notifications]');
     if (!button) return;
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-    if (Notification.permission === 'default') await Notification.requestPermission();
-    syncNotificationButton(button);
+    if (button.hasAttribute('data-push-first-allow')) {
+        try { localStorage.setItem(`finwise-push-prompt-dismissed:${button.dataset.userId}`, '1'); } catch (_) {}
+    }
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !window.isSecureContext) return;
+    if (!button.dataset.vapidKey) {
+        button.disabled = true;
+        button.textContent = button.dataset.setupLabel;
+        return;
+    }
+    button.disabled = true;
+    try {
+        await subscribeForPush(button, true);
+        if (button.hasAttribute('data-push-first-allow')) button.closest('[data-push-first-prompt]')?.setAttribute('hidden', '');
+    } catch (_) {
+        button.disabled = false;
+        button.textContent = button.dataset.errorLabel;
+        window.finwiseToast?.show(button.dataset.errorLabel, 'error', 5000);
+    }
 });
-function syncNotificationButton(button = document.querySelector('[data-enable-notifications]')) {
+async function syncNotificationButton(button = document.querySelector('[data-enable-notifications]:not([data-push-first-allow])')) {
     if (!button) return;
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !window.isSecureContext) { button.hidden = true; return; }
-    if (Notification.permission === 'granted') button.textContent = button.dataset.grantedLabel;
-    if (Notification.permission === 'denied') button.textContent = button.dataset.deniedLabel;
-    button.disabled = Notification.permission !== 'default';
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window) || !window.isSecureContext) { button.hidden = true; return; }
+    if (!button.dataset.vapidKey) {
+        button.hidden = true;
+        return;
+    }
+    if (Notification.permission === 'denied') {
+        button.textContent = button.dataset.deniedLabel;
+        button.disabled = true;
+        return;
+    }
+    button.textContent = Notification.permission === 'granted' ? button.dataset.grantedLabel : button.dataset.enableLabel;
+    button.disabled = Notification.permission === 'granted';
+
+    if (Notification.permission === 'granted') {
+        try {
+            const subscription = await (await navigator.serviceWorker.ready).pushManager.getSubscription();
+            const userId = String(button.dataset.userId);
+            if (subscription && !window.finwisePushLinkedUsers.has(userId)) {
+                await savePushSubscription(button, subscription);
+            } else if (!subscription) {
+                button.textContent = button.dataset.enableLabel;
+                button.disabled = false;
+            }
+        } catch (_) {
+            button.disabled = false;
+        }
+    }
 }
+function showFirstPushPrompt() {
+    const prompt = document.querySelector('[data-push-first-prompt]');
+    const button = prompt?.querySelector('[data-push-first-allow]');
+    if (!prompt || !button || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window) || !window.isSecureContext || Notification.permission !== 'default') return;
+    try { if (localStorage.getItem(`finwise-push-prompt-dismissed:${button.dataset.userId}`)) return; } catch (_) {}
+    prompt.hidden = false;
+}
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-push-prompt-dismiss]')) return;
+    const prompt = event.target.closest('[data-push-first-prompt]');
+    const userId = prompt?.querySelector('[data-push-first-allow]')?.dataset.userId;
+    try { if (userId) localStorage.setItem(`finwise-push-prompt-dismissed:${userId}`, '1'); } catch (_) {}
+    if (prompt) prompt.hidden = true;
+});
 window.addEventListener('finance-notification', async (event) => {
     if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+    const userId = document.querySelector('[data-enable-notifications]')?.dataset.userId;
+    if (userId && window.finwisePushLinkedUsers.has(String(userId))) return;
     const registration = await navigator.serviceWorker.ready;
     registration.active?.postMessage({ type: 'FINWISE_SHOW_NOTIFICATION', title: event.detail.title, body: event.detail.body });
 });
@@ -392,7 +484,7 @@ document.getElementById('pwa-install-button')?.addEventListener('click', async (
     await installPrompt.userChoice;
     installPrompt = null; event.currentTarget.classList.add('hidden');
 });
-document.addEventListener('DOMContentLoaded', () => { captureOnlineData(); setupOfflineForm(); refreshQueueStatus(); syncNotificationButton(); });
+document.addEventListener('DOMContentLoaded', () => { captureOnlineData(); setupOfflineForm(); refreshQueueStatus(); syncNotificationButton(); showFirstPushPrompt(); });
 document.addEventListener('livewire:navigated', () => { captureOnlineData(); setupOfflineForm(); refreshQueueStatus(); syncNotificationButton(); });
 window.addEventListener('locale-changed', (event) => { activeLocale = event.detail?.locale || activeLocale; document.documentElement.lang = activeLocale; refreshQueueStatus(); });
 window.addEventListener('online', () => { registerBackgroundSync(); syncQueue(); });

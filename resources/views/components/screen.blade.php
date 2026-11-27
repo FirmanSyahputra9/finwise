@@ -11,7 +11,10 @@
                         <p class="truncate font-spartan text-sm text-white/80">{{ $subtitle }}</p>
                     @endif
                 </div>
-                <livewire:notifications-menu :key="'screen-notifications'" />
+                <div class="flex shrink-0 items-center gap-2">
+                    <x-balance-visibility-toggle />
+                    <livewire:notifications-menu :key="'screen-notifications'" />
+                </div>
             </div>
         @endif
     </header>

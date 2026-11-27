@@ -41,7 +41,7 @@
             <p class="text-[15px] font-medium text-ink">{{ __('ui.income_expense') }}</p>
             <div class="mt-5 flex h-[132px] items-end justify-around gap-2 border-b border-dark px-2">
                 @foreach ($rows as $r)
-                    <div class="flex h-full min-w-0 flex-1 items-end justify-center gap-1" title="{{ $r['label'] }} · {{ __('ui.in') }} Rp {{ number_format($r['income'], 0, ',', '.') }} · {{ __('ui.out') }} Rp {{ number_format($r['expense'], 0, ',', '.') }}">
+                    <div class="flex h-full min-w-0 flex-1 items-end justify-center gap-1" title="{{ $r['label'] }} · {{ __('ui.in') }} IDR {{ number_format($r['income'], 0, ',', '.') }} · {{ __('ui.out') }} IDR {{ number_format($r['expense'], 0, ',', '.') }}">
                         <span class="w-2 flex-1 max-w-4 rounded-t-full bg-main" style="height: {{ $r['income'] ? max(4, (int) round($r['income'] / $max * 132)) : 0 }}px"></span>
                         <span class="w-2 flex-1 max-w-4 rounded-t-full bg-ocean" style="height: {{ $r['expense'] ? max(4, (int) round($r['expense'] / $max * 132)) : 0 }}px"></span>
                     </div>
@@ -72,8 +72,8 @@
             <div class="flex gap-2"><x-money-input id="monthly-budget" model="monthlyBudget" :value="$monthlyBudget" name="monthly_budget" placeholder="1,500,000" class="field" /><button class="btn inline-flex shrink-0 items-center gap-2 px-5"><span wire:loading wire:target="saveMonthlyBudget" class="app-spinner"></span>{{ __('ui.save') }}</button></div>
             @error('monthlyBudget')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
             @if ($monthlyBudget)
-                <p class="mt-2 text-xs text-dark/70">{{ __('ui.allocated') }} {{ \App\Support\Money::rp($allocatedBudget) }} {{ __('ui.of') }} {{ \App\Support\Money::rp($monthlyBudget) }}</p>
-                <p class="mt-1 text-xs text-dark/70">{{ __('ui.spent') }} {{ \App\Support\Money::rp($expense) }} · {{ __('ui.remaining_month') }} {{ \App\Support\Money::rp($monthlyBudget - $expense) }}</p>
+                <p data-fit-amount class="mt-2 text-xs text-dark/70">{{ __('ui.allocated') }} {{ \App\Support\Money::rp($allocatedBudget) }} {{ __('ui.of') }} {{ \App\Support\Money::rp($monthlyBudget) }}</p>
+                <p data-fit-amount class="mt-1 text-xs text-dark/70">{{ __('ui.spent') }} {{ \App\Support\Money::rp($expense) }} · {{ __('ui.remaining_month') }} {{ \App\Support\Money::rp($monthlyBudget - $expense) }}</p>
             @endif
         </form>
         <div class="grid grid-cols-2 gap-4">

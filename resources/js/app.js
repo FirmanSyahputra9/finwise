@@ -738,16 +738,18 @@ function bindCustomConfirmations() {
     const accept = modal.querySelector('[data-confirm-accept]');
     let pendingButton = null;
     let previousFocus = null;
-    const close = (confirmed) => {
+    const close = (confirmed, restoreFocus = true) => {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.inert = true;
         const button = pendingButton;
         pendingButton = null;
         if (confirmed && button?.isConnected && !button.disabled) {
             button.dataset.confirmApproved = 'true';
             button.click();
         }
-        previousFocus?.focus();
+        if (restoreFocus) previousFocus?.focus();
     };
 
     document.addEventListener('click', (event) => {
@@ -765,12 +767,16 @@ function bindCustomConfirmations() {
         message.textContent = button.dataset.confirm;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.inert = false;
         cancel.focus();
     }, true);
 
     cancel.addEventListener('click', () => close(false));
     accept.addEventListener('click', () => close(true));
     modal.addEventListener('click', (event) => { if (event.target === modal) close(false); });
+    document.addEventListener('livewire:navigating', () => close(false, false));
+    window.addEventListener('pageshow', () => close(false, false));
     document.addEventListener('keydown', (event) => {
         if (!pendingButton) return;
         if (event.key === 'Escape') { event.preventDefault(); close(false); }
@@ -859,6 +865,7 @@ function bindAmountFit(root = document) {
             observe(element);
             fitAmount(element, true);
         });
+        if (dashboardBalanceInitialized && dashboardBalanceHidden) bindDashboardBalanceVisibility();
     });
     amountFitMutationObserver.observe(document.body, { childList: true, characterData: true, subtree: true });
 }
@@ -870,8 +877,20 @@ function bindDashboardBalanceVisibility() {
     }
 
     const render = () => {
-        document.querySelectorAll('[data-balance-value]').forEach((value) => {
-            value.textContent = dashboardBalanceHidden ? '••••••' : value.dataset.balanceValue;
+        document.querySelectorAll('[data-fit-amount]').forEach((value) => {
+            if (dashboardBalanceHidden) {
+                if (value.dataset.moneyHidden !== 'true') {
+                    value.dataset.moneyVisibleHtml = value.innerHTML;
+                    value.dataset.moneyHidden = 'true';
+                } else if (!/^•+$/.test(value.textContent.trim())) {
+                    value.dataset.moneyVisibleHtml = value.innerHTML;
+                }
+                if (value.textContent !== '••••••') value.textContent = '••••••';
+            } else if (value.dataset.moneyHidden === 'true') {
+                value.innerHTML = value.dataset.moneyVisibleHtml ?? '';
+                delete value.dataset.moneyVisibleHtml;
+                delete value.dataset.moneyHidden;
+            }
         });
         document.querySelectorAll('[data-balance-toggle]').forEach((button) => {
             button.setAttribute('aria-pressed', String(dashboardBalanceHidden));

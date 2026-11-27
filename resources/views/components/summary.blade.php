@@ -2,7 +2,7 @@
 @php
     $pct = $income > 0 ? min(100, (int) round($expense / $income * 100)) : 0;
 @endphp
-<div data-summary-card class="card-3d mt-7 rounded-[26px] bg-white p-5 text-dark shadow-lg">
+<div data-summary-card class="card-3d mx-5 mt-7 rounded-[26px] bg-white p-5 text-dark shadow-lg">
     <div class="grid grid-cols-2 text-center">
         <div class="border-r border-dark/10">
             <p class="summary-balance-label text-xs text-nav/65">{{ __('ui.total_balance') }}</p>

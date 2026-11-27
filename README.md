@@ -101,6 +101,20 @@ Aktifkan kembali aplikasi setelah pekerjaan selesai:
 
     php artisan up
 
+### Notifikasi push browser
+
+finWise mengirim Web Push langsung dari Laravel dengan Web Push API browser dan package PHP lokal, tanpa SDK CDN atau server worker yang berjalan terus-menerus. HTTPS wajib di hosting. Siapkan VAPID satu kali:
+
+    composer install --no-dev --optimize-autoloader
+
+    php artisan webpush:generate-keys
+
+Simpan tiga nilai yang dicetak ke `.env` sebagai `PUSH_VAPID_PUBLIC_KEY`, `PUSH_VAPID_PRIVATE_KEY`, dan `PUSH_VAPID_SUBJECT` (gunakan alamat email admin yang valid sebagai subject). Jangan bagikan private key. Kunci dibaca langsung dari `.env`, termasuk saat konfigurasi Laravel dicache. Jalankan migrasi:
+
+    php artisan migrate --force
+
+Setelah itu, pengguna login lalu memilih **Izinkan notif HP** dan menyetujui prompt browser. Service worker push memakai `public/service-worker.js` yang sama dengan PWA. Browser iPhone perlu memasang PWA ke Home Screen dan memakai iOS/iPadOS 16.4 atau lebih baru. Hosting perlu PHP 8.3 dengan ekstensi cURL, OpenSSL, dan mbstring.
+
 ## Pengembangan dan tes
 
 Jalankan seluruh tes:

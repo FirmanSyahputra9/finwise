@@ -1,4 +1,4 @@
-@php($rp = fn($n) => 'Rp ' . number_format($n, 0, ',', '.'))
+@php($rp = fn($n) => 'IDR ' . number_format($n, 0, ',', '.'))
 <div
     x-on:edit-transaction.window="document.getElementById('transaction-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">
     <x-screen :title="__('ui.transactions')">
@@ -27,7 +27,7 @@
                 class="block text-xs font-medium text-dark/70">{{ __('ui.transaction_amount') }}
                 <span
                     class="mt-1 flex min-w-0 items-center gap-2 rounded-[18px] bg-light px-3 min-[380px]:gap-3 min-[380px]:px-4">
-                    <span class="shrink-0 text-base font-semibold text-dark/60">Rp</span>
+                    <span class="shrink-0 text-base font-semibold text-dark/60">IDR</span>
                     <x-money-input id="transaction-amount" model="amount" :value="$amount" name="amount"
                         placeholder="0" class="transaction-amount" offline-field="amount" />
                 </span>

@@ -77,7 +77,7 @@ class OfflineTransactionSyncController extends Controller
                 continue;
             }
 
-            $rp = fn (int $amount) => 'Rp '.number_format($amount, 0, ',', '.');
+            $rp = fn (int $amount) => 'IDR '.number_format($amount, 0, ',', '.');
             $request->user()->notify(new FinanceActivityNotification([
                 'title_key' => 'notification_offline_synced',
                 'message_key' => 'notification_offline_recorded',

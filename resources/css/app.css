@@ -414,6 +414,11 @@ html[data-theme="dark"] .text-nav,
 html[data-theme="dark"] .text-mint {
     color: #e5eff0;
 }
+html[data-theme="dark"] .app-toast-position[data-toast-type="success"],
+html[data-theme="dark"] .app-toast-position[data-toast-type="loading"] {
+    background-color: #052224;
+    color: #f1fff3;
+}
 html[data-theme="dark"] [class~="text-mint/90"] {
     color: rgb(229 239 240 / 92%);
 }

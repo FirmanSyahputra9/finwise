@@ -1,4 +1,4 @@
-@php($rp = fn ($n) => 'Rp '.number_format($n, 0, ',', '.'))
+@php($rp = fn ($n) => 'IDR '.number_format($n, 0, ',', '.'))
 <x-screen variant="wallet">
     <script type="application/json" id="offline-finance-data">{!! $offlineDataJson !!}</script>
     <x-slot:header>
@@ -12,14 +12,11 @@
                     @endif
                 </a>
                 <div class="min-w-0 text-left text-white">
-                    <p data-balance-value="{{ $rp($totalBalance) }}" data-fit-amount class="truncate text-base font-bold leading-tight tracking-tight">{{ $rp($totalBalance) }}</p>
+                    <p data-balance-value data-fit-amount class="truncate text-base font-bold leading-tight tracking-tight">{{ $rp($totalBalance) }}</p>
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-2">
-                <button type="button" data-balance-toggle data-show-label="{{ __('ui.show_balance') }}" data-hide-label="{{ __('ui.hide_balance') }}" aria-label="{{ __('ui.hide_balance') }}" aria-pressed="false" class="grid size-7 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/25">
-                    <x-icon name="eye" data-balance-eye-open class="size-3.5" />
-                    <x-icon name="eye-off" data-balance-eye-closed class="hidden size-3.5" />
-                </button>
+                <x-balance-visibility-toggle />
                 <livewire:notifications-menu :key="'dashboard-notifications'" />
             </div>
         </div>
@@ -51,7 +48,7 @@
             </svg>
             <div class="wallet-balance-card card-3d rounded-[26px] bg-white p-5 text-dark shadow-xl">
                 <p class="text-sm text-nav/65">{{ __('ui.total_balance') }}</p>
-                <p data-balance-value="{{ $rp($totalBalance) }}" data-fit-amount class="mt-1 text-3xl font-bold tracking-tight text-nav">{{ $rp($totalBalance) }}</p>
+                <p data-balance-value data-fit-amount class="mt-1 text-3xl font-bold tracking-tight text-nav">{{ $rp($totalBalance) }}</p>
                 <div class="mt-4 grid grid-cols-2 gap-4 border-t border-dark/10 pt-3 text-sm">
                     <div class="min-w-0"><p class="text-nav/60">{{ __('ui.income') }}</p><p data-fit-amount class="font-semibold text-emerald-700">{{ $rp($income) }}</p></div>
                     <div class="min-w-0"><p class="text-nav/60">{{ __('ui.expense') }}</p><p data-fit-amount class="font-semibold text-rose-600">{{ $rp($expense) }}</p></div>
@@ -77,8 +74,8 @@
         @if ($monthlyBudget)
             <div class="card-3d mb-4 rounded-2xl bg-dark p-4 text-mint">
                 <div class="flex justify-between gap-2 text-sm"><span>{{ __('ui.budget_total') }}</span><strong data-fit-amount class="max-w-[60%] text-right">{{ $rp($monthlyBudget) }}</strong></div>
-                <p class="mt-1 text-xs opacity-80">{{ __('ui.spent') }} {{ $rp($expense) }}</p>
-                <p class="mt-1 text-xs opacity-80">{{ __('ui.remaining_budget') }} {{ $rp($monthlyBudget - $expense) }}</p>
+                <p data-fit-amount class="mt-1 text-xs opacity-80">{{ __('ui.spent') }} {{ $rp($expense) }}</p>
+                <p data-fit-amount class="mt-1 text-xs opacity-80">{{ __('ui.remaining_budget') }} {{ $rp($monthlyBudget - $expense) }}</p>
             </div>
         @endif
         @forelse ($budgets as $budget)

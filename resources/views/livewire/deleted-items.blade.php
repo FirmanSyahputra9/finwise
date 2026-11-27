@@ -15,7 +15,7 @@
                 @foreach ($items as $item)
                     <li wire:key="deleted-{{ $item['type'] }}-{{ $item['id'] }}" class="flex items-center justify-between gap-3 py-3">
                         <div class="min-w-0">
-                            <p class="truncate text-sm text-dark">{{ $item['label'] }}</p>
+                            <p data-fit-amount class="truncate text-sm text-dark">{{ $item['label'] }}</p>
                             <p class="mt-0.5 text-xs text-dark/60">{{ $item['deletedAt']->diffForHumans() }}</p>
                         </div>
                         <div class="flex shrink-0 gap-2">

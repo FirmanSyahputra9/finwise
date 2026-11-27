@@ -41,6 +41,18 @@ class NotificationsMenu extends Component
     public function render()
     {
         $notifications = auth()->user()->notifications()->latest()->limit(8)->get();
+        $timezone = config('app.display_timezone', 'Asia/Jakarta');
+
+        foreach ($notifications as $notification) {
+            $localCreatedAt = $notification->created_at
+                ->copy()
+                ->timezone($timezone)
+                ->locale(app()->getLocale());
+
+            $notification->display_time = $localCreatedAt->diffForHumans();
+            $notification->display_datetime = $localCreatedAt->translatedFormat('j M Y, H:i');
+        }
+
         $legacyTypes = ['Pemasukan' => 'income', 'Pengeluaran' => 'expense', 'Transfer' => 'transfer'];
         foreach ($notifications as $notification) {
             $data = $notification->data;
@@ -61,10 +73,10 @@ class NotificationsMenu extends Component
 
             $data['title_key'] = $titleKey;
             $message = $data['message'] ?? '';
-            if (preg_match('/^(Pemasukan|Pengeluaran|Transfer) sebesar (Rp [\d.]+) (?:telah dicatat|berhasil disimpan)\.$/u', $message, $matches)) {
+            if (preg_match('/^(Pemasukan|Pengeluaran|Transfer) sebesar (IDR [\d.]+) (?:telah dicatat|berhasil disimpan)\.$/u', $message, $matches)) {
                 $data['message_key'] = $titleKey === 'notification_offline_synced' ? 'notification_offline_recorded' : 'notification_recorded';
                 $data['message_params'] = ['type' => $legacyTypes[$matches[1]], 'amount' => $matches[2]];
-            } elseif (preg_match('/^Pengeluaran kategori (.+) mencapai (Rp [\d.]+) dari budget (Rp [\d.]+)\.$/u', $message, $matches)) {
+            } elseif (preg_match('/^Pengeluaran kategori (.+) mencapai (IDR [\d.]+) dari budget (IDR [\d.]+)\.$/u', $message, $matches)) {
                 $data['message_key'] = 'notification_budget_detail';
                 $data['message_params'] = ['category' => $matches[1], 'spent' => $matches[2], 'budget' => $matches[3]];
             }

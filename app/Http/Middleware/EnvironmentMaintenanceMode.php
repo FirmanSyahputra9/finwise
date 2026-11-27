@@ -11,6 +11,10 @@ class EnvironmentMaintenanceMode
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (app()->runningUnitTests()) {
+            return $next($request);
+        }
+
         $environmentFile = base_path('.env');
 
         if (! is_readable($environmentFile)) {

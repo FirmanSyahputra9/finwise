@@ -28,11 +28,11 @@
             <div class="mt-5 grid grid-cols-2 text-center">
                 <div>
                     <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-main"></span>Income</p>
-                    <p class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($totalIncome) }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($totalIncome) }}</p>
                 </div>
                 <div>
                     <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-ocean"></span>Expense</p>
-                    <p class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($totalExpense) }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($totalExpense) }}</p>
                 </div>
             </div>
         </div>
