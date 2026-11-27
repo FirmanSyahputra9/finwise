@@ -77,7 +77,7 @@ class Chat extends Component
             abort_unless($connection, 404);
             $this->selectedConnection = $connection->id;
             $this->purgeExpiredMessages($connection);
-            $this->openedAtUnreadMessageId = $this->findFirstUnreadMessageId($connection);
+            $this->markExistingMessagesRead($connection);
 
             return;
         }
@@ -90,7 +90,7 @@ class Chat extends Component
         abort_unless($group, 404);
         $this->selectedGroup = $group->id;
         $this->purgeExpiredMessages($group);
-        $this->openedAtUnreadMessageId = $this->findFirstUnreadMessageId($group);
+        $this->markExistingMessagesRead($group);
     }
 
     public function connect(): void
@@ -310,14 +310,27 @@ class Chat extends Component
         }
     }
 
-    private function findFirstUnreadMessageId(ChatConnection|ChatGroup $conversation): ?int
+    private function markExistingMessagesRead(ChatConnection|ChatGroup $conversation): void
     {
+        $latestIncomingId = $conversation->messages()
+            ->where('sender_id', '!=', auth()->id())
+            ->max('id');
+
+        if (! $latestIncomingId) {
+            $this->openedAtUnreadMessageId = null;
+
+            return;
+        }
+
         $identity = ['user_id' => auth()->id()];
         $identity[$conversation instanceof ChatConnection ? 'connection_id' : 'group_id'] = $conversation->id;
-        $lastReadMessageId = ChatReadPosition::query()->where($identity)->value('last_read_message_id') ?? 0;
+        $position = ChatReadPosition::query()->firstOrNew($identity);
+        if ((int) ($position->last_read_message_id ?? 0) < (int) $latestIncomingId) {
+            $position->last_read_message_id = $latestIncomingId;
+            $position->save();
+        }
 
-        return $conversation->messages()->where('sender_id', '!=', auth()->id())
-            ->where('id', '>', $lastReadMessageId)->orderBy('id')->value('id');
+        $this->openedAtUnreadMessageId = null;
     }
 
     public function updateRetentionDays(int $days): void
@@ -511,6 +524,32 @@ class Chat extends Component
         $groups = ChatGroup::query()->whereHas('members', fn ($query) => $query->where('users.id', $me))
             ->withCount('members')->withMax('messages', 'created_at')
             ->orderByDesc('messages_max_created_at')->get();
+
+        if (! $this->selectedConnection && ! $this->selectedGroup) {
+            $connectionUnreadCounts = DB::table('chat_messages as messages')
+                ->leftJoin('chat_read_positions as positions', function ($join) use ($me) {
+                    $join->on('positions.connection_id', '=', 'messages.connection_id')
+                        ->where('positions.user_id', '=', $me);
+                })
+                ->whereIn('messages.connection_id', $connections->modelKeys())
+                ->where('messages.sender_id', '!=', $me)
+                ->whereRaw('messages.id > COALESCE(positions.last_read_message_id, 0)')
+                ->selectRaw('messages.connection_id as conversation_id, COUNT(*) as unread_count')
+                ->groupBy('messages.connection_id')->pluck('unread_count', 'conversation_id');
+            $groupUnreadCounts = DB::table('chat_messages as messages')
+                ->leftJoin('chat_read_positions as positions', function ($join) use ($me) {
+                    $join->on('positions.group_id', '=', 'messages.group_id')
+                        ->where('positions.user_id', '=', $me);
+                })
+                ->whereIn('messages.group_id', $groups->modelKeys())
+                ->where('messages.sender_id', '!=', $me)
+                ->whereRaw('messages.id > COALESCE(positions.last_read_message_id, 0)')
+                ->selectRaw('messages.group_id as conversation_id, COUNT(*) as unread_count')
+                ->groupBy('messages.group_id')->pluck('unread_count', 'conversation_id');
+
+            $connections->each(fn (ChatConnection $item) => $item->setAttribute('unread_count', (int) ($connectionUnreadCounts[$item->id] ?? 0)));
+            $groups->each(fn (ChatGroup $item) => $item->setAttribute('unread_count', (int) ($groupUnreadCounts[$item->id] ?? 0)));
+        }
 
         $connection = $this->selectedConnection
             ? $connections->firstWhere('id', $this->selectedConnection)

@@ -640,26 +640,42 @@ function bindChatReadObserver() {
     const seen = new Set();
     const pending = new Set();
     let timer = null;
+    let flushing = false;
 
-    const flush = () => {
+    const flush = async () => {
         timer = null;
-        if (pending.size === 0 || !componentId || !window.Livewire) return;
-        const ids = [...pending];
-        pending.clear();
-        window.Livewire.find(componentId)?.$wire.markMessagesRead(ids);
+        if (flushing || pending.size === 0 || !feed.isConnected) return;
+        const component = componentId && window.Livewire?.find(componentId);
+        if (!component) {
+            timer = setTimeout(flush, 500);
+            return;
+        }
+
+        const ids = [...pending].slice(0, 100);
+        ids.forEach((id) => pending.delete(id));
+        flushing = true;
+        try {
+            await component.$wire.markMessagesRead(ids);
+            ids.forEach((id) => seen.add(id));
+        } catch (_) {
+            ids.forEach((id) => pending.add(id));
+        } finally {
+            flushing = false;
+            if (pending.size > 0 && !timer) timer = setTimeout(flush, 250);
+        }
     };
     const observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
-            if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
+            const minimumVisibleHeight = Math.min(entry.boundingClientRect.height * 0.1, 48);
+            if (!entry.isIntersecting || entry.intersectionRect.height <= 0 || entry.intersectionRect.height < minimumVisibleHeight) continue;
             const message = entry.target;
             const id = message.dataset.chatMessageId;
-            if (!id || message.dataset.chatSenderId === feed.dataset.chatUserId || seen.has(id)) continue;
-            seen.add(id);
+            if (!id || message.dataset.chatSenderId === feed.dataset.chatUserId || seen.has(id) || pending.has(id)) continue;
             pending.add(id);
             if (!timer) timer = setTimeout(flush, 250);
             observer.unobserve(message);
         }
-    }, { root: feed, threshold: 0.5 });
+    }, { root: feed, threshold: [0, 0.01, 0.05, 0.1, 0.5] });
 
     const watch = (node) => {
         if (!(node instanceof Element)) return;

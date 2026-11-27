@@ -69,7 +69,7 @@
             @elseif ($activePanel === 'groups')
                 <section class="card-3d rounded-2xl bg-white p-4">
                     <h2 class="text-sm font-semibold text-dark">{{ __('ui.chat_groups') }}</h2>
-                    <div class="mt-3 space-y-2">@foreach ($groups as $item)<button type="button" wire:key="chat-group-{{ $item->id }}" wire:click="openGroup({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center rounded-full bg-dark font-semibold text-mint">{{ mb_strtoupper(mb_substr($item->name, 0, 1)) }}</span><span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $item->name }}</span><span class="text-xs text-dark/60">{{ $item->members_count }} {{ __('ui.chat_group_members_short') }}</span></button>@endforeach</div>
+                    <div class="mt-3 space-y-2">@foreach ($groups as $item)<button type="button" wire:key="chat-group-{{ $item->id }}" wire:click="openGroup({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center rounded-full bg-dark font-semibold text-mint">{{ mb_strtoupper(mb_substr($item->name, 0, 1)) }}</span><span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $item->name }}</span>@if ($item->unread_count > 0)<span title="{{ __('ui.chat_unread_messages') }}" class="grid size-6 shrink-0 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">{{ min($item->unread_count, 99) }}{{ $item->unread_count > 99 ? '+' : '' }}</span>@endif<span class="text-xs text-dark/60">{{ $item->members_count }} {{ __('ui.chat_group_members_short') }}</span></button>@endforeach</div>
                 </section>
             @endif
 
@@ -82,14 +82,15 @@
                         @foreach ($filteredGroups as $item)
                             <button type="button" wire:key="chat-search-group-{{ $item->id }}" wire:click="openGroup({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left">
                                 <span class="grid size-10 shrink-0 place-items-center rounded-full bg-dark font-semibold text-mint">{{ mb_strtoupper(mb_substr($item->name, 0, 1)) }}</span>
-                                <span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $item->name }}<span class="ml-2 text-[10px] font-normal text-dark/50">{{ __('ui.chat_groups') }}</span></span>
+                                <span class="min-w-0 flex-1 truncate text-sm {{ $item->unread_count > 0 ? 'font-semibold' : 'font-medium' }} text-dark">{{ $item->name }}<span class="ml-2 text-[10px] font-normal text-dark/50">{{ __('ui.chat_groups') }}</span></span>
+                                @if ($item->unread_count > 0)<span title="{{ __('ui.chat_unread_messages') }}" class="grid size-6 shrink-0 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">{{ min($item->unread_count, 99) }}{{ $item->unread_count > 99 ? '+' : '' }}</span>@endif
                                 <x-icon name="chat" class="size-4 text-nav" />
                             </button>
                         @endforeach
                         @foreach ($connections as $item)
                             @php($person = $item->otherUser(auth()->id()))
                             @if ($person && $filteredConnectedUsers->contains('id', $person->id))
-                                <button type="button" wire:key="chat-person-{{ $item->id }}" wire:click="open({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-sky font-semibold text-white">@if ($person->profile_photo_path)<img src="{{ Storage::disk('public')->url($person->profile_photo_path) }}" alt="" class="h-full w-full object-cover">@else{{ mb_strtoupper(mb_substr($person->name ?? '?', 0, 1)) }}@endif</span><span class="min-w-0 flex-1 truncate text-sm font-medium text-dark">{{ $person->name }}</span><x-icon name="chat" class="size-4 text-nav" /></button>
+                                <button type="button" wire:key="chat-person-{{ $item->id }}" wire:click="open({{ $item->id }})" class="flex w-full items-center gap-3 rounded-2xl bg-light p-3 text-left"><span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-sky font-semibold text-white">@if ($person->profile_photo_path)<img src="{{ Storage::disk('public')->url($person->profile_photo_path) }}" alt="" class="h-full w-full object-cover">@else{{ mb_strtoupper(mb_substr($person->name ?? '?', 0, 1)) }}@endif</span><span class="min-w-0 flex-1 truncate text-sm {{ $item->unread_count > 0 ? 'font-semibold' : 'font-medium' }} text-dark">{{ $person->name }}</span>@if ($item->unread_count > 0)<span title="{{ __('ui.chat_unread_messages') }}" class="grid size-6 shrink-0 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">{{ min($item->unread_count, 99) }}{{ $item->unread_count > 99 ? '+' : '' }}</span>@endif<x-icon name="chat" class="size-4 text-nav" /></button>
                             @endif
                         @endforeach
                     </div>
