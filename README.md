@@ -1,134 +1,189 @@
-# finWise
+<div align="center">
+  <img src="public/icons/finwise.svg" alt="finWise" width="112" height="112">
 
-Aplikasi pencatatan keuangan pribadi berbasis Laravel dan Livewire. finWise membantu mencatat pemasukan, pengeluaran, transfer antarakun, mengatur anggaran, dan memantau target simpanan.
+  <h1>finWise</h1>
 
-## Fitur
+  <p><strong>Catat uang dengan lebih jelas. Rencanakan langkah berikutnya dengan percaya diri.</strong></p>
 
-- **Beranda:** ringkasan saldo, pemasukan/pengeluaran bulan ini, anggaran, serta transaksi terbaru.
-- **Akun:** kelola akun tunai, bank, dan e-wallet. Saldo dihitung dari saldo awal dan seluruh transaksi.
-- **Transaksi:** catat pemasukan, pengeluaran, dan transfer; cari serta filter riwayat.
-- **Analisis:** grafik harian, mingguan, bulanan, dan tahunan; pilih satu atau beberapa kategori.
-- **Anggaran:** tetapkan batas pengeluaran bulanan dan alokasikan sebagian ke kategori. Total alokasi kategori tidak boleh melebihi batas bulanan. Pengeluaran online maupun transaksi offline yang disinkronkan mengikuti batas ini.
-- **Kategori:** lihat transaksi per kategori dan filter berdasarkan jenis serta tanggal.
-- **Target simpanan:** buat target dan catat kontribusi.
-- **Chat:** terhubung dengan kontak dan buat grup untuk bertukar pesan, stiker emoji, serta foto. Foto dapat dipilih lewat tombol lampiran atau ditempel dari clipboard; stiker gambar dari keypad ponsel dapat ditempel jika browser menyediakan gambar tersebut sebagai data clipboard. Chat pribadi juga mendukung panggilan suara WebRTC peer-to-peer tanpa relay media; koneksi tertentu dapat gagal jika jaringan memerlukan TURN.
-- **Mode offline:** transaksi dapat disimpan di perangkat saat offline dan disinkronkan kembali saat online.
-- **Tampilan:** pilih tema terang/gelap, warna aksen dan teks, pola latar Fuzzy Duck atau Rare Snake, font, serta ukuran font. Warna netral pola mengikuti tema; warna lainnya mengikuti aksen.
-- **Bahasa:** seluruh teks bawaan aplikasi, termasuk formulir, validasi, notifikasi, dan mode offline, tersedia dalam Bahasa Indonesia, Inggris, dan Jepang. Ubah bahasa dari Profil → Tampilan aplikasi; pilihan disimpan pada sesi. Nama kategori, akun, dan target yang dibuat pengguna tetap mengikuti teks yang dimasukkan.
-- **Nominal:** angka ditampilkan dengan pemisah ribuan; nilai yang disimpan tetap numerik.
+  <p>Aplikasi keuangan pribadi untuk mencatat transaksi, memahami arus uang, dan memantau target simpanan.</p>
 
-## Memulai
+  <img alt="PHP 8.3+" src="https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php&logoColor=white">
+  <img alt="Laravel 13" src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white">
+  <img alt="Livewire 4" src="https://img.shields.io/badge/Livewire-4-FB70A9?style=flat-square&logo=livewire&logoColor=white">
+  <img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-local-003B57?style=flat-square&logo=sqlite&logoColor=white">
 
-Ikuti langkah instalasi di bawah ini untuk menjalankan finWise secara lokal. Pastikan PHP, Composer, Node.js, npm, dan ekstensi PDO SQLite tersedia.
+  <br>
+  <sub>Antarmuka tersedia dalam Bahasa Indonesia, English, dan 日本語</sub>
+  <br><br>
+  <a href="#yang-bisa-kamu-lakukan">Fitur</a> ·
+  <a href="#mulai-dalam-beberapa-langkah">Instalasi</a> ·
+  <a href="#perintah-yang-sering-dipakai">Perintah</a> ·
+  <a href="#menjalankan-di-produksi">Produksi</a>
+</div>
 
-## Kebutuhan
+---
 
-- PHP 8.3 atau lebih baru
+## Tentang finWise
+
+finWise membantu mengelola keuangan harian dalam satu tempat. Catat pemasukan, pengeluaran, dan transfer; lihat ringkasan saldo; lalu gunakan analisis, anggaran, dan target simpanan untuk memahami kebiasaan finansial.
+
+Dibangun dengan **Laravel 13**, **Livewire 4**, **Blade**, **Tailwind CSS 4**, dan **Vite Plus**.
+
+## Yang bisa kamu lakukan
+
+|  | Fitur | Detail |
+|---|---|---|
+| 💸 | **Catat transaksi** | Pemasukan, pengeluaran, dan transfer antarakun dengan pencarian serta filter riwayat. |
+| 📊 | **Pahami arus uang** | Ringkasan saldo dan grafik harian, mingguan, bulanan, atau tahunan dengan filter kategori. |
+| 🎯 | **Atur rencana** | Kelola anggaran kategori dan pantau target simpanan. |
+| 🗂️ | **Pulihkan data** | Item yang dihapus masuk trash dan dapat dipulihkan selama tiga hari. |
+| 💬 | **Tetap terhubung** | Chat pribadi dan grup, stiker, foto, posisi baca, retensi pesan, serta panggilan suara WebRTC. |
+| 📲 | **Lanjutkan saat offline** | Baca snapshot terakhir dan catat transaksi baru di perangkat untuk disinkronkan kemudian. |
+| 🔔 | **Terima notifikasi** | Notifikasi aplikasi dan Web Push untuk aktivitas finansial. Push tidak memuat isi chat atau nominal sensitif. |
+| 🎨 | **Atur tampilanmu** | Tema terang/gelap, aksen, font, ukuran teks, pola, dan bahasa Indonesia, Inggris, atau Jepang. |
+
+> **Privasi:** data keuangan dibatasi per pengguna. Foto chat disimpan privat dan hanya dapat diakses oleh peserta percakapan.
+
+## Mulai dalam beberapa langkah
+
+### Kebutuhan
+
+- PHP **8.3+** dengan ekstensi PDO SQLite, OpenSSL, cURL, dan mbstring
 - Composer
 - Node.js dan npm
-- SQLite dengan ekstensi PDO SQLite untuk PHP
+- SQLite
 
-Proyek ini menggunakan Laravel 13, Livewire 4, Tailwind CSS 4, dan Vite Plus.
+### Instalasi
 
-## Instalasi lokal
+1. Pasang dependensi backend:
 
-1. Pasang dependensi PHP:
+   ```sh
+   composer install
+   ```
 
-       composer install
+2. Buat `.env` dan database SQLite jika belum tersedia.
 
-2. Buat file konfigurasi lokal.
+   Jika salah satu berkas sudah ada, lewati perintah pembuatannya agar konfigurasi atau data lokal tidak tertimpa.
 
-   macOS/Linux:
+   **Windows PowerShell**
 
-       cp .env.example .env
-       touch database/database.sqlite
+   ```powershell
+   Copy-Item .env.example .env
+   New-Item -ItemType File -Path database/database.sqlite
+   ```
 
-   Windows PowerShell:
+   **macOS / Linux**
 
-       Copy-Item .env.example .env
-       New-Item -ItemType File -Path database/database.sqlite
+   ```sh
+   cp .env.example .env
+   touch database/database.sqlite
+   ```
 
-   Jika file .env atau database/database.sqlite sudah ada, jangan buat ulang.
+3. Siapkan aplikasi dan aset:
 
-3. Buat application key:
+   ```sh
+   php artisan key:generate
+   npm install
+   php artisan migrate
+   ```
 
-       php artisan key:generate
+4. Jalankan server dan frontend dalam dua terminal:
 
-4. Pasang dependensi frontend dan siapkan database:
+   ```sh
+   php artisan serve
+   ```
 
-       npm install
-       php artisan migrate
+   ```sh
+   npm run dev
+   ```
 
-5. Jalankan aplikasi. Gunakan dua terminal.
+   Atau jalankan seluruh layanan pengembangan sekaligus dengan `composer dev`.
 
-   Terminal pertama:
+5. Buka alamat yang ditampilkan Artisan, biasanya <http://127.0.0.1:8000>, lalu buat akun.
 
-       php artisan serve
+### Data demo
 
-   Terminal kedua:
+Jalankan `php artisan db:seed` untuk membuat pengguna lokal `test@example.com` (kata sandi `password`), kategori bawaan, dan akun Dompet. Kredensial ini hanya untuk pengembangan lokal.
 
-       npm run dev
+## Perintah yang sering dipakai
 
-6. Buka alamat yang ditampilkan oleh php artisan serve, biasanya http://127.0.0.1:8000, lalu daftar melalui halaman Register.
+| Perintah | Kegunaan |
+|---|---|
+| `composer dev` | Menjalankan server, queue listener, log viewer, dan Vite Plus. |
+| `composer test` | Pemeriksaan Pint, PHPStan, dan tes aplikasi. |
+| `php artisan test` | Menjalankan tes Pest/PHPUnit. |
+| `composer lint:check` | Memeriksa format PHP tanpa mengubah file. |
+| `composer types:check` | Menjalankan analisis statis PHPStan. |
+| `npm run dev` | Menjalankan Vite Plus untuk pengembangan frontend. |
+| `npm run build` | Membangun aset frontend untuk produksi. |
 
-### Data contoh
+## Menjalankan di produksi
 
-Untuk mengisi database pengembangan dengan data contoh:
+### Build dan migrasi
 
-    php artisan db:seed
+```sh
+npm run build
+php artisan migrate --force
+```
 
-Seeder membuat akun pengembangan test@example.com dengan kata sandi password, beserta kategori default. Jangan gunakan kredensial tersebut di lingkungan produksi.
+Gunakan HTTPS untuk fitur browser seperti Web Push dan mikrofon panggilan suara.
 
-### Build aset
+### Web Push
 
-Untuk membuat aset frontend siap produksi:
+Buat pasangan kunci VAPID:
 
-    npm run build
+```sh
+php artisan webpush:generate-keys
+```
 
-### Halaman error dan maintenance
+Simpan nilai `PUSH_VAPID_PUBLIC_KEY`, `PUSH_VAPID_PRIVATE_KEY`, dan `PUSH_VAPID_SUBJECT` pada `.env`. Jaga private key tetap rahasia. Pengguna mengaktifkan notifikasi melalui browser. Di iPhone/iPad, pasang PWA ke Home Screen; Web Push memerlukan iOS/iPadOS 16.4 atau lebih baru.
 
-Halaman error finWise tersedia untuk HTTP 4xx/5xx umum. Di shared hosting, maintenance dapat diaktifkan hanya dengan mengubah `.env`; middleware membaca file itu langsung pada setiap request, termasuk saat konfigurasi Laravel dicache. Tidak perlu menjalankan perintah Artisan:
+### Mode maintenance
 
-    APP_MAINTENANCE=true
+Mode maintenance aplikasi dapat dikendalikan dari `.env`; middleware membaca berkas tersebut pada setiap request, termasuk saat konfigurasi Laravel dicache.
 
-Set `APP_MAINTENANCE=false` untuk membuka aplikasi kembali. Pesan dan interval refresh bisa diatur melalui `APP_MAINTENANCE_MESSAGE` dan `APP_MAINTENANCE_RETRY` (detik). Kosongkan pesan untuk memakai teks standar yang diterjemahkan.
+```dotenv
+APP_MAINTENANCE=true
+APP_MAINTENANCE_MESSAGE=
+APP_MAINTENANCE_RETRY=60
+```
 
-Untuk penggunaan Artisan, halaman maintenance khusus juga tersedia:
+Gunakan `APP_MAINTENANCE=false` untuk membuka aplikasi kembali. Pesan kosong memakai teks terjemahan bawaan. Mode maintenance Artisan juga didukung:
 
-    php artisan down --render=errors::maintenance --retry=60
+```sh
+php artisan down --render=errors::maintenance --retry=60
+php artisan up
+```
 
-Aktifkan kembali aplikasi setelah pekerjaan selesai:
+## Catatan penggunaan
 
-    php artisan up
+- Nominal disimpan sebagai integer Rupiah; tanggal transaksi menggunakan tanggal kalender.
+- Snapshot offline memuat maksimal 200 transaksi terakhir. Transaksi offline disimpan dalam antrean lokal dan dikirim saat koneksi pulih. Jangan hapus data browser sebelum sinkronisasi selesai.
+- Chat suara memakai WebRTC peer-to-peer tanpa relay media bawaan. Koneksi dapat gagal pada jaringan yang memerlukan TURN.
+- Foto profil disimpan sebagai WebP 1024 × 1024 dengan batas ukuran 1,5 MB. Berkas unggahan lokal berada di `public/profile-photos/`.
+- Preferensi tampilan disimpan di browser; pilihan bahasa disimpan di sesi.
 
-### Notifikasi push browser
+<details>
+  <summary><strong>Status batas anggaran</strong></summary>
 
-finWise mengirim Web Push langsung dari Laravel dengan Web Push API browser dan package PHP lokal, tanpa SDK CDN atau server worker yang berjalan terus-menerus. HTTPS wajib di hosting. Siapkan VAPID satu kali:
+  Batas bulanan dan alokasi kategori saat ini berfungsi sebagai ringkasan serta pemicu notifikasi. Transaksi yang melewati batas masih dapat disimpan, termasuk ketika transaksi offline disinkronkan.
+</details>
 
-    composer install --no-dev --optimize-autoloader
+## Struktur proyek
 
-    php artisan webpush:generate-keys
+```text
+app/                 Logika aplikasi, Livewire, model, dan layanan
+routes/              Route web dan perintah Artisan
+database/            Migrasi, seeder, dan factory
+resources/views/     Tampilan Blade
+resources/css/       CSS sumber
+resources/js/        JavaScript aplikasi
+lang/{id,en,ja}/     Terjemahan UI dan validasi
+public/              Aset publik, ikon, PWA, dan mode offline
+tests/               Tes Feature dan Unit
+```
 
-Simpan tiga nilai yang dicetak ke `.env` sebagai `PUSH_VAPID_PUBLIC_KEY`, `PUSH_VAPID_PRIVATE_KEY`, dan `PUSH_VAPID_SUBJECT` (gunakan alamat email admin yang valid sebagai subject). Jangan bagikan private key. Kunci dibaca langsung dari `.env`, termasuk saat konfigurasi Laravel dicache. Jalankan migrasi:
+## Lisensi
 
-    php artisan migrate --force
-
-Setelah itu, pengguna login lalu memilih **Izinkan notif HP** dan menyetujui prompt browser. Service worker push memakai `public/service-worker.js` yang sama dengan PWA. Browser iPhone perlu memasang PWA ke Home Screen dan memakai iOS/iPadOS 16.4 atau lebih baru. Hosting perlu PHP 8.3 dengan ekstensi cURL, OpenSSL, dan mbstring.
-
-## Pengembangan dan tes
-
-Jalankan seluruh tes:
-
-    php artisan test
-
-Tes mencakup perhitungan saldo, transaksi, filter kategori, anggaran bulanan, sinkronisasi transaksi offline, target simpanan, profil, dan ringkasan beranda. Jalankan `npm run build` untuk memeriksa build aset frontend.
-
-## Catatan anggaran
-
-Batas bulanan adalah plafon seluruh pengeluaran pada bulan tersebut. Alokasi kategori bersifat opsional, tetapi total alokasi kategori harus tetap berada di dalam plafon. Transaksi yang membuat total pengeluaran melewati plafon ditolak, termasuk saat transaksi offline disinkronkan.
-
-Tanggal transaksi disimpan sebagai tanggal kalender tanpa jam. Karena itu, analisis harian menghitung seluruh transaksi pada tanggal yang dipilih.
-
-## Preferensi aplikasi
-
-Pengaturan tema, warna, font, dan ukuran teks tersimpan di browser. Pilihan bahasa tersimpan di sesi, sehingga digunakan saat berpindah halaman selama sesi tersebut masih aktif.
+Proyek ini menggunakan lisensi MIT.

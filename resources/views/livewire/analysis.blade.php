@@ -38,7 +38,14 @@
         @endif
 
         <div class="card-3d mt-5 rounded-[50px] bg-light px-7 py-6">
-            <p class="text-[15px] font-medium text-ink">{{ __('ui.income_expense') }}</p>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-[15px] font-medium text-ink">{{ __('ui.average_income_expense') }}</p>
+                <div role="group" aria-label="{{ __('ui.average_basis') }}" class="segmented-control flex gap-1 rounded-full bg-white/70 p-1">
+                    @foreach (['all' => __('ui.average_all_periods'), 'active' => __('ui.average_active_periods')] as $value => $label)
+                        <button type="button" aria-pressed="{{ $averageMode === $value ? 'true' : 'false' }}" wire:click="$set('averageMode', '{{ $value }}')" class="rounded-full px-3 py-1.5 text-[10px] font-medium {{ $averageMode === $value ? 'bg-main text-ink' : 'text-dark/70' }}">{{ $label }}</button>
+                    @endforeach
+                </div>
+            </div>
             <div class="mt-5 flex h-[132px] items-end justify-around gap-2 border-b border-dark px-2">
                 @foreach ($rows as $r)
                     <div class="flex h-full min-w-0 flex-1 items-end justify-center gap-1" title="{{ $r['label'] }} · {{ __('ui.in') }} IDR {{ number_format($r['income'], 0, ',', '.') }} · {{ __('ui.out') }} IDR {{ number_format($r['expense'], 0, ',', '.') }}">
@@ -53,19 +60,19 @@
 
             <div class="mt-5 grid grid-cols-2 text-center">
                 <div>
-                    <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-main"></span>{{ __('ui.income') }}</p>
-                    <p data-fit-amount class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($totalIncome) }}</p>
+                    <p class="text-[12px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-main"></span>{{ __('ui.average_income_period') }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ink">{{ \App\Support\Money::rp($averageIncome) }}</p>
                 </div>
                 <div>
-                    <p class="text-[15px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-ocean"></span>{{ __('ui.expense') }}</p>
-                    <p data-fit-amount class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($totalExpense) }}</p>
+                    <p class="text-[12px] font-medium text-ink"><span class="mr-1 inline-block size-2 rounded-full bg-ocean"></span>{{ __('ui.average_expense_period') }}</p>
+                    <p data-fit-amount class="text-lg font-semibold text-ocean">{{ \App\Support\Money::rp($averageExpense) }}</p>
                 </div>
             </div>
         </div>
 
         <div class="mb-3 mt-6 flex items-center justify-between">
             <h2 class="text-[15px] font-medium text-ink">{{ __('ui.monthly_budget') }}</h2>
-            <button type="button" wire:click="createBudget" class="dark-contrast-action rounded-full bg-main px-4 py-2 text-xs font-medium text-ink">{{ __('ui.add_budget') }}</button>
+            <button type="button" wire:click="createBudget" aria-label="{{ __('ui.add_budget') }}" title="{{ __('ui.add_budget') }}" class="dark-contrast-action grid size-9 place-items-center rounded-full bg-main text-ink"><x-icon name="plus" class="size-4" /></button>
         </div>
         <form wire:submit="saveMonthlyBudget" class="card-3d mb-4 rounded-2xl bg-light p-4">
             <label for="monthly-budget" class="label mt-0">{{ __('ui.monthly_budget_limit') }}</label>
@@ -85,8 +92,8 @@
             @foreach ($budgetCards as $card)
                 <div wire:key="budget-{{ $card['id'] }}" class="card-3d relative flex h-[190px] flex-col items-center justify-center gap-2 rounded-[36px] bg-sky px-2">
                     <div class="absolute right-3 top-3 flex gap-2 text-xs font-medium text-white">
-                        <button type="button" wire:click="editBudget({{ $card['id'] }})">{{ __('ui.edit') }}</button>
-                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="deleteBudget" data-confirm="{{ __('ui.delete_category_budget') }}" class="disabled:opacity-50">{{ __('ui.delete') }}</button>
+                        <button type="button" wire:click="editBudget({{ $card['id'] }})" aria-label="{{ __('ui.edit_budget') }}" title="{{ __('ui.edit_budget') }}" class="grid size-6 place-items-center rounded-full bg-white/15"><x-icon name="edit" class="size-2.5" /></button>
+                        <button type="button" wire:click="deleteBudget({{ $card['id'] }})" wire:loading.attr="disabled" wire:target="deleteBudget" data-confirm="{{ __('ui.delete_category_budget') }}" aria-label="{{ __('ui.delete') }}" title="{{ __('ui.delete') }}" class="grid size-6 place-items-center rounded-full bg-white/15 disabled:opacity-50"><x-icon name="trash" class="size-2.5" /></button>
                     </div>
                     <div class="grid size-[96px] place-items-center rounded-full" style="background: conic-gradient(var(--color-ocean) {{ $card['percentage'] }}%, #F1FFF3 0)">
                         <div class="analysis-budget-percent grid size-[74px] place-items-center rounded-full bg-sky text-xl font-semibold text-mint">{{ $card['percentage'] }}%</div>

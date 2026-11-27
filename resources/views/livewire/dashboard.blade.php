@@ -115,7 +115,7 @@
                 <li class="p-3 text-sm text-gray-500">{{ __('ui.no_transactions') }}</li>
             @endforelse
         </ul>
-        <a href="{{ route('transactions') }}" wire:navigate class="btn mt-4 flex items-center justify-center">{{ __('ui.add_transaction') }}</a>
+        <a href="{{ route('transactions') }}" wire:navigate aria-label="{{ __('ui.add_transaction') }}" class="btn mt-4 flex items-center justify-center gap-2"><x-icon name="plus" class="size-4" />{{ __('ui.transactions') }}</a>
     </section>
 </div>
 </x-screen>

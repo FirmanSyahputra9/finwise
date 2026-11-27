@@ -16,7 +16,7 @@ it('renders the analysis page with daily chart buckets', function () {
         ->assertSee('data-summary-card', false)
         ->assertSee(__('ui.total_balance'))
         ->assertSee(__('ui.expense_status_safe'))
-        ->assertSee('Pemasukan & Pengeluaran')
+        ->assertSee(__('ui.average_income_expense'))
         ->assertSee('Budget Bulan Ini');
 });
 
@@ -93,4 +93,24 @@ it('counts each daily chart bucket for one complete calendar date', function () 
             return $rows->last()['expense'] === 15_000
                 && $rows->slice(-2)->first()['expense'] === 20_000;
         });
+});
+
+it('shows the average income and expenses per selected chart bucket', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $incomeCategory = Category::create(['name' => 'Gaji', 'type' => 'income']);
+    $expenseCategory = Category::create(['name' => 'Belanja', 'type' => 'expense']);
+    Transaction::create(['account_id' => $account->id, 'category_id' => $incomeCategory->id, 'type' => 'income', 'amount' => 300_000, 'date' => today()]);
+    Transaction::create(['account_id' => $account->id, 'category_id' => $incomeCategory->id, 'type' => 'income', 'amount' => 200_000, 'date' => today()->subDay()]);
+    Transaction::create(['account_id' => $account->id, 'category_id' => $expenseCategory->id, 'type' => 'expense', 'amount' => 70_000, 'date' => today()]);
+
+    Livewire::test(Analysis::class)
+        ->assertViewHas('averageIncome', intdiv(500_000, 7))
+        ->assertViewHas('averageExpense', intdiv(70_000, 7))
+        ->assertSee(__('ui.average_income_period'))
+        ->assertSee(__('ui.average_expense_period'))
+        ->set('averageMode', 'active')
+        ->assertViewHas('averageIncome', 250_000)
+        ->assertViewHas('averageExpense', 70_000)
+        ->assertSee(__('ui.average_income_period'));
 });

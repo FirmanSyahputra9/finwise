@@ -18,6 +18,8 @@ class Analysis extends Component
 
     public string $period = 'daily';
 
+    public string $averageMode = 'all';
+
     public bool $budgetModal = false;
 
     public ?int $budgetId = null;
@@ -34,6 +36,13 @@ class Analysis extends Component
         $this->analysisCategoryIds = in_array($id, $selected, true)
             ? array_values(array_diff($selected, [$id]))
             : [...$selected, $id];
+    }
+
+    public function updatedAverageMode(string $mode): void
+    {
+        if (! in_array($mode, ['all', 'active'], true)) {
+            $this->averageMode = 'all';
+        }
     }
 
     public function mount(): void
@@ -155,6 +164,9 @@ class Analysis extends Component
             'income' => $sum(TransactionType::Income, $b),
             'expense' => $sum(TransactionType::Expense, $b),
         ]);
+        $bucketCount = max(1, $rows->count());
+        $incomeBucketCount = max(1, $rows->where('income', '>', 0)->count());
+        $expenseBucketCount = max(1, $rows->where('expense', '>', 0)->count());
         $budgetCards = Budget::with('category')->where('month', now()->month)->where('year', now()->year)->get()
             ->map(fn (Budget $budget) => [
                 'id' => $budget->id,
@@ -170,6 +182,9 @@ class Analysis extends Component
             'max' => max(1, $rows->max(fn ($r) => max($r['income'], $r['expense']))),
             'totalIncome' => $rows->sum('income'),
             'totalExpense' => $rows->sum('expense'),
+            'averageIncome' => intdiv((int) $rows->sum('income'), $this->averageMode === 'active' ? $incomeBucketCount : $bucketCount),
+            'averageExpense' => intdiv((int) $rows->sum('expense'), $this->averageMode === 'active' ? $expenseBucketCount : $bucketCount),
+            'averageMode' => $this->averageMode,
             'budgetCards' => $budgetCards,
             'expenseCategories' => Category::where('type', 'expense')->orderBy('name')->get(),
             'analysisCategories' => Category::orderBy('type')->orderBy('name')->get(),

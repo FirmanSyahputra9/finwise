@@ -18,8 +18,8 @@
                         <div class="min-w-0"><h3 class="truncate font-semibold text-ink">{{ $goal->name }}</h3>
                             <p class="mt-1 text-xs text-dark/60">{{ $goal->target_date ? __('ui.target').' ' : '' }}@if ($goal->target_date)<x-date-label :date="$goal->target_date" />@else{{ __('ui.no_deadline') }}@endif</p></div>
                         <div class="flex shrink-0 gap-2">
-                            <button type="button" wire:click="edit({{ $goal->id }})" class="rounded-full bg-light px-3 py-1 text-xs text-dark">{{ __('ui.edit') }}</button>
-                            <button type="button" wire:click="delete({{ $goal->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete') }} {{ $goal->name }}?" class="rounded-full bg-red-50 px-3 py-1 text-xs text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button>
+                            <button type="button" wire:click="edit({{ $goal->id }})" aria-label="{{ __('ui.edit') }} {{ $goal->name }}" title="{{ __('ui.edit') }}" class="grid size-6 place-items-center rounded-full bg-light text-dark"><x-icon name="edit" class="size-2.5" /></button>
+                            <button type="button" wire:click="delete({{ $goal->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete') }} {{ $goal->name }}?" aria-label="{{ __('ui.delete') }} {{ $goal->name }}" title="{{ __('ui.delete') }}" class="grid size-6 place-items-center rounded-full bg-red-50 text-red-600 disabled:opacity-50"><x-icon name="trash" class="size-2.5" /></button>
                         </div>
                     </div>
                     <div class="savings-progress-card mt-4 rounded-2xl p-3">

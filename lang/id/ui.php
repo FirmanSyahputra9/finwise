@@ -26,7 +26,7 @@ return [
     'income' => 'Pemasukan', 'expense' => 'Pengeluaran', 'transfer' => 'Transfer',
     'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', 'yearly' => 'Tahunan',
     'period' => 'Periode analisis', 'category_filter' => 'Filter kategori', 'selected' => 'dipilih', 'all_categories' => 'semua kategori',
-    'in' => 'Masuk', 'out' => 'Keluar', 'no_categories' => 'Belum ada kategori.', 'category_type' => 'Jenis kategori', 'clear_selection' => 'Hapus semua pilihan',
+    'in' => 'Masuk', 'out' => 'Keluar', 'no_categories' => 'Belum ada kategori.', 'category_type' => 'Jenis kategori', 'clear_selection' => 'Hapus semua pilihan', 'average_income_expense' => 'Rata-rata pemasukan & pengeluaran', 'average_basis' => 'Hitung rata-rata:', 'average_all_periods' => 'Semua periode', 'average_active_periods' => 'Periode aktif', 'average_income_period' => 'Rata-rata pemasukan', 'average_expense_period' => 'Rata-rata pengeluaran',
     'chart_shows' => 'Grafik menampilkan:', 'income_expense' => 'Pemasukan & Pengeluaran',
     'monthly_budget' => 'Budget Bulan Ini', 'add_budget' => '+ Tambah budget', 'monthly_budget_limit' => 'Batas total budget bulan ini',
     'save' => 'Simpan', 'allocated' => 'Alokasi kategori:', 'of' => 'dari', 'spent' => 'Sudah dipakai:', 'remaining_month' => 'Sisa yang boleh dipakai bulan ini:',

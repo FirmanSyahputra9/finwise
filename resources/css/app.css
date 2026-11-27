@@ -116,7 +116,10 @@ html[data-pattern="rare-snake-68"] .wallet-screen-hero {
 .app-screen-header h1 { transform-origin: left center !important; }
 html[data-pattern] .app-screen-header [data-screen-title] { width: 100%; min-height: 2rem; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 html[data-pattern="fuzzy-duck-40"] .app-screen-header,
-html[data-pattern="rare-snake-68"] .app-screen-header { background-image: linear-gradient(135deg, var(--color-blue), var(--color-ocean)); }
+html[data-pattern="rare-snake-68"] .app-screen-header {
+    background-color: color-mix(in srgb, var(--pattern-neutral) 40%, transparent) !important;
+    background-image: none !important;
+}
 html[data-pattern="fuzzy-duck-40"] [data-screen-scroll][data-scrolled="true"] .app-screen-header [data-screen-title],
 html[data-pattern="rare-snake-68"] [data-screen-scroll][data-scrolled="true"] .app-screen-header [data-screen-title] { padding: 0; background: transparent; }
 @media (prefers-reduced-motion: reduce) { .app-screen-header { transition: none; } }

@@ -145,12 +145,13 @@
                             {{ $t->type->value === 'income' ? '+' : '-' }}{{ $rp($t->amount) }}
                         </span>
                         <div class="flex shrink-0 gap-3">
-                            <button type="button" wire:click="edit({{ $t->id }})"
-                                class="text-xs text-blue">{{ __('ui.edit') }}</button>
+                            <button type="button" wire:click="edit({{ $t->id }})" aria-label="{{ __('ui.edit') }}" title="{{ __('ui.edit') }}"
+                                class="grid size-6 place-items-center rounded-full bg-light text-blue"><x-icon name="edit" class="size-2.5" /></button>
                             <button type="button" wire:click="delete({{ $t->id }})"
                                 wire:loading.attr="disabled" wire:target="delete"
                                 data-confirm="{{ __('ui.delete_transaction_confirm') }}"
-                                class="text-xs text-red-600 disabled:opacity-50">{{ __('ui.delete') }}</button>
+                                aria-label="{{ __('ui.delete') }}" title="{{ __('ui.delete') }}"
+                                class="grid size-6 place-items-center rounded-full bg-red-50 text-red-600 disabled:opacity-50"><x-icon name="trash" class="size-2.5" /></button>
                         </div>
                     </div>
                 </li>
