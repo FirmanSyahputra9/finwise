@@ -20,6 +20,7 @@ return [
     'appearance' => 'App appearance', 'appearance_hint' => 'Preferences are saved on this device', 'pattern' => 'Background pattern', 'pattern_none' => 'No pattern', 'pattern_fuzzy_duck' => 'Fuzzy Duck', 'pattern_rare_snake' => 'Rare Snake',
     'theme' => 'Theme', 'light' => 'Light', 'dark' => 'Dark', 'accent' => 'Accent color',
     'text_color' => 'Text and input color', 'font' => 'Font family', 'font_size' => 'Font size',
+    'analysis_chart' => 'Analysis chart', 'chart_bar' => 'Bars', 'chart_line' => 'Line', 'chart_pie' => 'Donut', 'category_distribution' => 'Category breakdown',
     'preview' => 'Live preview', 'preview_text' => 'App appearance preview',
     'preview_button' => 'Example button', 'saved' => 'Changes applied and saved.',
     'savings_goals' => 'Savings Goals',

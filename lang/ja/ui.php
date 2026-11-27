@@ -22,6 +22,7 @@ return [
     'appearance' => 'アプリの表示', 'appearance_hint' => '設定はこの端末に保存されます', 'pattern' => '背景パターン', 'pattern_none' => 'なし', 'pattern_fuzzy_duck' => 'ファジーダック', 'pattern_rare_snake' => 'レアスネーク',
     'theme' => 'テーマ', 'light' => 'ライト', 'dark' => 'ダーク', 'accent' => 'アクセントカラー',
     'text_color' => '文字と入力欄の色', 'font' => 'フォント', 'font_size' => '文字サイズ',
+    'analysis_chart' => '分析グラフ', 'chart_bar' => '棒', 'chart_line' => '線', 'chart_pie' => 'ドーナツ', 'category_distribution' => 'カテゴリー別の内訳',
     'preview' => 'ライブプレビュー', 'preview_text' => 'アプリ表示の例',
     'preview_button' => 'ボタンの例', 'saved' => '変更を適用して保存しました。',
     'savings_goals' => '貯蓄目標',

@@ -20,6 +20,7 @@ return [
     'appearance' => 'Tampilan aplikasi', 'appearance_hint' => 'Preferensi tersimpan di perangkat ini', 'pattern' => 'Pola latar', 'pattern_none' => 'Tanpa pola', 'pattern_fuzzy_duck' => 'Fuzzy Duck', 'pattern_rare_snake' => 'Rare Snake',
     'theme' => 'Tema', 'light' => 'Terang', 'dark' => 'Gelap', 'accent' => 'Warna aksen',
     'text_color' => 'Warna teks dan isian', 'font' => 'Jenis font', 'font_size' => 'Ukuran font',
+    'analysis_chart' => 'Grafik analisis', 'chart_bar' => 'Batang', 'chart_line' => 'Garis', 'chart_pie' => 'Donat', 'category_distribution' => 'Komposisi kategori',
     'preview' => 'Pratinjau langsung', 'preview_text' => 'Contoh teks tampilan aplikasi',
     'preview_button' => 'Contoh tombol', 'saved' => 'Perubahan langsung diterapkan dan disimpan.',
     'savings_goals' => 'Target Simpanan',

@@ -1,4 +1,4 @@
-            <div x-data="{ open: false, edit: false, security: false, help: false, appearance: { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none' }, init() { this.appearance = window.finwiseAppearance.read() }, saveAppearance() { this.appearance = window.finwiseAppearance.save(this.appearance); window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: @js(__('ui.saved')), type: 'success' } })) } }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
+            <div x-data="{ open: false, edit: false, security: false, help: false, appearance: { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none', analysisChart: 'bar' }, init() { this.appearance = window.finwiseAppearance.read() }, saveAppearance() { this.appearance = window.finwiseAppearance.save(this.appearance); window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: @js(__('ui.saved')), type: 'success' } })) } }" x-on:profile-updated.window="edit = false" x-on:password-updated.window="security = false">
     <x-screen :title="__('ui.profile')">
         <x-slot:top>
             <div class="mt-6 flex justify-center" data-profile-photo-area>
@@ -121,6 +121,14 @@
                     <div class="flex gap-2" role="group" aria-label="{{ __('ui.font_size') }}">
                         @foreach (['14', '16', '18', '20'] as $size)
                             <button type="button" class="appearance-choice min-w-9 px-2" x-bind:aria-pressed="appearance.size === '{{ $size }}'" x-on:click="appearance.size = '{{ $size }}'; saveAppearance()">{{ $size }}</button>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="card-3d flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-mint px-4 py-3">
+                    <p class="text-sm font-medium text-dark">{{ __('ui.analysis_chart') }}</p>
+                    <div class="flex gap-2" role="group" aria-label="{{ __('ui.analysis_chart') }}">
+                        @foreach ([['bar', __('ui.chart_bar')], ['line', __('ui.chart_line')], ['pie', __('ui.chart_pie')]] as [$value, $label])
+                            <button type="button" class="appearance-choice" x-bind:aria-pressed="appearance.analysisChart === '{{ $value }}'" x-on:click="appearance.analysisChart = '{{ $value }}'; saveAppearance()">{{ $label }}</button>
                         @endforeach
                     </div>
                 </div>

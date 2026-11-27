@@ -8,7 +8,7 @@
     <script>
         (() => {
             if (window.finwiseAppearance) return;
-            const defaults = { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none' };
+            const defaults = { theme: 'light', accent: 'green', textColor: 'default', font: 'poppins', size: '16', pattern: 'none', analysisChart: 'bar' };
             const allowed = {
                 theme: ['light', 'dark'],
                 accent: ['green', 'blue', 'pink', 'purple', 'orange', 'red'],
@@ -16,6 +16,7 @@
                 font: ['poppins', 'system', 'arial', 'georgia'],
                 size: ['14', '16', '18', '20'],
                 pattern: ['none', 'fuzzy-duck-40', 'rare-snake-68'],
+                analysisChart: ['bar', 'line', 'pie'],
             };
             const normalize = (value = {}) => Object.fromEntries(
                 Object.keys(defaults).map((key) => [key, allowed[key].includes(value[key]) ? value[key] : defaults[key]])

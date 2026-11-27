@@ -35,13 +35,13 @@ Dibangun dengan **Laravel 13**, **Livewire 4**, **Blade**, **Tailwind CSS 4**, d
 |  | Fitur | Detail |
 |---|---|---|
 | 💸 | **Catat transaksi** | Pemasukan, pengeluaran, dan transfer antarakun dengan pencarian serta filter riwayat. |
-| 📊 | **Pahami arus uang** | Ringkasan saldo dan grafik harian, mingguan, bulanan, atau tahunan dengan filter kategori. |
+| 📊 | **Pahami arus uang** | Grafik tren batang/garis atau komposisi kategori donat. Pilih gaya grafik di Profil; grafik mengikuti periode dan filter kategori. |
 | 🎯 | **Atur rencana** | Kelola anggaran kategori dan pantau target simpanan. |
 | 🗂️ | **Pulihkan data** | Item yang dihapus masuk trash dan dapat dipulihkan selama tiga hari. |
 | 💬 | **Tetap terhubung** | Chat pribadi dan grup, stiker, foto, posisi baca, retensi pesan, serta panggilan suara WebRTC. |
 | 📲 | **Lanjutkan saat offline** | Baca snapshot terakhir dan catat transaksi baru di perangkat untuk disinkronkan kemudian. |
 | 🔔 | **Terima notifikasi** | Notifikasi aplikasi dan Web Push untuk aktivitas finansial. Push tidak memuat isi chat atau nominal sensitif. |
-| 🎨 | **Atur tampilanmu** | Tema terang/gelap, aksen, font, ukuran teks, pola, dan bahasa Indonesia, Inggris, atau Jepang. |
+| 🎨 | **Atur tampilanmu** | Tema terang/gelap, aksen, font, ukuran teks, pola, gaya grafik, dan bahasa Indonesia, Inggris, atau Jepang. |
 
 > **Privasi:** data keuangan dibatasi per pengguna. Foto chat disimpan privat dan hanya dapat diakses oleh peserta percakapan.
 
