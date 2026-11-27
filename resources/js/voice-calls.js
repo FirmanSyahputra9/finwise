@@ -39,7 +39,7 @@ function showCall(state, status) {
     const muteButton = modal.querySelector('[data-call-mute]');
     title.textContent = state.remoteName || node.dataset.labelIncoming;
     label.textContent = status;
-    incomingActions.hidden = state.role !== 'callee' || state.call.status !== 'accepted' && state.call.status !== 'connecting';
+    incomingActions.hidden = state.role !== 'callee' || state.call.status !== 'ringing' || state.accepted;
     activeActions.hidden = !state.accepted && state.role !== 'caller';
     muteButton.hidden = !state.accepted;
 }
