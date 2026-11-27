@@ -72,13 +72,15 @@
             <div class="flex gap-2"><x-money-input id="monthly-budget" model="monthlyBudget" :value="$monthlyBudget" name="monthly_budget" placeholder="1,500,000" class="field" /><button class="btn inline-flex shrink-0 items-center gap-2 px-5"><span wire:loading wire:target="saveMonthlyBudget" class="app-spinner"></span>{{ __('ui.save') }}</button></div>
             @error('monthlyBudget')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
             @if ($monthlyBudget)
-                <p data-fit-amount class="mt-2 text-xs text-dark/70">{{ __('ui.allocated') }} {{ \App\Support\Money::rp($allocatedBudget) }} {{ __('ui.of') }} {{ \App\Support\Money::rp($monthlyBudget) }}</p>
-                <p data-fit-amount class="mt-1 text-xs text-dark/70">{{ __('ui.spent') }} {{ \App\Support\Money::rp($expense) }} · {{ __('ui.remaining_month') }} {{ \App\Support\Money::rp($monthlyBudget - $expense) }}</p>
+                <p class="mt-3 flex min-w-0 items-center gap-2 text-[10px] leading-tight text-dark/70">
+                    <span class="min-w-0 flex-1 truncate">{{ __('ui.remaining_month') }}</span>
+                    <span data-fit-amount class="shrink-0 whitespace-nowrap text-right">{{ \App\Support\Money::rp($monthlyBudget - $expense) }}</span>
+                </p>
             @endif
         </form>
         <div class="grid grid-cols-2 gap-4">
             @if ($budgetCards->isEmpty())
-                <p class="col-span-2 text-center text-sm text-nav/60">{{ __('ui.no_budget') }}</p>
+                <p class="col-span-2 text-center text-sm text-nav/60">{{ $monthlyBudget ? __('ui.no_category_budget') : __('ui.no_budget') }}</p>
             @endif
             @foreach ($budgetCards as $card)
                 <div wire:key="budget-{{ $card['id'] }}" class="card-3d relative flex h-[190px] flex-col items-center justify-center gap-2 rounded-[36px] bg-sky px-2">

@@ -186,6 +186,21 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatedType(string $type): void
+    {
+        $this->resetValidation('category_id');
+
+        if ($type === 'transfer' || ! $this->category_id) {
+            $this->reset('category_id');
+
+            return;
+        }
+
+        if (! Category::whereKey($this->category_id)->where('type', $type)->exists()) {
+            $this->reset('category_id');
+        }
+    }
+
     public function updatedFilterType(string $type): void
     {
         if ($this->filterCategory) {

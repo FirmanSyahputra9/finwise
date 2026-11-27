@@ -477,6 +477,9 @@ html[data-theme="dark"] .summary-progress-fill {
     outline: 1px solid rgb(195 215 219 / 28%);
     outline-offset: -1px;
 }
+html[data-theme="dark"] .summary-expense-ratio {
+    color: hsl(var(--summary-progress-hue) 72% 68%) !important;
+}
 
 html[data-text-color="black"] { --user-text-color: #111827; }
 html[data-text-color="white"] { --user-text-color: #f8fafc; }

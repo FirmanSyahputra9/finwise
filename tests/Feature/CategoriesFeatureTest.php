@@ -31,6 +31,30 @@ it('creates a category and rejects an empty name', function () {
         ->assertHasErrors(['name']);
 });
 
+it('creates income categories that can be selected for income transactions', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+
+    Livewire::test(Categories::class)
+        ->set('categoryType', 'income')
+        ->set('name', 'Bonus')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $incomeCategory = Category::where('name', 'Bonus')->where('type', 'income')->firstOrFail();
+
+    Livewire::test(\App\Livewire\Transactions\Index::class)
+        ->set('type', 'income')
+        ->set('account_id', $account->id)
+        ->set('category_id', $incomeCategory->id)
+        ->set('amount', 50_000)
+        ->set('date', today()->toDateString())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Transaction::where('category_id', $incomeCategory->id)->exists())->toBeTrue();
+});
+
 it('shows category transactions and applies type and date filters', function () {
     $this->actingAs(User::factory()->create());
     $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);

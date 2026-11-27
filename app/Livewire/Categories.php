@@ -14,6 +14,7 @@ class Categories extends Component
     use HasSummary;
 
     public string $name = '';
+    public string $categoryType = 'expense';
     public ?int $selectedCategory = null;
     public string $typeFilter = '';
     public string $dateFrom = '';
@@ -26,13 +27,21 @@ class Categories extends Component
 
     public function save(): void
     {
-        $this->validate(['name' => ['required', 'string', 'max:40']]);
+        $this->validate([
+            'name' => ['required', 'string', 'max:40'],
+            'categoryType' => ['required', 'in:income,expense'],
+        ]);
 
-        Category::create(['name' => $this->name, 'type' => 'expense']);
+        Category::create(['name' => $this->name, 'type' => $this->categoryType]);
 
         $this->reset('name');
         $this->dispatch('saved');
         $this->dispatch('app-toast', message: __('ui.saved'));
+    }
+
+    public function updatedCategoryType(): void
+    {
+        $this->reset('selectedCategory');
     }
 
     public function delete(int $id): void
@@ -55,7 +64,7 @@ class Categories extends Component
             ->latest('date')->get() : collect();
         return view('livewire.categories', [
             ...$this->summary(),
-            'categories' => Category::where('type', 'expense')->orderBy('name')->get(),
+            'categories' => Category::where('type', $this->categoryType)->orderBy('name')->get(),
             'transactions' => $transactions,
             'selectedCategoryName' => Category::find($this->selectedCategory)?->name,
         ]);

@@ -15,9 +15,33 @@ it('renders the analysis page with daily chart buckets', function () {
         ->assertOk()
         ->assertSee('data-summary-card', false)
         ->assertSee(__('ui.total_balance'))
-        ->assertSee(__('ui.looks_good'))
+        ->assertSee(__('ui.expense_status_safe'))
         ->assertSee('Pemasukan & Pengeluaran')
         ->assertSee('Budget Bulan Ini');
+});
+
+it('clarifies that category budgets are missing when the monthly limit is already set', function () {
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test(Analysis::class)
+        ->set('monthlyBudget', 100_000)
+        ->call('saveMonthlyBudget')
+        ->assertSee(__('ui.no_category_budget'));
+});
+
+it('changes the summary spending guidance across the progress color ranges', function () {
+    $this->actingAs(User::factory()->create());
+    $account = Account::create(['name' => 'Dompet', 'type' => 'cash']);
+    $incomeCategory = Category::create(['name' => 'Gaji', 'type' => 'income']);
+    $expenseCategory = Category::create(['name' => 'Belanja', 'type' => 'expense']);
+    Transaction::create(['account_id' => $account->id, 'category_id' => $incomeCategory->id, 'type' => 'income', 'amount' => 100_000, 'date' => today()]);
+
+    foreach ([[10_000, 'expense_status_safe'], [30_000, 'expense_status_controlled'], [50_000, 'expense_status_attention'], [70_000, 'expense_status_high'], [99_999, 'expense_status_high'], [100_000, 'expense_status_limit'], [110_000, 'expense_status_exceeded']] as [$amount, $status]) {
+        Transaction::where('type', 'expense')->delete();
+        Transaction::create(['account_id' => $account->id, 'category_id' => $expenseCategory->id, 'type' => 'expense', 'amount' => $amount, 'date' => today()]);
+
+        Livewire::test(Analysis::class)->assertSee(__('ui.'.$status));
+    }
 });
 
 it('filters analysis totals by multiple selected categories', function () {

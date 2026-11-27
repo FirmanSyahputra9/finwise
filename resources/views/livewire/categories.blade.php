@@ -4,7 +4,13 @@
             <x-summary :balance="$balance" :income="$income" :expense="$expense" />
         </x-slot:top>
 
-        <div class="grid grid-cols-3 gap-x-4 gap-y-6">
+        <div role="group" aria-label="{{ __('ui.category_type') }}" class="segmented-control grid grid-cols-2 gap-1 rounded-[18px] bg-light p-1">
+            @foreach (['expense' => __('ui.expense'), 'income' => __('ui.income')] as $value => $label)
+                <button type="button" aria-pressed="{{ $categoryType === $value ? 'true' : 'false' }}" wire:click="$set('categoryType', '{{ $value }}')" class="min-h-10 rounded-[14px] px-3 py-2 text-sm font-medium {{ $categoryType === $value ? 'bg-main text-ink shadow-sm' : 'text-dark/70' }}">{{ $label }}</button>
+            @endforeach
+        </div>
+
+        <div class="mt-5 grid grid-cols-3 gap-x-4 gap-y-6">
             @foreach ($categories as $c)
                 <div wire:key="c-{{ $c->id }}" class="group relative text-center">
                     <button type="button" wire:click="delete({{ $c->id }})" wire:loading.attr="disabled" wire:target="delete" data-confirm="{{ __('ui.delete_category_confirm', ['category' => $c->name]) }}" aria-label="{{ __('ui.delete') }} {{ $c->name }}" class="absolute -right-2 -top-2 z-10 grid size-7 place-items-center rounded-full bg-red-500 text-lg leading-none text-white shadow disabled:opacity-50">&times;</button>
@@ -38,6 +44,11 @@
             <h2 class="text-center text-xl font-bold text-dark">{{ __('ui.new_category') }}</h2>
             <input id="category-name" name="name" type="text" autocomplete="off" wire:model="name" placeholder="{{ __('ui.category_name_placeholder') }}" class="field mt-6">
             @error('name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            <label for="category-type" class="label mt-4">{{ __('ui.category_type') }}</label>
+            <select id="category-type" name="category_type" wire:model="categoryType" class="transaction-control mt-1">
+                <option value="expense">{{ __('ui.expense') }}</option>
+                <option value="income">{{ __('ui.income') }}</option>
+            </select>
             <div class="mt-6 flex flex-col items-center gap-3">
                 <button type="submit" class="btn inline-flex items-center justify-center gap-2 w-full max-w-[218px]"><span wire:loading wire:target="save" class="app-spinner"></span>{{ __('ui.save') }}</button>
                 <button type="button" x-on:click="open = false" class="btn-soft w-full max-w-[218px]">{{ __('ui.cancel') }}</button>
